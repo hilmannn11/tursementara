@@ -1,0 +1,109 @@
+<!doctype html>
+<html lang="id">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Benteng Mission</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/pannellum@2.5.6/build/pannellum.css" />
+    <link rel="stylesheet" href="./styles.css" />
+  </head>
+  <body>
+    <header class="app-header">
+      <a class="brand" href="#home" aria-label="Benteng Mission beranda">
+        <span class="brand-mark">BM</span>
+        <span>
+          <strong>Benteng Mission</strong>
+          <small>Eksplorasi Benteng Van den Bosch</small>
+        </span>
+      </a>
+      <nav class="top-nav" aria-label="Navigasi utama">
+        <a href="#tour">Tur 360</a>
+        <a href="#archive">Full Arsip</a>
+        <a href="#profile">Profil</a>
+      </nav>
+    </header>
+
+    <main>
+      <section id="home" class="hero">
+        <div class="hero-copy">
+          <p class="eyebrow">Sejarah interaktif untuk generasi digital</p>
+          <h1>Benteng Van den Bosch jadi misi eksplorasi.</h1>
+          <p>
+            Jelajahi titik-titik benteng, buka arsip sejarah, jawab kuis singkat,
+            lalu kumpulkan badge digital sebagai bukti misi.
+          </p>
+          <div class="hero-actions">
+            <a class="button primary" href="#tour">Mulai Tur</a>
+            <a class="button secondary" href="#archive">Lihat Full Arsip</a>
+          </div>
+        </div>
+        <aside class="mission-panel" aria-label="Ringkasan misi">
+          <span class="panel-label">Progress Misi</span>
+          <strong id="heroProgress">0/3 badge</strong>
+          <div class="progress-track"><span id="heroProgressBar"></span></div>
+          <p>Kumpulkan semua badge untuk membuka sertifikat digital prototipe.</p>
+        </aside>
+      </section>
+
+      <section id="tour" class="tour-section">
+        <div class="section-heading">
+          <p class="eyebrow">Tur Virtual 360</p>
+          <h2>Masuk ke titik eksplorasi</h2>
+          <p>Ikuti panah di dalam panorama untuk berjalan maju dari satu titik ke titik berikutnya.</p>
+        </div>
+        <div class="tour-layout">
+          <div class="viewer-shell">
+            <div id="panorama" aria-label="Viewer panorama 360 derajat"></div>
+            <div id="floorNavZone" class="floor-nav-zone" aria-label="Zona panah navigasi">
+              <button id="floorArrowButton" class="floor-arrow" type="button" aria-label="Jalan maju"></button>
+            </div>
+          </div>
+          <aside class="room-panel">
+            <h3 id="roomTitle">Titik Eksplorasi</h3>
+            <p id="roomDescription"></p>
+            <button id="openArchiveButton" class="button primary" type="button">Buka Arsip Titik Ini</button>
+          </aside>
+        </div>
+      </section>
+
+      <section id="archive" class="archive-section">
+        <div class="section-heading">
+          <p class="eyebrow">Full Arsip</p>
+          <h2>Arsip bisa dibuka tanpa syarat badge</h2>
+          <p>Semua materi sejarah tetap bebas diakses, sementara kuis berfungsi sebagai lapisan gamifikasi.</p>
+        </div>
+        <div id="archiveGrid" class="archive-grid"></div>
+      </section>
+
+      <section id="profile" class="profile-section">
+        <div class="section-heading">
+          <p class="eyebrow">Profil</p>
+          <h2>Badge dan reward</h2>
+        </div>
+        <div class="profile-layout">
+          <div>
+            <h3>Badge Terkumpul</h3>
+            <div id="badgeGrid" class="badge-grid"></div>
+          </div>
+          <div class="reward-panel">
+            <h3>Reward</h3>
+            <p id="rewardText">Kumpulkan semua badge untuk membuka sertifikat digital.</p>
+            <button id="resetButton" class="button secondary" type="button">Reset Progress</button>
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <dialog id="archiveModal" class="modal">
+      <button class="icon-button" id="closeArchiveButton" type="button" aria-label="Tutup arsip">×</button>
+      <div id="archiveModalContent"></div>
+    </dialog>
+
+    <dialog id="quizModal" class="modal quiz-modal">
+      <div id="quizContent"></div>
+    </dialog>
+
+    <script src="https://cdn.jsdelivr.net/npm/pannellum@2.5.6/build/pannellum.js"></script>
+    <script src="./app.js"></script>
+  </body>
+</html>
