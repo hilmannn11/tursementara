@@ -14,9 +14,9 @@ const rooms = [
         "Titik ini menjadi awal perjalanan virtual. Narasi arsip bisa diganti dengan penjelasan sejarah lokasi, fungsi ruang, atau cerita pengunjung.",
     },
     quiz: {
-      question: "Apa fungsi titik pertama dalam tur virtual ini?",
-      options: ["Awal jalur eksplorasi", "Halaman reward", "Tempat menghapus badge"],
-      answer: 0,
+      question: "Siapa saja orang yang ada di dalam sini?",
+      options: ["MBG", "Entah gatau", "Rahmat Toyota", "Kungskik, Abay, dan orang Rusia"],
+      answer: 3,
     },
   },
   {
@@ -32,8 +32,8 @@ const rooms = [
         "Titik kedua dapat memuat cerita lanjutan, foto pembanding, peta posisi, atau informasi bangunan di sekitar jalur.",
     },
     quiz: {
-      question: "Bagaimana cara berpindah lokasi di tur ini?",
-      options: ["Klik panah di dalam panorama", "Klik tombol daftar tempat", "Menutup browser"],
+      question: "Gacor ga ni web jadinya?",
+      options: ["Gacor banget mas Hilman", "B aja", "Ga", "Anjay"],
       answer: 0,
     },
   },
@@ -75,6 +75,7 @@ let viewer;
 let tourCreated = false;
 let quizTimer;
 let walkClickTimer;
+let quizAnswered = false;
 
 const archiveModal = document.querySelector("#archiveModal");
 const quizModal = document.querySelector("#quizModal");
@@ -254,18 +255,17 @@ function openArchive(roomId) {
 
 function closeArchiveAndScheduleQuiz() {
   archiveModal.close();
-  quizTimer = setTimeout(() => openQuiz(currentRoom.id), 3500);
+  clearTimeout(quizTimer);
+  quizTimer = setTimeout(() => openQuiz(currentRoom.id), 650);
 }
 
 function openQuiz(roomId) {
   const room = rooms.find((item) => item.id === roomId);
-  const earned = getBadges().includes(room.id);
 
-  if (earned) {
-    return;
-  }
+  quizAnswered = false;
 
   quizContent.innerHTML = `
+    <button id="quizCloseButton" class="quiz-close-button" type="button" aria-label="Tutup kuis" disabled>×</button>
     <p class="eyebrow">Kuis Misi</p>
     <h2>${room.title}</h2>
     <p>${room.quiz.question}</p>
@@ -274,24 +274,39 @@ function openQuiz(roomId) {
         .map((option, index) => `<button type="button" data-index="${index}">${option}</button>`)
         .join("")}
     </div>
-    <p id="quizFeedback"></p>
+    <p id="quizFeedback" class="quiz-feedback" aria-live="polite"></p>
   `;
 
   quizContent.querySelectorAll("button").forEach((button) => {
-    button.addEventListener("click", () => checkAnswer(room, Number(button.dataset.index)));
+    if (button.dataset.index !== undefined) {
+      button.addEventListener("click", () => checkAnswer(room, Number(button.dataset.index)));
+    }
   });
+
+  quizContent.querySelector("#quizCloseButton").addEventListener("click", () => quizModal.close());
 
   quizModal.showModal();
 }
 
 function checkAnswer(room, selectedIndex) {
   const feedback = document.querySelector("#quizFeedback");
+  const options = [...quizContent.querySelectorAll(".quiz-options button")];
+  const selectedButton = options[selectedIndex];
+
+  options.forEach((button) => button.classList.remove("is-correct", "is-wrong"));
+
   if (selectedIndex === room.quiz.answer) {
+    quizAnswered = true;
     saveBadge(room.id);
-    feedback.textContent = `Benar. Badge "${room.badge}" berhasil dikumpulkan.`;
-    setTimeout(() => quizModal.close(), 1200);
+    selectedButton.classList.add("is-correct");
+    options.forEach((button) => (button.disabled = true));
+    feedback.className = "quiz-feedback is-success";
+    feedback.textContent = `Benar. Badge "${room.badge}" berhasil dikumpulkan. Kamu bisa menutup kuis.`;
+    quizContent.querySelector("#quizCloseButton").disabled = false;
   } else {
-    feedback.textContent = "Belum tepat. Coba baca ulang arsipnya, lalu pilih jawaban yang paling sesuai.";
+    selectedButton.classList.add("is-wrong");
+    feedback.className = "quiz-feedback is-error";
+    feedback.textContent = "Jawaban belum tepat. Coba lagi.";
   }
 }
 
@@ -504,6 +519,12 @@ document.addEventListener("pointerleave", () => {
 archiveModal.addEventListener("cancel", (event) => {
   event.preventDefault();
   closeArchiveAndScheduleQuiz();
+});
+
+quizModal.addEventListener("cancel", (event) => {
+  if (!quizAnswered) {
+    event.preventDefault();
+  }
 });
 
 renderArchiveGrid();
