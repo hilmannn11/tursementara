@@ -796,3 +796,14 @@ section:not(.home-screen):not(.mission-strip) {
     grid-template-columns: 1fr;
   }
 }
+
+@media (pointer: coarse) {
+  .floor-nav-zone {
+    height: 100%;
+  }
+
+  .floor-arrow {
+    top: 57%;
+    left: 50%;
+  }
+}

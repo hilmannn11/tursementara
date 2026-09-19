@@ -76,6 +76,7 @@ let tourCreated = false;
 let quizTimer;
 let walkClickTimer;
 let quizAnswered = false;
+const isTouchViewport = window.matchMedia("(pointer: coarse)").matches || "ontouchstart" in window;
 
 const archiveModal = document.querySelector("#archiveModal");
 const quizModal = document.querySelector("#quizModal");
@@ -114,6 +115,17 @@ function updateWalkButton() {
   updateActiveDirectionFromYaw();
 }
 
+function positionMobileArrow() {
+  if (!isTouchViewport) {
+    return;
+  }
+
+  floorArrowButton.classList.add("is-visible");
+  floorArrowButton.style.setProperty("--arrow-x", "50%");
+  floorArrowButton.style.setProperty("--arrow-y", "57%");
+  floorArrowButton.style.setProperty("--arrow-scale", "0.68");
+}
+
 function createTour() {
   viewer = pannellum.viewer("panorama", {
     default: {
@@ -146,6 +158,7 @@ function createTour() {
 
   viewer.on("scenechange", (sceneId) => updateRoomPanel(sceneId));
   updateRoomPanel(rooms[0].id);
+  positionMobileArrow();
 }
 
 function walk(direction) {
@@ -194,6 +207,12 @@ function setActiveFloorDirection(direction, keepPosition = false) {
 }
 
 function moveFloorArrow(event) {
+  if (isTouchViewport) {
+    positionMobileArrow();
+    updateActiveDirectionFromYaw();
+    return;
+  }
+
   const rect = viewerShell.getBoundingClientRect();
   const activeTop = rect.top + rect.height * 0.42;
   if (event.clientY < activeTop) {
