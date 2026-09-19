@@ -72,6 +72,7 @@ const sceneLinks = {
 
 let currentRoom = rooms[0];
 let viewer;
+let tourCreated = false;
 let quizTimer;
 let walkClickTimer;
 
@@ -82,6 +83,11 @@ const quizContent = document.querySelector("#quizContent");
 const viewerShell = document.querySelector(".viewer-shell");
 const floorNavZone = document.querySelector("#floorNavZone");
 const floorArrowButton = document.querySelector("#floorArrowButton");
+const cursorGlow = document.querySelector("#cursorGlow");
+const explorationContent = document.querySelector("#explorationContent");
+const homeScreen = document.querySelector("#home");
+const aboutPage = document.querySelector("#aboutPage");
+const pageSections = ["malangsari", "tour", "archive", "profile"].map((id) => document.querySelector(`#${id}`));
 let peekTimer;
 let activeFloorDirection = "forward";
 
@@ -178,7 +184,8 @@ function setActiveFloorDirection(direction, keepPosition = false) {
   floorArrowButton.title = nextStep ? nextStep.label : "Tidak ada jalur di arah ini";
   floorArrowButton.setAttribute("aria-label", nextStep?.label || "Tidak ada jalur di arah ini");
   floorArrowButton.classList.toggle("is-hidden", !nextStep);
-  floorArrowButton.style.setProperty("--arrow-rotation", direction === "back" ? "225deg" : "45deg");
+  floorArrowButton.classList.toggle("is-back", direction === "back");
+  floorArrowButton.style.setProperty("--arrow-rotation", direction === "back" ? "0deg" : "0deg");
 
   if (!keepPosition) {
     floorArrowButton.style.setProperty("--arrow-y", "46%");
@@ -195,10 +202,17 @@ function moveFloorArrow(event) {
 
   const x = ((event.clientX - rect.left) / rect.width) * 100;
   const y = ((event.clientY - activeTop) / (rect.bottom - activeTop)) * 100;
+  const centerX = rect.left + rect.width / 2;
+  const centerY = rect.top + rect.height / 2;
+  const normalizedX = (event.clientX - centerX) / (rect.width / 2);
+  const normalizedY = (event.clientY - centerY) / (rect.height / 2);
+  const axisDistance = Math.min(1, Math.hypot(normalizedX, normalizedY));
+  const arrowScale = 0.78 - axisDistance * 0.2;
 
   floorArrowButton.classList.add("is-visible");
   floorArrowButton.style.setProperty("--arrow-x", `${Math.min(Math.max(x, 15), 85)}%`);
   floorArrowButton.style.setProperty("--arrow-y", `${Math.min(Math.max(y, 22), 68)}%`);
+  floorArrowButton.style.setProperty("--arrow-scale", arrowScale.toFixed(2));
   updateActiveDirectionFromYaw();
 }
 
@@ -325,6 +339,113 @@ function renderProfile() {
     .join("");
 }
 
+function showExploration(targetId, updateHistory = true) {
+  const pageKey = targetId === "archive" ? "archive" : targetId === "profile" ? "profile" : "malangsari";
+  const visibleSections = pageKey === "malangsari" ? ["malangsari", "tour"] : [pageKey];
+
+  pageSections.forEach((section) => {
+    section.hidden = !visibleSections.includes(section.id);
+  });
+
+  homeScreen.hidden = true;
+  aboutPage.hidden = true;
+  explorationContent.hidden = false;
+  document.body.classList.remove("home-locked");
+  document.body.classList.add("exploration-active");
+  window.scrollTo(0, 0);
+
+  if (pageKey === "malangsari") {
+    requestAnimationFrame(() => {
+      if (!tourCreated) {
+        createTour();
+        tourCreated = true;
+      } else {
+        viewer.resize();
+      }
+    });
+  }
+
+  if (updateHistory) {
+    history.pushState({ view: "exploration", targetId: pageKey }, "", `#${pageKey}`);
+  }
+}
+
+function showHome(updateHistory = true) {
+  explorationContent.hidden = true;
+  aboutPage.hidden = true;
+  homeScreen.hidden = false;
+  document.body.classList.add("home-locked");
+  document.body.classList.remove("exploration-active");
+  window.scrollTo(0, 0);
+
+  if (updateHistory) {
+    history.pushState({ view: "home" }, "", "#home");
+  }
+}
+
+const homeSlides = [...document.querySelectorAll(".home-slide")];
+let activeHomeSlide = 0;
+
+if (homeSlides.length > 1) {
+  window.setInterval(() => {
+    homeSlides[activeHomeSlide].classList.remove("is-active");
+    activeHomeSlide = (activeHomeSlide + 1) % homeSlides.length;
+    homeSlides[activeHomeSlide].classList.add("is-active");
+  }, 5200);
+}
+
+function showAbout(updateHistory = true) {
+  homeScreen.hidden = true;
+  explorationContent.hidden = true;
+  aboutPage.hidden = false;
+  document.body.classList.remove("home-locked", "exploration-active");
+  window.scrollTo(0, 0);
+
+  if (updateHistory) {
+    history.pushState({ view: "about" }, "", "#about");
+  }
+}
+
+if (window.location.hash === "#about") {
+  showAbout(false);
+} else if (window.location.hash && window.location.hash !== "#home") {
+  showExploration(window.location.hash.slice(1), false);
+} else {
+  showHome(false);
+}
+
+document.querySelectorAll(".glass-menu a").forEach((link) => {
+  link.addEventListener("click", (event) => {
+    event.preventDefault();
+    showExploration(link.getAttribute("href").slice(1));
+  });
+});
+
+document.querySelector(".lithera-logo").addEventListener("click", (event) => {
+  event.preventDefault();
+  showHome();
+});
+
+document.querySelector(".about-link").addEventListener("click", (event) => {
+  event.preventDefault();
+  showAbout();
+});
+
+document.querySelector(".about-back").addEventListener("click", (event) => {
+  event.preventDefault();
+  showHome();
+});
+
+window.addEventListener("popstate", () => {
+  if (window.location.hash === "#about") {
+    showAbout(false);
+  } else if (window.location.hash && window.location.hash !== "#home") {
+    showExploration(window.location.hash.slice(1), false);
+  } else {
+    showHome(false);
+  }
+});
+
 document.querySelector("#openArchiveButton").addEventListener("click", () => openArchive(currentRoom.id));
 document.querySelector("#closeArchiveButton").addEventListener("click", closeArchiveAndScheduleQuiz);
 floorArrowButton.addEventListener("click", handleArrowClick);
@@ -337,6 +458,49 @@ document.querySelector("#resetButton").addEventListener("click", () => {
   renderProfile();
 });
 
+document.addEventListener("pointermove", (event) => {
+  cursorGlow.style.setProperty("--cursor-x", `${event.clientX}px`);
+  cursorGlow.style.setProperty("--cursor-y", `${event.clientY}px`);
+  cursorGlow.classList.toggle("is-visible", !document.body.classList.contains("exploration-active"));
+
+  const menuLinks = [...document.querySelectorAll(".glass-menu a")];
+  let nearestLink = null;
+  let nearestDistance = Infinity;
+
+  menuLinks.forEach((link) => {
+    const rect = link.getBoundingClientRect();
+    const nearestX = Math.max(rect.left, Math.min(event.clientX, rect.right));
+    const nearestY = Math.max(rect.top, Math.min(event.clientY, rect.bottom));
+    const distance = Math.hypot(event.clientX - nearestX, event.clientY - nearestY);
+    if (distance < nearestDistance) {
+      nearestDistance = distance;
+      nearestLink = link;
+    }
+  });
+
+  menuLinks.forEach((link) => link.classList.remove("is-near"));
+  if (nearestLink && nearestDistance < 35) {
+    nearestLink.classList.add("is-near");
+  }
+});
+
+document.addEventListener("pointerover", (event) => {
+  if (event.target.closest("a, button")) {
+    cursorGlow.classList.add("is-hovering");
+  }
+});
+
+document.addEventListener("pointerout", (event) => {
+  if (event.target.closest("a, button") && !event.relatedTarget?.closest?.("a, button")) {
+    cursorGlow.classList.remove("is-hovering");
+  }
+});
+
+document.addEventListener("pointerleave", () => {
+  cursorGlow.classList.remove("is-visible");
+  document.querySelectorAll(".glass-menu a.is-near").forEach((link) => link.classList.remove("is-near"));
+});
+
 archiveModal.addEventListener("cancel", (event) => {
   event.preventDefault();
   closeArchiveAndScheduleQuiz();
@@ -344,4 +508,3 @@ archiveModal.addEventListener("cancel", (event) => {
 
 renderArchiveGrid();
 renderProfile();
-createTour();

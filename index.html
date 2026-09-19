@@ -8,40 +8,56 @@
     <link rel="stylesheet" href="./styles.css" />
   </head>
   <body>
-    <header class="app-header">
-      <a class="brand" href="#home" aria-label="Benteng Mission beranda">
-        <span class="brand-mark">BM</span>
-        <span>
-          <strong>Benteng Mission</strong>
-          <small>Eksplorasi Benteng Van den Bosch</small>
-        </span>
-      </a>
-      <nav class="top-nav" aria-label="Navigasi utama">
-        <a href="#tour">Tur 360</a>
-        <a href="#archive">Full Arsip</a>
-        <a href="#profile">Profil</a>
-      </nav>
-    </header>
+    <div id="cursorGlow" class="cursor-glow" aria-hidden="true"></div>
 
     <main>
-      <section id="home" class="hero">
-        <div class="hero-copy">
-          <p class="eyebrow">Sejarah interaktif untuk generasi digital</p>
-          <h1>Benteng Van den Bosch jadi misi eksplorasi.</h1>
-          <p>
-            Jelajahi titik-titik benteng, buka arsip sejarah, jawab kuis singkat,
-            lalu kumpulkan badge digital sebagai bukti misi.
-          </p>
-          <div class="hero-actions">
-            <a class="button primary" href="#tour">Mulai Tur</a>
-            <a class="button secondary" href="#archive">Lihat Full Arsip</a>
+      <section id="home" class="home-screen">
+        <header class="home-header">
+          <a class="lithera-logo" href="#home" aria-label="Lithera beranda">l<span class="logo-i"><span class="logo-i-stem">ı</span><span class="logo-i-dot"></span></span>thera</a>
+          <a class="about-link" href="#about">about</a>
+        </header>
+        <div class="home-stage">
+          <div class="home-image-space" aria-label="Slideshow situs sejarah">
+            <img class="home-slide is-active" src="./assets/home/home-1.png" alt="Situs sejarah dengan susunan batu di area hijau" />
+            <img class="home-slide" src="./assets/home/home-2.png" alt="Reruntuhan bangunan batu di area terbuka" />
+            <img class="home-slide" src="./assets/home/home-3.png" alt="Situs batu bersejarah di tengah hutan berkabut" />
           </div>
+          <nav class="glass-menu" aria-label="Navigasi utama">
+            <a href="#malangsari"><span>Malangsari</span></a>
+            <a href="#tour"><span>Kendenglembu</span></a>
+            <a href="#archive"><span>Arsip</span></a>
+            <a href="#profile"><span>Badge</span></a>
+          </nav>
         </div>
-        <aside class="mission-panel" aria-label="Ringkasan misi">
+      </section>
+
+      <section id="aboutPage" class="about-page" hidden>
+        <div class="about-page-inner">
+          <p class="eyebrow">About Lithera</p>
+          <h1>Ruang untuk mengenal sejarah lebih dekat.</h1>
+          <p class="about-lead">
+            Lithera adalah ruang eksplorasi digital untuk situs-situs bersejarah. Di sini,
+            cerita, arsip, dan pengalaman visual dirangkai menjadi perjalanan yang bisa dijelajahi.
+          </p>
+          <div class="about-rule"></div>
+          <p>
+            Melalui tur virtual, arsip terbuka, kuis, dan badge, Lithera mengajak pengunjung
+            menemukan kembali jejak masa lalu dengan cara yang lebih dekat dengan generasi sekarang.
+          </p>
+          <a class="about-back" href="#home">Kembali ke home</a>
+        </div>
+      </section>
+
+      <div id="explorationContent" class="exploration-content" hidden>
+      <section id="malangsari" class="mission-strip" aria-label="Progress misi Malangsari">
+        <div>
+          <p class="eyebrow">Benteng Mission</p>
+          <h1>Sejarah yang bisa dijelajahi.</h1>
+        </div>
+        <aside class="mission-panel">
           <span class="panel-label">Progress Misi</span>
           <strong id="heroProgress">0/3 badge</strong>
           <div class="progress-track"><span id="heroProgressBar"></span></div>
-          <p>Kumpulkan semua badge untuk membuka sertifikat digital prototipe.</p>
         </aside>
       </section>
 
@@ -92,6 +108,7 @@
           </div>
         </div>
       </section>
+      </div>
     </main>
 
     <dialog id="archiveModal" class="modal">
@@ -102,6 +119,13 @@
     <dialog id="quizModal" class="modal quiz-modal">
       <div id="quizContent"></div>
     </dialog>
+
+    <svg class="liquid-filter-defs" width="0" height="0" aria-hidden="true">
+      <filter id="liquid-lens">
+        <feTurbulence type="fractalNoise" baseFrequency="0.008" numOctaves="2" result="noise" />
+        <feDisplacementMap in="SourceGraphic" in2="noise" scale="18" xChannelSelector="R" yChannelSelector="G" />
+      </filter>
+    </svg>
 
     <script src="https://cdn.jsdelivr.net/npm/pannellum@2.5.6/build/pannellum.js"></script>
     <script src="./app.js"></script>
