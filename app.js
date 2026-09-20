@@ -6,7 +6,8 @@ const rooms = [
     title: "Titik 1",
     description: "Awal jalur virtual. Klik panah di lantai untuk berjalan maju ke titik berikutnya.",
     panorama: "./assets/panoramas/titik-1.png",
-    badge: "Penjelajah Titik 1",
+    badge: "The Wanderer",
+    badgeImage: "./assets/badges/homo-erectus.png",
     archive: {
       title: "Arsip Titik 1",
       type: "Foto panorama dan catatan lokasi",
@@ -24,7 +25,8 @@ const rooms = [
     title: "Titik 2",
     description: "Titik lanjutan. Arahkan pandangan ke jalur depan, lalu klik panah untuk maju lagi.",
     panorama: "./assets/panoramas/titik-2.png",
-    badge: "Penjelajah Titik 2",
+    badge: "The Survivor",
+    badgeImage: "./assets/badges/homo-neanderthal.png",
     archive: {
       title: "Arsip Titik 2",
       type: "Foto panorama dan catatan lokasi",
@@ -42,7 +44,8 @@ const rooms = [
     title: "Titik 3",
     description: "Titik akhir jalur contoh. Nanti titik ini bisa disambungkan lagi ke panorama berikutnya.",
     panorama: "./assets/panoramas/titik-3.png",
-    badge: "Penjelajah Titik 3",
+    badge: "The Thinker",
+    badgeImage: "./assets/badges/homo-sapiens.png",
     archive: {
       title: "Arsip Titik 3",
       type: "Foto panorama dan catatan lokasi",
@@ -106,8 +109,10 @@ function saveBadge(roomId) {
 
 function updateRoomPanel(roomId) {
   currentRoom = rooms.find((room) => room.id === roomId) || rooms[0];
+  const roomNumber = rooms.findIndex((room) => room.id === currentRoom.id) + 1;
   document.querySelector("#roomTitle").textContent = currentRoom.title;
   document.querySelector("#roomDescription").textContent = currentRoom.description;
+  document.querySelector("#roomIndex").textContent = String(roomNumber).padStart(2, "0");
   updateWalkButton();
 }
 
@@ -174,9 +179,11 @@ function enableTemporaryPeek(event) {
   event?.preventDefault();
   event?.stopPropagation();
   floorNavZone.classList.add("peek-mode");
+  floorArrowButton.classList.add("is-peeking");
   clearTimeout(peekTimer);
   peekTimer = setTimeout(() => {
     floorNavZone.classList.remove("peek-mode");
+    floorArrowButton.classList.remove("is-peeking");
   }, 1600);
 }
 
@@ -192,14 +199,21 @@ function handleArrowDoubleClick(event) {
 
 function setActiveFloorDirection(direction, keepPosition = false) {
   const links = sceneLinks[currentRoom.id] || {};
-  const nextStep = links[direction];
-  activeFloorDirection = direction;
+  let resolvedDirection = direction;
+  let nextStep = links[resolvedDirection];
+
+  if (!nextStep && isTouchViewport) {
+    resolvedDirection = links.forward ? "forward" : "back";
+    nextStep = links[resolvedDirection];
+  }
+
+  activeFloorDirection = resolvedDirection;
   floorArrowButton.disabled = !nextStep;
   floorArrowButton.title = nextStep ? nextStep.label : "Tidak ada jalur di arah ini";
   floorArrowButton.setAttribute("aria-label", nextStep?.label || "Tidak ada jalur di arah ini");
   floorArrowButton.classList.toggle("is-hidden", !nextStep);
-  floorArrowButton.classList.toggle("is-back", direction === "back");
-  floorArrowButton.style.setProperty("--arrow-rotation", direction === "back" ? "0deg" : "0deg");
+  floorArrowButton.classList.toggle("is-back", resolvedDirection === "back");
+  floorArrowButton.style.setProperty("--arrow-rotation", resolvedDirection === "back" ? "0deg" : "0deg");
 
   if (!keepPosition) {
     floorArrowButton.style.setProperty("--arrow-y", "46%");
@@ -333,12 +347,18 @@ function renderArchiveGrid() {
   const grid = document.querySelector("#archiveGrid");
   grid.innerHTML = rooms
     .map(
-      (room) => `
+      (room, index) => `
         <article class="archive-card">
-          <p class="eyebrow">${room.title}</p>
-          <h3>${room.archive.title}</h3>
-          <p>${room.archive.body}</p>
-          <button class="button secondary" type="button" data-room="${room.id}">Buka Arsip</button>
+          <div class="archive-visual" style="background-image: linear-gradient(180deg, rgba(16, 24, 21, 0.02), rgba(16, 24, 21, 0.58)), url('${room.panorama}');" aria-hidden="true">
+            <span class="archive-number">0${index + 1}</span>
+            <span class="archive-visual-label">${room.title}</span>
+          </div>
+          <div class="archive-card-body">
+            <p class="eyebrow">Arsip ${String(index + 1).padStart(2, "0")}</p>
+            <h3>${room.archive.title}</h3>
+            <p>${room.archive.body}</p>
+            <button class="button secondary" type="button" data-room="${room.id}">Buka Arsip</button>
+          </div>
         </article>
       `
     )
@@ -353,7 +373,11 @@ function renderProfile() {
   const badges = getBadges();
   const percent = Math.round((badges.length / rooms.length) * 100);
   document.querySelector("#heroProgress").textContent = `${badges.length}/${rooms.length} badge`;
-  document.querySelector("#heroProgressBar").style.width = `${percent}%`;
+  const heroProgressBar = document.querySelector("#heroProgressBar");
+  heroProgressBar.dataset.level = String(badges.length);
+  heroProgressBar.style.width = `${percent}%`;
+  document.querySelector("#profileBadgeCount").textContent = badges.length;
+  document.querySelector(".reward-panel").classList.toggle("is-unlocked", badges.length === rooms.length);
   document.querySelector("#rewardText").textContent =
     badges.length === rooms.length
       ? "Selamat. Sertifikat digital prototipe terbuka karena semua badge sudah terkumpul."
@@ -364,9 +388,12 @@ function renderProfile() {
       const earned = badges.includes(room.id);
       return `
         <article class="badge-card ${earned ? "earned" : ""}">
-          <span class="badge-icon">${earned ? "✓" : "?"}</span>
+          <div class="badge-visual ${earned ? "is-earned" : "is-locked"}">
+            <img class="badge-art" src="${room.badgeImage}" alt="${room.badge}, ${room.title}" />
+            ${earned ? "" : '<span class="badge-icon" aria-label="Badge terkunci"></span>'}
+          </div>
           <strong>${room.badge}</strong>
-          <small>${earned ? "Sudah didapat" : "Belum didapat"}</small>
+          <small>${earned ? "Sudah didapat" : "Jawab kuis untuk membuka"}</small>
         </article>
       `;
     })
@@ -374,7 +401,9 @@ function renderProfile() {
 }
 
 function showExploration(targetId, updateHistory = true) {
-  const pageKey = targetId === "archive" ? "archive" : targetId === "profile" ? "profile" : "malangsari";
+  const validViews = ["malangsari", "tour", "archive", "profile"];
+  const routeKey = validViews.includes(targetId) ? targetId : "malangsari";
+  const pageKey = routeKey === "archive" ? "archive" : routeKey === "profile" ? "profile" : "malangsari";
   const visibleSections = pageKey === "malangsari" ? ["malangsari", "tour"] : [pageKey];
 
   pageSections.forEach((section) => {
@@ -384,8 +413,20 @@ function showExploration(targetId, updateHistory = true) {
   homeScreen.hidden = true;
   aboutPage.hidden = true;
   explorationContent.hidden = false;
+  explorationContent.dataset.view = routeKey;
   document.body.classList.remove("home-locked");
   document.body.classList.add("exploration-active");
+  document.querySelector("#missionSite").textContent =
+    routeKey === "tour" ? "Kendenglembu · Banyuwangi, Jawa Timur" : "Malangsari · Banyuwangi, Jawa Timur";
+  document.querySelectorAll("[data-explore-route]").forEach((link) => {
+    const isActive = link.dataset.exploreRoute === routeKey;
+    link.classList.toggle("is-active", isActive);
+    if (isActive) {
+      link.setAttribute("aria-current", "page");
+    } else {
+      link.removeAttribute("aria-current");
+    }
+  });
   window.scrollTo(0, 0);
 
   if (pageKey === "malangsari") {
@@ -400,8 +441,16 @@ function showExploration(targetId, updateHistory = true) {
   }
 
   if (updateHistory) {
-    history.pushState({ view: "exploration", targetId: pageKey }, "", `#${pageKey}`);
+    history.pushState({ view: "exploration", targetId: routeKey }, "", `#${routeKey}`);
   }
+}
+
+function transitionTo(renderPage) {
+  document.body.classList.add("page-is-exiting");
+  window.setTimeout(() => {
+    renderPage();
+    requestAnimationFrame(() => document.body.classList.remove("page-is-exiting"));
+  }, 190);
 }
 
 function showHome(updateHistory = true) {
@@ -418,15 +467,48 @@ function showHome(updateHistory = true) {
 }
 
 const homeSlides = [...document.querySelectorAll(".home-slide")];
+const slideDots = [...document.querySelectorAll(".slide-dot")];
+const slidePlace = document.querySelector("#slidePlace");
+const slideLocation = document.querySelector("#slideLocation");
 let activeHomeSlide = 0;
+let homeSlideTimer;
 
-if (homeSlides.length > 1) {
-  window.setInterval(() => {
-    homeSlides[activeHomeSlide].classList.remove("is-active");
-    activeHomeSlide = (activeHomeSlide + 1) % homeSlides.length;
-    homeSlides[activeHomeSlide].classList.add("is-active");
-  }, 5200);
+function showHomeSlide(index) {
+  if (!homeSlides.length) {
+    return;
+  }
+
+  homeSlides[activeHomeSlide].classList.remove("is-active");
+  activeHomeSlide = (index + homeSlides.length) % homeSlides.length;
+  homeSlides[activeHomeSlide].classList.add("is-active");
+  slidePlace.textContent = homeSlides[activeHomeSlide].dataset.place;
+  slideLocation.textContent = "Banyuwangi, Jawa Timur, Indonesia";
+  updateSlideIndicator();
 }
+
+function updateSlideIndicator() {
+  slideDots.forEach((dot, index) => {
+    dot.classList.toggle("is-active", index === activeHomeSlide);
+    dot.setAttribute("aria-label", `Gambar ${index + 1}${index === activeHomeSlide ? " aktif" : ""}`);
+  });
+}
+
+function restartHomeSlideTimer() {
+  clearInterval(homeSlideTimer);
+  if (homeSlides.length > 1) {
+    homeSlideTimer = window.setInterval(() => showHomeSlide(activeHomeSlide + 1), 5200);
+  }
+}
+
+slideDots.forEach((dot) => {
+  dot.addEventListener("click", () => {
+    showHomeSlide(Number(dot.dataset.slide));
+    restartHomeSlideTimer();
+  });
+});
+
+updateSlideIndicator();
+restartHomeSlideTimer();
 
 function showAbout(updateHistory = true) {
   homeScreen.hidden = true;
@@ -451,34 +533,55 @@ if (window.location.hash === "#about") {
 document.querySelectorAll(".glass-menu a").forEach((link) => {
   link.addEventListener("click", (event) => {
     event.preventDefault();
-    showExploration(link.getAttribute("href").slice(1));
+    transitionTo(() => showExploration(link.getAttribute("href").slice(1)));
   });
+});
+
+document.querySelectorAll("[data-explore-route]").forEach((link) => {
+  link.addEventListener("click", (event) => {
+    event.preventDefault();
+    transitionTo(() => showExploration(link.dataset.exploreRoute));
+  });
+});
+
+document.querySelector(".explore-home").addEventListener("click", (event) => {
+  event.preventDefault();
+  transitionTo(() => showHome());
 });
 
 document.querySelector(".lithera-logo").addEventListener("click", (event) => {
   event.preventDefault();
-  showHome();
+  transitionTo(() => showHome());
+});
+
+document.querySelector(".home-return-tag").addEventListener("click", (event) => {
+  event.currentTarget.blur();
+  transitionTo(() => showHome());
 });
 
 document.querySelector(".about-link").addEventListener("click", (event) => {
   event.preventDefault();
-  showAbout();
+  transitionTo(() => showAbout());
 });
 
 document.querySelector(".about-back").addEventListener("click", (event) => {
   event.preventDefault();
-  showHome();
+  transitionTo(() => showHome());
 });
 
 window.addEventListener("popstate", () => {
-  if (window.location.hash === "#about") {
-    showAbout(false);
-  } else if (window.location.hash && window.location.hash !== "#home") {
-    showExploration(window.location.hash.slice(1), false);
-  } else {
-    showHome(false);
-  }
+  transitionTo(() => applyRoute(false));
 });
+
+function applyRoute(updateHistory = false) {
+  if (window.location.hash === "#about") {
+    showAbout(updateHistory);
+  } else if (window.location.hash && window.location.hash !== "#home") {
+    showExploration(window.location.hash.slice(1), updateHistory);
+  } else {
+    showHome(updateHistory);
+  }
+}
 
 document.querySelector("#openArchiveButton").addEventListener("click", () => openArchive(currentRoom.id));
 document.querySelector("#closeArchiveButton").addEventListener("click", closeArchiveAndScheduleQuiz);
@@ -534,6 +637,29 @@ document.addEventListener("pointerleave", () => {
   cursorGlow.classList.remove("is-visible");
   document.querySelectorAll(".glass-menu a.is-near").forEach((link) => link.classList.remove("is-near"));
 });
+
+if (window.matchMedia("(hover: hover) and (pointer: fine)").matches) {
+  const interactiveSurfaceSelector = ".mission-panel, .room-panel, .archive-card, .badge-card, .reward-panel";
+
+  document.addEventListener("pointermove", (event) => {
+    const surface = event.target.closest(interactiveSurfaceSelector);
+    if (!surface) {
+      return;
+    }
+
+    const rect = surface.getBoundingClientRect();
+    surface.style.setProperty("--surface-x", `${event.clientX - rect.left}px`);
+    surface.style.setProperty("--surface-y", `${event.clientY - rect.top}px`);
+    surface.classList.add("is-surface-active");
+  });
+
+  document.addEventListener("pointerout", (event) => {
+    const surface = event.target.closest(interactiveSurfaceSelector);
+    if (surface && !surface.contains(event.relatedTarget)) {
+      surface.classList.remove("is-surface-active");
+    }
+  });
+}
 
 archiveModal.addEventListener("cancel", (event) => {
   event.preventDefault();

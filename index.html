@@ -13,14 +13,31 @@
     <main>
       <section id="home" class="home-screen">
         <header class="home-header">
-          <a class="lithera-logo" href="#home" aria-label="Lithera beranda">l<span class="logo-i"><span class="logo-i-stem">ı</span><span class="logo-i-dot"></span></span>thera</a>
-          <a class="about-link" href="#about">about</a>
+          <div class="brand-lockup">
+            <a class="lithera-logo" href="#home" aria-label="Lithera beranda">l<span class="logo-i"><span class="logo-i-stem">ı</span><span class="logo-i-dot"></span></span>thera</a>
+            <div class="brand-meta">
+              <span class="brand-subtitle">Digital Archive of Ancient Landscapes</span>
+              <a class="about-link" href="#about">about</a>
+            </div>
+          </div>
+          <img class="institution-logo" src="./assets/brand/institution-mark.png" alt="Lambang institusi" />
         </header>
         <div class="home-stage">
           <div class="home-image-space" aria-label="Slideshow situs sejarah">
-            <img class="home-slide is-active" src="./assets/home/home-1.png" alt="Situs sejarah dengan susunan batu di area hijau" />
-            <img class="home-slide" src="./assets/home/home-2.png" alt="Reruntuhan bangunan batu di area terbuka" />
-            <img class="home-slide" src="./assets/home/home-3.png" alt="Situs batu bersejarah di tengah hutan berkabut" />
+            <img class="home-slide is-active" src="./assets/home/home-1.png" data-place="Kendenglembu" alt="Kendenglembu, Banyuwangi, dengan susunan batu di area hijau" />
+            <img class="home-slide" src="./assets/home/home-2.png" data-place="Kendenglembu" alt="Kendenglembu, Banyuwangi, dengan reruntuhan bangunan batu" />
+            <img class="home-slide" src="./assets/home/home-3.png" data-place="Malangsari" alt="Malangsari, Banyuwangi, dengan situs batu di tengah hutan berkabut" />
+            <img class="home-slide" src="./assets/home/home-4.jpg" data-place="Malangsari" alt="Malangsari, Banyuwangi, dengan gerbang masuk situs" />
+          </div>
+          <div class="slide-caption" aria-live="polite">
+            <strong id="slidePlace">Kendenglembu</strong>
+            <span id="slideLocation">Banyuwangi, Jawa Timur, Indonesia</span>
+          </div>
+          <div class="slide-indicators" aria-label="Indikator slideshow">
+            <button class="slide-dot is-active" type="button" data-slide="0" aria-label="Tampilkan gambar 1"></button>
+            <button class="slide-dot" type="button" data-slide="1" aria-label="Tampilkan gambar 2"></button>
+            <button class="slide-dot" type="button" data-slide="2" aria-label="Tampilkan gambar 3"></button>
+            <button class="slide-dot" type="button" data-slide="3" aria-label="Tampilkan gambar 4"></button>
           </div>
           <nav class="glass-menu" aria-label="Navigasi utama">
             <a href="#malangsari"><span>Malangsari</span></a>
@@ -49,9 +66,19 @@
       </section>
 
       <div id="explorationContent" class="exploration-content" hidden>
+      <nav class="explore-nav" aria-label="Navigasi eksplorasi">
+        <a class="explore-home" href="#home" aria-label="Kembali ke home Lithera">Lithera</a>
+        <div class="explore-nav-links">
+          <a href="#malangsari" data-explore-route="malangsari">Malangsari</a>
+          <a href="#tour" data-explore-route="tour">Kendenglembu</a>
+          <a href="#archive" data-explore-route="archive">Arsip</a>
+          <a href="#profile" data-explore-route="profile">Badge</a>
+        </div>
+      </nav>
       <section id="malangsari" class="mission-strip" aria-label="Progress misi Malangsari">
-        <div>
-          <p class="eyebrow">Lithera</p>
+        <div class="mission-copy">
+          <button class="eyebrow home-return-tag" type="button" aria-label="Kembali ke home Lithera">Lithera</button>
+          <p id="missionSite" class="mission-site">Malangsari · Banyuwangi, Jawa Timur</p>
           <h1>Sejarah yang bisa dijelajahi.</h1>
         </div>
         <aside class="mission-panel">
@@ -62,7 +89,7 @@
       </section>
 
       <section id="tour" class="tour-section">
-        <div class="section-heading">
+        <div class="section-heading tour-heading">
           <p class="eyebrow">Tur Virtual 360</p>
           <h2>Masuk ke titik eksplorasi</h2>
           <p>Ikuti panah di dalam panorama untuk berjalan maju dari satu titik ke titik berikutnya.</p>
@@ -75,6 +102,10 @@
             </div>
           </div>
           <aside class="room-panel">
+            <div class="room-panel-top">
+              <span id="roomIndex" class="room-index">01</span>
+              <span class="room-kicker">Titik aktif</span>
+            </div>
             <h3 id="roomTitle">Titik Eksplorasi</h3>
             <p id="roomDescription"></p>
             <button id="openArchiveButton" class="button primary" type="button">Buka Arsip di Titik Ini</button>
@@ -92,9 +123,14 @@
       </section>
 
       <section id="profile" class="profile-section">
-        <div class="section-heading">
-          <p class="eyebrow">Profil</p>
-          <h2>Badge dan reward</h2>
+        <div class="section-heading profile-heading">
+          <div>
+            <p class="eyebrow">Profil</p>
+            <h2>Badge dan reward</h2>
+          </div>
+          <div class="collection-count" aria-label="Jumlah badge terkumpul">
+            <strong id="profileBadgeCount">0</strong><span>/ 3</span>
+          </div>
         </div>
         <div class="profile-layout">
           <div>
