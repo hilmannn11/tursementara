@@ -91,7 +91,6 @@ const quizContent = document.querySelector("#quizContent");
 const viewerShell = document.querySelector(".viewer-shell");
 const floorNavZone = document.querySelector("#floorNavZone");
 const floorArrowButton = document.querySelector("#floorArrowButton");
-const cursorGlow = document.querySelector("#cursorGlow");
 const explorationContent = document.querySelector("#explorationContent");
 const homeScreen = document.querySelector("#home");
 const aboutPage = document.querySelector("#aboutPage");
@@ -488,6 +487,13 @@ function renderProfile() {
   heroProgressBar.parentElement.setAttribute("aria-valuenow", String(badges.length));
   heroProgressBar.parentElement.setAttribute("aria-valuetext", `${badges.length} dari ${rooms.length} badge`);
   document.querySelector("#profileBadgeCount").textContent = badges.length;
+  document.querySelector("#homeBadgeCount").textContent = badges.length;
+  document.querySelector("#collectionProgress").value = badges.length;
+  document.querySelector("#collectionPercent").textContent = `${percent}%`;
+  document.querySelector("#collectionMessage").textContent = badges.length === rooms.length
+    ? "Lengkap! Setiap tantangan sudah menjadi bagian dari koleksimu."
+    : badges.length === 0 ? "Perjalanan besarmu dimulai dari satu badge."
+    : `Sudah ${badges.length} badge! Tinggal ${rooms.length - badges.length} lagi untuk melengkapi koleksimu.`;
   document.querySelector(".reward-panel").classList.toggle("is-unlocked", badges.length === rooms.length);
   document.querySelector("#rewardText").textContent =
     badges.length === rooms.length
@@ -499,16 +505,22 @@ function renderProfile() {
       const earned = badges.includes(room.id);
       return `
         <article class="badge-card ${earned ? "earned" : ""}">
+          <span class="badge-state">${earned ? "Terkumpul" : "Belum terbuka"}</span>
           <div class="badge-visual ${earned ? "is-earned" : "is-locked"}">
             <img class="badge-art" src="${room.badgeImage}" alt="${room.badge}, ${room.title}" />
             ${earned ? "" : '<span class="badge-icon" role="img" aria-label="Badge terkunci"></span>'}
           </div>
           <strong>${room.badge}</strong>
+          <p class="badge-caption">${["Langkah pertama, cerita pertama.", "Rasa penasaran membawamu lebih jauh.", "Satu penemuan melengkapi perjalanan."][rooms.indexOf(room)]}</p>
           <small>${earned ? "Sudah didapat" : "Jawab kuis untuk membuka"}</small>
+          <button class="badge-challenge" type="button" data-badge-room="${room.id}" aria-label="${earned ? "Ulangi" : "Mulai"} tantangan ${room.badge}">${earned ? "Coba lagi" : "Mulai tantangan"}<span aria-hidden="true">&rarr;</span></button>
         </article>
       `;
     })
     .join("");
+  document.querySelectorAll("[data-badge-room]").forEach((button) => {
+    button.addEventListener("click", () => openQuiz(button.dataset.badgeRoom));
+  });
 }
 
 function showExploration(targetId, updateHistory = true) {
@@ -517,9 +529,9 @@ function showExploration(targetId, updateHistory = true) {
     targetId = "kendenglembu";
     history.replaceState({ targetId }, "", `#${targetId}`);
   }
-  const validViews = ["malangsari", "kendenglembu", "archive", "profile"];
+  const validViews = ["sites", "malangsari", "kendenglembu", "archive", "profile"];
   const routeKey = validViews.includes(targetId) ? targetId : "malangsari";
-  const pageKey = routeKey === "archive" ? "archive" : routeKey === "profile" ? "profile" : "malangsari";
+  const pageKey = ["sites", "archive", "profile"].includes(routeKey) ? routeKey : "malangsari";
   const visibleSections = pageKey === "malangsari" ? ["malangsari", "kendenglembu"] : [pageKey];
 
   pageSections.forEach((section) => {
@@ -559,7 +571,9 @@ function showExploration(targetId, updateHistory = true) {
 
 function updateNavigation(routeKey) {
   globalNav.hidden = routeKey === "home";
-  document.querySelector("#siteChooser").hidden = !["malangsari", "kendenglembu"].includes(routeKey);
+  restartHomeSlideTimer();
+  globalNav.querySelector(".explore-nav-links").hidden = ["sites", "archive", "profile"].includes(routeKey);
+  document.querySelector("#siteChooser").hidden = routeKey !== "sites";
   document.querySelectorAll("[data-site-route]").forEach((link) => {
     const isActive = link.dataset.siteRoute === routeKey;
     link.classList.toggle("is-active", isActive);
@@ -567,7 +581,7 @@ function updateNavigation(routeKey) {
     if (isActive) link.setAttribute("aria-current", "page");
     else link.removeAttribute("aria-current");
   });
-  const titles = { home: "Beranda", malangsari: "Malangsari", kendenglembu: "Kendenglembu", archive: "Arsip", profile: "Badge", about: "About" };
+  const titles = { home: "Beranda", sites: "Pilih Situs", malangsari: "Malangsari", kendenglembu: "Kendenglembu", archive: "Arsip", profile: "Badge", about: "About" };
   document.title = `${titles[routeKey]} | Lithera`;
   document.querySelectorAll("[data-explore-route]").forEach((link) => {
     const isActive = link.dataset.exploreRoute === routeKey;
@@ -619,6 +633,8 @@ const slidePlace = document.querySelector("#slidePlace");
 const slideLocation = document.querySelector("#slideLocation");
 let activeHomeSlide = 0;
 let homeSlideTimer;
+let homeSlideHovered = false;
+let homeSlideFocused = false;
 
 function showHomeSlide(index) {
   if (!homeSlides.length) {
@@ -642,7 +658,7 @@ function updateSlideIndicator() {
 
 function restartHomeSlideTimer() {
   clearInterval(homeSlideTimer);
-  if (homeSlides.length > 1) {
+  if (homeSlides.length > 1 && !homeScreen.hidden && !document.hidden && !reducedMotion.matches && !homeSlideHovered && !homeSlideFocused) {
     homeSlideTimer = window.setInterval(() => showHomeSlide(activeHomeSlide + 1), 5200);
   }
 }
@@ -656,6 +672,26 @@ slideDots.forEach((dot) => {
 
 updateSlideIndicator();
 restartHomeSlideTimer();
+
+const homeStage = document.querySelector(".home-stage");
+homeStage.addEventListener("mouseenter", () => {
+  homeSlideHovered = true;
+  restartHomeSlideTimer();
+});
+homeStage.addEventListener("mouseleave", () => {
+  homeSlideHovered = false;
+  restartHomeSlideTimer();
+});
+homeStage.addEventListener("focusin", () => {
+  homeSlideFocused = true;
+  restartHomeSlideTimer();
+});
+homeStage.addEventListener("focusout", (event) => {
+  homeSlideFocused = homeStage.contains(event.relatedTarget);
+  restartHomeSlideTimer();
+});
+document.addEventListener("visibilitychange", restartHomeSlideTimer);
+reducedMotion.addEventListener("change", restartHomeSlideTimer);
 
 const homeIntro = document.querySelector(".home-intro");
 if (homeIntro) {
@@ -693,7 +729,7 @@ document.addEventListener("click", (event) => {
   const link = event.target.closest("a[href^='#']");
   if (!link || event.button !== 0 || event.ctrlKey || event.metaKey || event.shiftKey || event.altKey) return;
   const route = link.getAttribute("href").slice(1);
-  if (!["home", "about", "malangsari", "kendenglembu", "archive", "profile"].includes(route)) return;
+  if (!["home", "about", "sites", "malangsari", "kendenglembu", "archive", "profile"].includes(route)) return;
   event.preventDefault();
   transitionTo(() => route === "home" ? showHome() : route === "about" ? showAbout() : showExploration(route));
 });
@@ -765,72 +801,6 @@ document.querySelector("#resetButton").addEventListener("click", () => {
   localStorage.removeItem(STORAGE_KEY);
   renderProfile();
 });
-
-document.addEventListener("pointermove", (event) => {
-  cursorGlow.style.setProperty("--cursor-x", `${event.clientX}px`);
-  cursorGlow.style.setProperty("--cursor-y", `${event.clientY}px`);
-  cursorGlow.classList.toggle("is-visible", !document.body.classList.contains("exploration-active"));
-
-  const menuLinks = [...document.querySelectorAll(".glass-menu a")];
-  let nearestLink = null;
-  let nearestDistance = Infinity;
-
-  menuLinks.forEach((link) => {
-    const rect = link.getBoundingClientRect();
-    const nearestX = Math.max(rect.left, Math.min(event.clientX, rect.right));
-    const nearestY = Math.max(rect.top, Math.min(event.clientY, rect.bottom));
-    const distance = Math.hypot(event.clientX - nearestX, event.clientY - nearestY);
-    if (distance < nearestDistance) {
-      nearestDistance = distance;
-      nearestLink = link;
-    }
-  });
-
-  menuLinks.forEach((link) => link.classList.remove("is-near"));
-  if (nearestLink && nearestDistance < 35) {
-    nearestLink.classList.add("is-near");
-  }
-});
-
-document.addEventListener("pointerover", (event) => {
-  if (event.target.closest("a, button")) {
-    cursorGlow.classList.add("is-hovering");
-  }
-});
-
-document.addEventListener("pointerout", (event) => {
-  if (event.target.closest("a, button") && !event.relatedTarget?.closest?.("a, button")) {
-    cursorGlow.classList.remove("is-hovering");
-  }
-});
-
-document.addEventListener("pointerleave", () => {
-  cursorGlow.classList.remove("is-visible");
-  document.querySelectorAll(".glass-menu a.is-near").forEach((link) => link.classList.remove("is-near"));
-});
-
-if (window.matchMedia("(hover: hover) and (pointer: fine)").matches) {
-  const interactiveSurfaceSelector = ".mission-panel, .room-panel, .archive-card, .badge-card, .reward-panel";
-
-  document.addEventListener("pointermove", (event) => {
-    const surface = event.target.closest(interactiveSurfaceSelector);
-    if (!surface) {
-      return;
-    }
-
-    const rect = surface.getBoundingClientRect();
-    surface.style.setProperty("--surface-x", `${event.clientX - rect.left}px`);
-    surface.style.setProperty("--surface-y", `${event.clientY - rect.top}px`);
-    surface.classList.add("is-surface-active");
-  });
-
-  document.addEventListener("pointerout", (event) => {
-    const surface = event.target.closest(interactiveSurfaceSelector);
-    if (surface && !surface.contains(event.relatedTarget)) {
-      surface.classList.remove("is-surface-active");
-    }
-  });
-}
 
 archiveModal.addEventListener("cancel", (event) => {
   event.preventDefault();

@@ -6,12 +6,12 @@
     <title>Lithera</title>
     <meta name="description" content="Lithera: eksplorasi panorama 360 derajat, arsip dan referensi penelitian situs Kendenglembu dan Malangsari, Banyuwangi." />
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/pannellum@2.5.6/build/pannellum.css" />
-    <link rel="stylesheet" href="./styles.css?v=20260921-site-choice-1" />
+    <link rel="stylesheet" href="./styles.css?v=20260921-sites-page-1" />
     <link rel="stylesheet" href="./ux.css?v=20260921-panorama-4" />
+    <link rel="stylesheet" href="./discovery.css?v=1" />
+    <link rel="stylesheet" href="./theme.css?v=1" />
   </head>
   <body>
-    <div id="cursorGlow" class="cursor-glow" aria-hidden="true"></div>
-
     <main>
       <section id="home" class="home-screen">
         <header class="home-header">
@@ -41,18 +41,48 @@
             <button class="slide-dot" type="button" data-slide="2" aria-label="Tampilkan gambar 3"></button>
             <button class="slide-dot" type="button" data-slide="3" aria-label="Tampilkan gambar 4"></button>
           </div>
-          <nav class="glass-menu" aria-label="Navigasi utama">
-            <a href="#archive"><span>Arsip</span></a>
-            <a href="#profile"><span>Badge</span></a>
-          </nav>
         </div>
         <section class="home-intro" aria-labelledby="homeTitle">
           <div class="home-intro-inner">
-            <p class="home-intro-kicker">Arsip digital lanskap purba</p>
+            <p class="home-intro-kicker">Arsip digital zaman praaksara</p>
             <h1 id="homeTitle">Lithera</h1>
             <p class="home-intro-lead">Mengenal jejak masa lalu, lebih dekat.</p>
-            <p class="home-intro-description">Lithera adalah ruang eksplorasi digital untuk mengenal situs bersejarah di Banyuwangi. Melalui tur virtual dan arsip penelitian, jelajahi lanskap Kendenglembu dan Malangsari serta cerita yang tersimpan di dalamnya.</p>
-            <a class="home-tour-link" href="#malangsari">Coba Tur Virtual <span aria-hidden="true">&rarr;</span></a>
+            <p class="home-intro-description">Lithera adalah arsip digital interaktif yang membawa Anda ke pusat situs purbakala Kendenglembu dan Malangsari. Masuk ke dalam tur virtual 360°, bedah arsip penelitian autentik, dan selesaikan kuis sejarah untuk mengklaim sertifikat penjelajah Anda.</p>
+            <a class="home-tour-link" href="#sites">Coba Tur Virtual 360°<span aria-hidden="true">&rarr;</span></a>
+          </div>
+        </section>
+        <section class="home-discover" aria-labelledby="discoverTitle">
+          <div class="discovery-inner">
+            <p class="discovery-kicker">Perjalanan belum selesai</p>
+            <h2 id="discoverTitle">Ada cerita. Ada pencapaian.</h2>
+            <p class="discovery-lead">Baca jejak penelitiannya, lalu kumpulkan kenangan dari perjalananmu.</p>
+            <nav class="discovery-links" aria-label="Arsip dan koleksi badge">
+              <a class="discovery-card discovery-archive" href="#archive" data-reveal>
+                <div class="discovery-art archive-art">
+                  <img src="./assets/home/home-2.png" alt="" loading="lazy" />
+                  <span class="discovery-stamp">Catatan dari masa lalu</span>
+                </div>
+                <div class="discovery-card-copy">
+                  <span class="discovery-kicker">02 penelitian &middot; 03 arsip tur</span>
+                  <h3>Arsip &amp; cerita</h3>
+                  <p>Temukan kisah di balik situs, dari catatan lapangan hingga referensi penelitian.</p>
+                  <span class="discovery-action">Buka arsip <span aria-hidden="true">&rarr;</span></span>
+                </div>
+              </a>
+              <a class="discovery-card discovery-badges" href="#profile" data-reveal>
+                <div class="discovery-art badge-art-stage" aria-hidden="true">
+                  <img src="./assets/badges/homo-erectus.png" alt="" loading="lazy" />
+                  <img src="./assets/badges/homo-neanderthal.png" alt="" loading="lazy" />
+                  <img src="./assets/badges/homo-sapiens.png" alt="" loading="lazy" />
+                </div>
+                <div class="discovery-card-copy">
+                  <span class="discovery-kicker"><span id="homeBadgeCount">0</span> dari 3 badge terkumpul</span>
+                  <h3>Koleksi penjelajah</h3>
+                  <p>Setiap tantangan menyimpan pencapaian. Kenali ketiga badge dan lengkapi koleksimu.</p>
+                  <span class="discovery-action">Lihat badge <span aria-hidden="true">&rarr;</span></span>
+                </div>
+              </a>
+            </nav>
           </div>
         </section>
       </section>
@@ -110,6 +140,7 @@
       </section>
       <section id="malangsari" class="mission-strip" aria-label="Progress misi Malangsari">
         <div class="mission-copy">
+          <a class="site-picker-back" href="#sites">&larr; Pilih situs lain</a>
           <button class="eyebrow home-return-tag" type="button" aria-label="Kembali ke home Lithera">Lithera</button>
           <p id="missionSite" class="mission-site">Malangsari · Banyuwangi, Jawa Timur</p>
           <h1>Sejarah yang bisa dijelajahi.</h1>
@@ -148,14 +179,27 @@
       </section>
 
       <section id="archive" class="archive-section">
-        <div class="section-heading">
-          <p class="eyebrow">Full Arsip</p>
-          <h2>Arsip bisa dibuka tanpa syarat badge</h2>
-          <p>Semua materi sejarah tetap bebas diakses, sementara kuis berfungsi sebagai lapisan gamifikasi.</p>
+        <nav class="collection-nav" aria-label="Navigasi koleksi">
+          <a href="#archive" aria-current="page">Arsip</a>
+          <a href="#profile">Badge</a>
+        </nav>
+        <div class="collection-heading">
+          <div>
+            <p class="discovery-kicker">Ruang baca Lithera</p>
+            <h1>Arsip &amp; cerita</h1>
+            <p>Selalu ada cerita di balik sebuah tempat. Temukan jejaknya melalui penelitian dan catatan perjalanan.</p>
+          </div>
+          <div class="archive-heading-photo" aria-hidden="true"><img src="./assets/home/home-3.png" alt="" /><span>Malangsari &amp; Kendenglembu</span></div>
         </div>
-        <div class="research-references" role="region" aria-labelledby="researchTitle">
-          <h3 id="researchTitle">Referensi penelitian</h3>
+        <div class="archive-tabs" role="tablist" aria-label="Jenis arsip">
+          <button id="researchTab" type="button" role="tab" aria-selected="true" aria-controls="researchPanel">Penelitian <span>02</span></button>
+          <button id="tourArchiveTab" type="button" role="tab" aria-selected="false" aria-controls="tourArchivePanel" tabindex="-1">Arsip tur <span>03</span></button>
+        </div>
+        <div id="researchPanel" class="research-references" role="tabpanel" aria-labelledby="researchTab" tabindex="0">
+          <div class="collection-section-label"><h2 id="researchTitle">Dari catatan para peneliti</h2><span>Terbuka untuk semua</span></div>
+          <div class="research-grid">
           <article class="research-entry">
+            <img class="research-cover" src="./assets/home/home-1.png" alt="" />
             <p class="reference-location">Kendenglembu</p>
             <h4>Awal kolonisasi Austronesia di tenggara Pulau Jawa: Perspektif Situs Kendenglembu</h4>
             <p>Penelitian ini membandingkan data arkeologi dan linguistik mengenai migrasi penutur <span class="glossary-entry"><button class="glossary-term" type="button" aria-expanded="false" aria-describedby="termAustronesia">Austronesia</button><span id="termAustronesia" class="glossary-tooltip" role="tooltip" hidden>Dalam artikel ini, Austronesia merujuk pada kelompok bahasa dan masyarakat penuturnya, bukan spesies manusia. Kajian migrasinya menggabungkan bukti bahasa dan arkeologi.</span></span>. Temuan Kendenglembu membuka hipotesis jalur dari Sulawesi Barat; ini merupakan interpretasi penelitian, bukan kesimpulan tunggal tentang asal-usul penduduk.</p>
@@ -163,37 +207,57 @@
             <div class="reference-actions"><a href="https://ejournal.brin.go.id/amerta/article/view/3521" target="_blank" rel="noopener noreferrer">Baca sumber jurnal <span class="sr-only">(tab baru)</span></a><button class="cite-button" type="button" data-cite="kendenglembu"><img src="./assets/icons/copy.svg" alt="" width="16" height="16" />Kutip / Cite<span class="sr-only"> penelitian Kendenglembu</span></button></div>
           </article>
           <article class="research-entry">
+            <img class="research-cover" src="./assets/home/home-3.png" alt="" />
             <p class="reference-location">Malangsari</p>
             <h4>Hasil ekskavasi Situs Malangsari, Banyuwangi: Data baru dolmen di Jawa Timur</h4>
             <p>Ekskavasi di Petak D55, Blok Sidomaju, Afdeling Mulyosari menemukan konstruksi <span class="glossary-entry"><button class="glossary-term" type="button" aria-expanded="false" aria-describedby="termDolmen">dolmen</button><span id="termDolmen" class="glossary-tooltip" role="tooltip" hidden>Monumen batu besar yang dibahas sebagai konstruksi kubur dalam penelitian Malangsari. Fungsi dan konteks tiap temuan ditafsirkan melalui penelitian, bukan dari bentuknya saja.</span></span> yang masih utuh, tetapi tanpa sisa manusia atau artefak. Penulis menafsirkannya sebagai indikasi pembukaan sebelumnya dan menekankan perlunya penelitian lebih lanjut.</p>
             <p class="reference-metadata">Gunadi Kasnowihardjo · 2017 · <cite>Berkala Arkeologi</cite>, 37(1), 1–14 · DOI: 10.30883/jba.v37i1.108</p>
             <div class="reference-actions"><a href="https://ejournal.brin.go.id/berkalaarkeologi/article/view/4414" target="_blank" rel="noopener noreferrer">Baca sumber jurnal <span class="sr-only">(tab baru)</span></a><button class="cite-button" type="button" data-cite="malangsari"><img src="./assets/icons/copy.svg" alt="" width="16" height="16" />Kutip / Cite<span class="sr-only"> penelitian Malangsari</span></button></div>
           </article>
+          </div>
           <p class="provenance-note">Ringkasan dan glosarium diadaptasi dari artikel di atas. Tahun sitasi mengikuti tahun edisi jurnal (2011/2017); portal BRIN menampilkan tanggal publikasi 2024 yang berbeda. Referensi ini bukan atribusi foto panorama. Identitas lokasi, pembuat, tanggal, dan izin foto demo belum diverifikasi.</p>
         </div>
-        <h3>Arsip titik · Materi demo</h3>
-        <div id="archiveGrid" class="archive-grid"></div>
+        <div id="tourArchivePanel" role="tabpanel" aria-labelledby="tourArchiveTab" tabindex="0" hidden>
+          <div class="collection-section-label"><h2>Catatan sepanjang perjalanan</h2><span>3 titik &middot; Materi demo</span></div>
+          <div id="archiveGrid" class="archive-grid"></div>
+        </div>
+        <div class="collection-footer"><p>Cerita terasa berbeda ketika dijelajahi.</p><a href="#sites">Masuk tur virtual <span aria-hidden="true">&rarr;</span></a></div>
       </section>
 
       <section id="profile" class="profile-section">
-        <div class="section-heading profile-heading">
+        <nav class="collection-nav" aria-label="Navigasi koleksi">
+          <a href="#archive">Arsip</a>
+          <a href="#profile" aria-current="page">Badge</a>
+        </nav>
+        <div class="collection-heading profile-heading">
           <div>
-            <p class="eyebrow">Profil</p>
-            <h2>Badge dan reward</h2>
+            <p class="discovery-kicker">Sedikit penasaran, banyak penemuan</p>
+            <h1>Koleksi penjelajah</h1>
+            <p>Tiga tantangan, tiga badge untuk dikoleksi. Setiap jawaban benar menambah satu cerita dalam perjalananmu.</p>
           </div>
           <div class="collection-count" role="group" aria-label="Jumlah badge terkumpul">
-            <strong id="profileBadgeCount">0</strong><span>/ 3</span>
+            <div><strong id="profileBadgeCount">0</strong><span>/ 3</span></div>
+            <span>badge terkumpul</span>
           </div>
+        </div>
+        <div class="collection-progress">
+          <div><p id="collectionMessage" role="status">Perjalanan besarmu dimulai dari satu badge.</p><span id="collectionPercent">0%</span></div>
+          <progress id="collectionProgress" value="0" max="3" aria-label="Kemajuan koleksi badge"></progress>
         </div>
         <div class="profile-layout">
           <div>
-            <h3>Badge Terkumpul</h3>
+            <div class="collection-section-label"><h2>Temui koleksimu</h2><span>Jawab, temukan, kumpulkan</span></div>
             <div id="badgeGrid" class="badge-grid"></div>
           </div>
           <div class="reward-panel">
-            <h3>Reward</h3>
-            <p id="rewardText">Kumpulkan semua badge untuk membuka sertifikat digital.</p>
-            <button id="resetButton" class="button secondary" type="button">Reset Progress</button>
+            <div class="certificate-art" aria-hidden="true"><span>LITHERA</span><strong>Sertifikat<br />Penjelajah</strong><img src="./assets/badges/homo-sapiens.png" alt="" /><small>3 tantangan &middot; 1 perjalanan</small></div>
+            <div class="reward-copy">
+              <p class="discovery-kicker">Pencapaian berikutnya</p>
+              <h3>Satu koleksi, satu pencapaian.</h3>
+              <p id="rewardText">Kumpulkan semua badge untuk membuka sertifikat digital.</p>
+              <a class="collection-primary" href="#sites">Lanjutkan penjelajahan <span aria-hidden="true">&rarr;</span></a>
+              <button id="resetButton" class="button secondary" type="button">Reset Progress</button>
+            </div>
           </div>
         </div>
       </section>
@@ -228,7 +292,8 @@
     </svg>
 
     <script src="https://cdn.jsdelivr.net/npm/pannellum@2.5.6/build/pannellum.js"></script>
-    <script src="./app.js?v=20260921-site-choice-1"></script>
+    <script src="./app.js?v=20260921-theme-1"></script>
     <script src="./literacy.js"></script>
+    <script src="./discovery.js?v=1"></script>
   </body>
 </html>

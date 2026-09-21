@@ -546,6 +546,7 @@ body.exploration-active .cursor-glow {
 }
 
 .site-chooser {
+  min-height: calc(100svh - 70px);
   padding: 36px clamp(18px, 4vw, 56px) 40px;
   background: #f4f8f5;
   letter-spacing: 0;
@@ -554,6 +555,17 @@ body.exploration-active .cursor-glow {
 .site-chooser-inner {
   max-width: 1160px;
   margin: 0 auto;
+}
+
+.site-picker-back {
+  display: block;
+  width: fit-content;
+  margin-bottom: 20px;
+  padding: 10px 0;
+  color: #18483d;
+  font-size: 14px;
+  font-weight: 700;
+  text-underline-offset: 4px;
 }
 
 .site-chooser-label {
@@ -1382,6 +1394,10 @@ section:not(.home-screen):not(.mission-strip) {
 .explore-home:focus-visible {
   color: #b8401c;
   transform: translateY(-1px);
+}
+
+.explore-nav-links[hidden] {
+  display: none;
 }
 
 .explore-nav-links {
