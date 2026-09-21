@@ -634,16 +634,16 @@ section:not(.home-screen):not(.mission-strip) {
 }
 
 #malangsari:not([hidden]) > div > .eyebrow,
-#tour:not([hidden]) .section-heading .eyebrow {
+#kendenglembu:not([hidden]) .section-heading .eyebrow {
   animation: enter-up 520ms 40ms both cubic-bezier(0.22, 1, 0.36, 1);
 }
 
 #malangsari:not([hidden]) > div > h1,
-#tour:not([hidden]) .section-heading h2 {
+#kendenglembu:not([hidden]) .section-heading h2 {
   animation: enter-up 560ms 110ms both cubic-bezier(0.22, 1, 0.36, 1);
 }
 
-#tour:not([hidden]) .section-heading p:not(.eyebrow) {
+#kendenglembu:not([hidden]) .section-heading p:not(.eyebrow) {
   animation: enter-up 560ms 180ms both cubic-bezier(0.22, 1, 0.36, 1);
 }
 
@@ -680,13 +680,16 @@ section:not(.home-screen):not(.mission-strip) {
 
 .tour-layout {
   display: grid;
-  grid-template-columns: minmax(0, 1fr) 340px;
+  grid-template-columns: minmax(0, 1fr);
+  width: 100%;
   gap: 20px;
   align-items: stretch;
 }
 
 .viewer-shell {
   position: relative;
+  width: 100%;
+  min-width: 0;
   min-height: 560px;
   overflow: hidden;
   border-radius: 14px;

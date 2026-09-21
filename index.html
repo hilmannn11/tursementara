@@ -4,8 +4,10 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Lithera</title>
+    <meta name="description" content="Lithera: eksplorasi panorama 360 derajat, arsip dan referensi penelitian situs Kendenglembu dan Malangsari, Banyuwangi." />
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/pannellum@2.5.6/build/pannellum.css" />
-    <link rel="stylesheet" href="./styles.css" />
+    <link rel="stylesheet" href="./styles.css?v=20260921-panorama-4" />
+    <link rel="stylesheet" href="./ux.css?v=20260921-panorama-4" />
   </head>
   <body>
     <div id="cursorGlow" class="cursor-glow" aria-hidden="true"></div>
@@ -23,7 +25,7 @@
           <img class="institution-logo" src="./assets/brand/institution-mark.png" alt="Lambang institusi" />
         </header>
         <div class="home-stage">
-          <div class="home-image-space" aria-label="Slideshow situs sejarah">
+          <div class="home-image-space" role="group" aria-label="Slideshow situs sejarah">
             <img class="home-slide is-active" src="./assets/home/home-1.png" data-place="Kendenglembu" alt="Kendenglembu, Banyuwangi, dengan susunan batu di area hijau" />
             <img class="home-slide" src="./assets/home/home-2.png" data-place="Kendenglembu" alt="Kendenglembu, Banyuwangi, dengan reruntuhan bangunan batu" />
             <img class="home-slide" src="./assets/home/home-3.png" data-place="Malangsari" alt="Malangsari, Banyuwangi, dengan situs batu di tengah hutan berkabut" />
@@ -33,7 +35,7 @@
             <strong id="slidePlace">Kendenglembu</strong>
             <span id="slideLocation">Banyuwangi, Jawa Timur, Indonesia</span>
           </div>
-          <div class="slide-indicators" aria-label="Indikator slideshow">
+          <div class="slide-indicators" role="group" aria-label="Indikator slideshow">
             <button class="slide-dot is-active" type="button" data-slide="0" aria-label="Tampilkan gambar 1"></button>
             <button class="slide-dot" type="button" data-slide="1" aria-label="Tampilkan gambar 2"></button>
             <button class="slide-dot" type="button" data-slide="2" aria-label="Tampilkan gambar 3"></button>
@@ -41,12 +43,23 @@
           </div>
           <nav class="glass-menu" aria-label="Navigasi utama">
             <a href="#malangsari"><span>Malangsari</span></a>
-            <a href="#tour"><span>Kendenglembu</span></a>
+            <a href="#kendenglembu"><span>Kendenglembu</span></a>
             <a href="#archive"><span>Arsip</span></a>
             <a href="#profile"><span>Badge</span></a>
           </nav>
         </div>
       </section>
+
+      <nav id="globalNav" class="explore-nav" aria-label="Navigasi global" hidden>
+        <a class="explore-home" href="#home" aria-label="Kembali ke home Lithera">Lithera</a>
+        <div class="explore-nav-links">
+          <a href="#malangsari" data-explore-route="malangsari">Malangsari</a>
+          <a href="#kendenglembu" data-explore-route="kendenglembu">Kendenglembu</a>
+          <a href="#archive" data-explore-route="archive">Arsip</a>
+          <a href="#profile" data-explore-route="profile">Badge</a>
+          <a href="#about" data-explore-route="about">About</a>
+        </div>
+      </nav>
 
       <section id="aboutPage" class="about-page" hidden>
         <div class="about-page-inner">
@@ -66,15 +79,6 @@
       </section>
 
       <div id="explorationContent" class="exploration-content" hidden>
-      <nav class="explore-nav" aria-label="Navigasi eksplorasi">
-        <a class="explore-home" href="#home" aria-label="Kembali ke home Lithera">Lithera</a>
-        <div class="explore-nav-links">
-          <a href="#malangsari" data-explore-route="malangsari">Malangsari</a>
-          <a href="#tour" data-explore-route="tour">Kendenglembu</a>
-          <a href="#archive" data-explore-route="archive">Arsip</a>
-          <a href="#profile" data-explore-route="profile">Badge</a>
-        </div>
-      </nav>
       <section id="malangsari" class="mission-strip" aria-label="Progress misi Malangsari">
         <div class="mission-copy">
           <button class="eyebrow home-return-tag" type="button" aria-label="Kembali ke home Lithera">Lithera</button>
@@ -84,11 +88,11 @@
         <aside class="mission-panel">
           <span class="panel-label">Progress Misi</span>
           <strong id="heroProgress">0/3 badge</strong>
-          <div class="progress-track"><span id="heroProgressBar"></span></div>
+          <div class="progress-track" role="progressbar" aria-label="Progress misi" aria-valuemin="0" aria-valuemax="3" aria-valuenow="0"><span id="heroProgressBar"></span></div>
         </aside>
       </section>
 
-      <section id="tour" class="tour-section">
+      <section id="kendenglembu" class="tour-section">
         <div class="section-heading tour-heading">
           <p class="eyebrow">Tur Virtual 360</p>
           <h2>Masuk ke titik eksplorasi</h2>
@@ -96,21 +100,22 @@
         </div>
         <div class="tour-layout">
           <div class="viewer-shell">
-            <div id="panorama" aria-label="Viewer panorama 360 derajat"></div>
-            <div id="floorNavZone" class="floor-nav-zone" aria-label="Zona panah navigasi">
-              <button id="floorArrowButton" class="floor-arrow" type="button" aria-label="Jalan maju"></button>
+            <div id="panorama" role="region" aria-label="Viewer panorama 360 derajat"></div>
+            <div id="floorNavZone" class="floor-nav-zone" role="group" aria-label="Zona panah navigasi">
+              <button id="floorArrowButton" class="floor-arrow is-hidden" type="button" aria-label="Jalan maju" disabled></button>
             </div>
+            <div id="viewerTools" class="viewer-tools" hidden>
+              <button id="viewerHelp" class="viewer-tool" type="button" aria-label="Tampilkan panduan panorama" title="Panduan panorama"><img src="./assets/icons/circle-help.svg" alt="" width="22" height="22" /></button>
+              <button id="viewerCompass" class="viewer-tool" type="button" aria-label="Kompas relatif. Kembali ke arah awal panorama; utara belum dikalibrasi." title="Arah relatif · kembali ke pandangan awal (bukan utara geografis)"><img src="./assets/icons/compass.svg" alt="" width="24" height="24" /></button>
+            </div>
+            <div id="viewerHint" class="viewer-hint" role="status" aria-live="polite" hidden>
+              <img src="./assets/icons/hand.svg" alt="" width="28" height="28" />
+              <span>Geser untuk memutar 360° • Klik penanda untuk berpindah</span>
+            </div>
+            <p id="viewerError" class="viewer-error" role="alert" hidden>Panorama belum dapat dimuat. Periksa koneksi lalu muat ulang halaman. Arsip tetap dapat diakses lewat menu Arsip.</p>
           </div>
-          <aside class="room-panel">
-            <div class="room-panel-top">
-              <span id="roomIndex" class="room-index">01</span>
-              <span class="room-kicker">Titik aktif</span>
-            </div>
-            <h3 id="roomTitle">Titik Eksplorasi</h3>
-            <p id="roomDescription"></p>
-            <button id="openArchiveButton" class="button primary" type="button">Buka Arsip di Titik Ini</button>
-          </aside>
         </div>
+        <p class="provenance-note">Panorama dan kuis saat ini merupakan demo interaksi.</p>
       </section>
 
       <section id="archive" class="archive-section">
@@ -119,6 +124,25 @@
           <h2>Arsip bisa dibuka tanpa syarat badge</h2>
           <p>Semua materi sejarah tetap bebas diakses, sementara kuis berfungsi sebagai lapisan gamifikasi.</p>
         </div>
+        <div class="research-references" role="region" aria-labelledby="researchTitle">
+          <h3 id="researchTitle">Referensi penelitian</h3>
+          <article class="research-entry">
+            <p class="reference-location">Kendenglembu</p>
+            <h4>Awal kolonisasi Austronesia di tenggara Pulau Jawa: Perspektif Situs Kendenglembu</h4>
+            <p>Penelitian ini membandingkan data arkeologi dan linguistik mengenai migrasi penutur <span class="glossary-entry"><button class="glossary-term" type="button" aria-expanded="false" aria-describedby="termAustronesia">Austronesia</button><span id="termAustronesia" class="glossary-tooltip" role="tooltip" hidden>Dalam artikel ini, Austronesia merujuk pada kelompok bahasa dan masyarakat penuturnya, bukan spesies manusia. Kajian migrasinya menggabungkan bukti bahasa dan arkeologi.</span></span>. Temuan Kendenglembu membuka hipotesis jalur dari Sulawesi Barat; ini merupakan interpretasi penelitian, bukan kesimpulan tunggal tentang asal-usul penduduk.</p>
+            <p class="reference-metadata">Sofwan Noerwidi &amp; Priyatno Hadi Sulistyarto · 2011 · <cite>AMERTA</cite>, 29(1), 45–60</p>
+            <div class="reference-actions"><a href="https://ejournal.brin.go.id/amerta/article/view/3521" target="_blank" rel="noopener noreferrer">Baca sumber jurnal <span class="sr-only">(tab baru)</span></a><button class="cite-button" type="button" data-cite="kendenglembu"><img src="./assets/icons/copy.svg" alt="" width="16" height="16" />Kutip / Cite<span class="sr-only"> penelitian Kendenglembu</span></button></div>
+          </article>
+          <article class="research-entry">
+            <p class="reference-location">Malangsari</p>
+            <h4>Hasil ekskavasi Situs Malangsari, Banyuwangi: Data baru dolmen di Jawa Timur</h4>
+            <p>Ekskavasi di Petak D55, Blok Sidomaju, Afdeling Mulyosari menemukan konstruksi <span class="glossary-entry"><button class="glossary-term" type="button" aria-expanded="false" aria-describedby="termDolmen">dolmen</button><span id="termDolmen" class="glossary-tooltip" role="tooltip" hidden>Monumen batu besar yang dibahas sebagai konstruksi kubur dalam penelitian Malangsari. Fungsi dan konteks tiap temuan ditafsirkan melalui penelitian, bukan dari bentuknya saja.</span></span> yang masih utuh, tetapi tanpa sisa manusia atau artefak. Penulis menafsirkannya sebagai indikasi pembukaan sebelumnya dan menekankan perlunya penelitian lebih lanjut.</p>
+            <p class="reference-metadata">Gunadi Kasnowihardjo · 2017 · <cite>Berkala Arkeologi</cite>, 37(1), 1–14 · DOI: 10.30883/jba.v37i1.108</p>
+            <div class="reference-actions"><a href="https://ejournal.brin.go.id/berkalaarkeologi/article/view/4414" target="_blank" rel="noopener noreferrer">Baca sumber jurnal <span class="sr-only">(tab baru)</span></a><button class="cite-button" type="button" data-cite="malangsari"><img src="./assets/icons/copy.svg" alt="" width="16" height="16" />Kutip / Cite<span class="sr-only"> penelitian Malangsari</span></button></div>
+          </article>
+          <p class="provenance-note">Ringkasan dan glosarium diadaptasi dari artikel di atas. Tahun sitasi mengikuti tahun edisi jurnal (2011/2017); portal BRIN menampilkan tanggal publikasi 2024 yang berbeda. Referensi ini bukan atribusi foto panorama. Identitas lokasi, pembuat, tanggal, dan izin foto demo belum diverifikasi.</p>
+        </div>
+        <h3>Arsip titik · Materi demo</h3>
         <div id="archiveGrid" class="archive-grid"></div>
       </section>
 
@@ -128,7 +152,7 @@
             <p class="eyebrow">Profil</p>
             <h2>Badge dan reward</h2>
           </div>
-          <div class="collection-count" aria-label="Jumlah badge terkumpul">
+          <div class="collection-count" role="group" aria-label="Jumlah badge terkumpul">
             <strong id="profileBadgeCount">0</strong><span>/ 3</span>
           </div>
         </div>
@@ -147,13 +171,24 @@
       </div>
     </main>
 
-    <dialog id="archiveModal" class="modal">
-      <button class="icon-button" id="closeArchiveButton" type="button" aria-label="Tutup arsip">×</button>
+    <dialog id="archiveModal" class="modal" aria-labelledby="archiveTitle">
+      <div class="dialog-toolbar"><span>Arsip titik</span><button class="icon-button" id="closeArchiveButton" type="button" aria-label="Tutup arsip"><img src="./assets/icons/x.svg" alt="" width="22" height="22" /></button></div>
       <div id="archiveModalContent"></div>
     </dialog>
 
-    <dialog id="quizModal" class="modal quiz-modal">
+    <dialog id="quizModal" class="modal quiz-modal" aria-labelledby="quizTitle" aria-describedby="quizQuestion quizCloseHint">
       <div id="quizContent"></div>
+    </dialog>
+
+    <dialog id="citationModal" class="modal citation-modal" aria-labelledby="citationTitle">
+      <div class="dialog-toolbar"><h2 id="citationTitle">Kutip sumber</h2><button id="closeCitationButton" class="icon-button" type="button" aria-label="Tutup sitasi"><img src="./assets/icons/x.svg" alt="" width="22" height="22" /></button></div>
+      <div class="dialog-body">
+        <fieldset class="citation-style"><legend>Format sitasi</legend><label><input type="radio" name="citationStyle" value="apa" checked /> APA 7</label><label><input type="radio" name="citationStyle" value="mla" /> MLA 9</label></fieldset>
+        <label class="sr-only" for="citationOutput">Teks sitasi</label>
+        <textarea id="citationOutput" readonly rows="7" spellcheck="false"></textarea>
+        <button id="copyCitationButton" class="button secondary" type="button"><img src="./assets/icons/copy.svg" alt="" width="18" height="18" />Salin sitasi</button>
+        <p id="citationStatus" role="status" aria-live="polite"></p>
+      </div>
     </dialog>
 
     <svg class="liquid-filter-defs" width="0" height="0" aria-hidden="true">
@@ -164,6 +199,7 @@
     </svg>
 
     <script src="https://cdn.jsdelivr.net/npm/pannellum@2.5.6/build/pannellum.js"></script>
-    <script src="./app.js"></script>
+    <script src="./app.js?v=20260921-panorama-4"></script>
+    <script src="./literacy.js"></script>
   </body>
 </html>

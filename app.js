@@ -79,6 +79,8 @@ let tourCreated = false;
 let quizTimer;
 let walkClickTimer;
 let quizAnswered = false;
+let activeArchiveRoomId = rooms[0].id;
+let transitionTimer;
 const isTouchViewport = window.matchMedia("(pointer: coarse)").matches || "ontouchstart" in window;
 
 const archiveModal = document.querySelector("#archiveModal");
@@ -92,7 +94,19 @@ const cursorGlow = document.querySelector("#cursorGlow");
 const explorationContent = document.querySelector("#explorationContent");
 const homeScreen = document.querySelector("#home");
 const aboutPage = document.querySelector("#aboutPage");
-const pageSections = ["malangsari", "tour", "archive", "profile"].map((id) => document.querySelector(`#${id}`));
+const pageSections = ["malangsari", "kendenglembu", "archive", "profile"].map((id) => document.querySelector(`#${id}`));
+const globalNav = document.querySelector("#globalNav");
+const viewerHint = document.querySelector("#viewerHint");
+const viewerTools = document.querySelector("#viewerTools");
+const viewerError = document.querySelector("#viewerError");
+const viewerCompass = document.querySelector("#viewerCompass");
+const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)");
+let viewerHintShown = false;
+let hintCheckFrame;
+let viewerInView = false;
+let hintTimer;
+let compassFrame;
+let lastCompassYaw;
 let peekTimer;
 let activeFloorDirection = "forward";
 
@@ -109,10 +123,7 @@ function saveBadge(roomId) {
 
 function updateRoomPanel(roomId) {
   currentRoom = rooms.find((room) => room.id === roomId) || rooms[0];
-  const roomNumber = rooms.findIndex((room) => room.id === currentRoom.id) + 1;
-  document.querySelector("#roomTitle").textContent = currentRoom.title;
-  document.querySelector("#roomDescription").textContent = currentRoom.description;
-  document.querySelector("#roomIndex").textContent = String(roomNumber).padStart(2, "0");
+  document.querySelector("#panorama").setAttribute("aria-label", `Viewer panorama 360 derajat, ${currentRoom.title}`);
   updateWalkButton();
 }
 
@@ -132,12 +143,16 @@ function positionMobileArrow() {
 }
 
 function createTour() {
+  if (!window.pannellum) {
+    viewerError.hidden = false;
+    return;
+  }
   viewer = pannellum.viewer("panorama", {
     default: {
       firstScene: rooms[0].id,
       sceneFadeDuration: 650,
       autoLoad: true,
-      compass: true,
+      compass: false,
       hfov: 105,
     },
     scenes: Object.fromEntries(
@@ -162,8 +177,82 @@ function createTour() {
   });
 
   viewer.on("scenechange", (sceneId) => updateRoomPanel(sceneId));
+  // Keep overlays inside Pannellum's container, including in fullscreen mode.
+  viewer.getContainer().append(floorNavZone, viewerTools, viewerHint, viewerError);
+  viewer.on("load", () => {
+    viewerError.hidden = true;
+    viewerTools.hidden = false;
+    resetFloorArrow();
+    maybeShowViewerHint();
+    startCompass();
+    viewer.getContainer().querySelectorAll(".pnlm-hotspot").forEach((marker) => {
+      marker.tabIndex = 0;
+      marker.setAttribute("role", "button");
+      marker.setAttribute("aria-label", "Buka arsip di titik ini");
+      marker.addEventListener("keydown", (event) => {
+        if (event.key === "Enter" || event.key === " ") {
+          event.preventDefault();
+          openArchive(currentRoom.id);
+        }
+      });
+    });
+  });
+  viewer.on("error", () => {
+    hideViewerHint();
+    viewerTools.hidden = true;
+    viewerError.hidden = false;
+    cancelAnimationFrame(compassFrame);
+  });
   updateRoomPanel(rooms[0].id);
   positionMobileArrow();
+}
+
+function hideViewerHint() {
+  clearTimeout(hintTimer);
+  viewerHint.hidden = true;
+}
+
+function showViewerHint() {
+  if (!viewer?.isLoaded() || document.hidden) return;
+  clearTimeout(hintTimer);
+  viewerHintShown = true;
+  viewerHint.hidden = false;
+  // Only an explicit help-button click can replay the guide after its first use.
+  hintTimer = setTimeout(hideViewerHint, 3000);
+}
+
+function maybeShowViewerHint() {
+  const site = explorationContent.dataset.view;
+  if (viewerHintShown || document.body.classList.contains("page-is-exiting")) return;
+  if (!viewerInView || explorationContent.hidden || !viewer?.isLoaded() || document.hidden) return;
+  if (!["malangsari", "kendenglembu"].includes(site)) return;
+  const rect = viewerShell.getBoundingClientRect();
+  const navBottom = document.fullscreenElement ? 0 : globalNav.getBoundingClientRect().bottom;
+  const hintTop = rect.top + parseFloat(getComputedStyle(viewerHint).top);
+  // Do not spend the one-time guide while only the viewer's edge is on screen.
+  if (rect.top > innerHeight * 0.55 || hintTop < navBottom + 8 || hintTop + 120 > innerHeight) return;
+  showViewerHint();
+}
+
+function scheduleViewerHintCheck() {
+  if (viewerHintShown || hintCheckFrame) return;
+  hintCheckFrame = requestAnimationFrame(() => {
+    hintCheckFrame = null;
+    maybeShowViewerHint();
+  });
+}
+
+function startCompass() {
+  cancelAnimationFrame(compassFrame);
+  if (!viewerInView || !viewer?.isLoaded() || explorationContent.hidden || document.hidden) return;
+  const yaw = Math.round(viewer.getYaw());
+  if (yaw !== lastCompassYaw) {
+    viewerCompass.querySelector("img").style.transform = `rotate(${-yaw}deg)`;
+    viewerCompass.setAttribute("aria-label", `Kompas relatif, ${yaw} derajat dari arah awal. Kembali ke arah awal; utara belum dikalibrasi.`);
+    lastCompassYaw = yaw;
+    updateActiveDirectionFromYaw();
+  }
+  compassFrame = requestAnimationFrame(startCompass);
 }
 
 function walk(direction) {
@@ -173,6 +262,13 @@ function walk(direction) {
   }
 
   viewer.loadScene(nextStep.target, null, nextStep.targetYaw);
+}
+
+function revealFloorArrow() {
+  if (!viewer?.isLoaded()) return;
+  positionMobileArrow();
+  updateWalkButton();
+  floorArrowButton.classList.add("is-visible");
 }
 
 function enableTemporaryPeek(event) {
@@ -187,9 +283,11 @@ function enableTemporaryPeek(event) {
   }, 1600);
 }
 
-function handleArrowClick(direction) {
+function handleArrowClick(event) {
+  event.stopPropagation();
+  const direction = activeFloorDirection;
   clearTimeout(walkClickTimer);
-  walkClickTimer = setTimeout(() => walk(activeFloorDirection), 220);
+  walkClickTimer = setTimeout(() => walk(direction), 220);
 }
 
 function handleArrowDoubleClick(event) {
@@ -202,7 +300,7 @@ function setActiveFloorDirection(direction, keepPosition = false) {
   let resolvedDirection = direction;
   let nextStep = links[resolvedDirection];
 
-  if (!nextStep && isTouchViewport) {
+  if (!nextStep) {
     resolvedDirection = links.forward ? "forward" : "back";
     nextStep = links[resolvedDirection];
   }
@@ -221,21 +319,23 @@ function setActiveFloorDirection(direction, keepPosition = false) {
 }
 
 function moveFloorArrow(event) {
+  if (!viewer?.isLoaded()) return;
   if (isTouchViewport) {
     positionMobileArrow();
     updateActiveDirectionFromYaw();
     return;
   }
 
-  const rect = viewerShell.getBoundingClientRect();
+  const rect = viewer.getContainer().getBoundingClientRect();
   const activeTop = rect.top + rect.height * 0.42;
   if (event.clientY < activeTop) {
-    hideFloorArrow();
+    resetFloorArrow();
     return;
   }
 
-  const x = ((event.clientX - rect.left) / rect.width) * 100;
-  const y = ((event.clientY - activeTop) / (rect.bottom - activeTop)) * 100;
+  const zone = floorNavZone.getBoundingClientRect();
+  const x = ((event.clientX - zone.left) / zone.width) * 100;
+  const y = ((event.clientY - zone.top) / zone.height) * 100;
   const centerX = rect.left + rect.width / 2;
   const centerY = rect.top + rect.height / 2;
   const normalizedX = (event.clientX - centerX) / (rect.width / 2);
@@ -250,9 +350,12 @@ function moveFloorArrow(event) {
   updateActiveDirectionFromYaw();
 }
 
-function hideFloorArrow() {
-  floorArrowButton.classList.add("is-hidden");
-  floorArrowButton.classList.remove("is-visible");
+function resetFloorArrow() {
+  if (!viewer?.isLoaded()) return;
+  floorArrowButton.style.setProperty("--arrow-x", "50%");
+  floorArrowButton.style.setProperty("--arrow-y", "46%");
+  floorArrowButton.style.setProperty("--arrow-scale", "0.68");
+  revealFloorArrow();
 }
 
 function normalizeYaw(yaw) {
@@ -267,12 +370,12 @@ function updateActiveDirectionFromYaw() {
 
 function openArchive(roomId) {
   const room = rooms.find((item) => item.id === roomId);
-  currentRoom = room;
+  activeArchiveRoomId = room.id;
   clearTimeout(quizTimer);
 
   archiveModalContent.innerHTML = `
     <p class="eyebrow">${room.title}</p>
-    <h2>${room.archive.title}</h2>
+    <h2 id="archiveTitle">${room.archive.title}</h2>
     <div class="archive-meta">
       <div class="archive-thumb">ARSIP</div>
       <div>
@@ -280,7 +383,7 @@ function openArchive(roomId) {
         <p>${room.archive.body}</p>
       </div>
     </div>
-    <p>Di versi produksi, area ini dapat berisi galeri foto lama, dokumen hasil pindai, peta lama, audio narasi, atau tautan sumber.</p>
+    <p class="provenance-note">Materi demo: narasi dan identitas lokasi foto belum diverifikasi. Referensi jurnal tersedia terpisah di halaman Arsip dan tidak menjadi atribusi foto ini.</p>
   `;
 
   archiveModal.showModal();
@@ -289,7 +392,8 @@ function openArchive(roomId) {
 function closeArchiveAndScheduleQuiz() {
   archiveModal.close();
   clearTimeout(quizTimer);
-  quizTimer = setTimeout(() => openQuiz(currentRoom.id), 650);
+  const roomId = activeArchiveRoomId;
+  quizTimer = setTimeout(() => openQuiz(roomId), 650);
 }
 
 function openQuiz(roomId) {
@@ -298,16 +402,21 @@ function openQuiz(roomId) {
   quizAnswered = false;
 
   quizContent.innerHTML = `
-    <button id="quizCloseButton" class="quiz-close-button" type="button" aria-label="Tutup kuis" disabled>×</button>
+    <div class="dialog-toolbar">
+      <h2 id="quizTitle">${room.title}</h2>
+      <button id="quizCloseButton" class="quiz-close-button" type="button" aria-label="Tutup kuis" aria-describedby="quizCloseHint" disabled><img src="./assets/icons/x.svg" alt="" width="22" height="22" /></button>
+    </div>
+    <div class="dialog-body">
     <p class="eyebrow">Kuis Misi</p>
-    <h2>${room.title}</h2>
-    <p>${room.quiz.question}</p>
+    <p id="quizCloseHint" class="quiz-close-hint">Jawab dengan benar untuk mengaktifkan tombol tutup.</p>
+    <p id="quizQuestion">${room.quiz.question}</p>
     <div class="quiz-options">
       ${room.quiz.options
         .map((option, index) => `<button type="button" data-index="${index}">${option}</button>`)
         .join("")}
     </div>
     <p id="quizFeedback" class="quiz-feedback" aria-live="polite"></p>
+    </div>
   `;
 
   quizContent.querySelectorAll("button").forEach((button) => {
@@ -336,6 +445,8 @@ function checkAnswer(room, selectedIndex) {
     feedback.className = "quiz-feedback is-success";
     feedback.textContent = `Benar. Badge "${room.badge}" berhasil dikumpulkan. Kamu bisa menutup kuis.`;
     quizContent.querySelector("#quizCloseButton").disabled = false;
+    quizContent.querySelector("#quizCloseHint").textContent = "Kuis selesai. Tombol tutup sudah aktif.";
+    quizContent.querySelector("#quizCloseButton").focus({ preventScroll: true });
   } else {
     selectedButton.classList.add("is-wrong");
     feedback.className = "quiz-feedback is-error";
@@ -376,6 +487,8 @@ function renderProfile() {
   const heroProgressBar = document.querySelector("#heroProgressBar");
   heroProgressBar.dataset.level = String(badges.length);
   heroProgressBar.style.width = `${percent}%`;
+  heroProgressBar.parentElement.setAttribute("aria-valuenow", String(badges.length));
+  heroProgressBar.parentElement.setAttribute("aria-valuetext", `${badges.length} dari ${rooms.length} badge`);
   document.querySelector("#profileBadgeCount").textContent = badges.length;
   document.querySelector(".reward-panel").classList.toggle("is-unlocked", badges.length === rooms.length);
   document.querySelector("#rewardText").textContent =
@@ -390,7 +503,7 @@ function renderProfile() {
         <article class="badge-card ${earned ? "earned" : ""}">
           <div class="badge-visual ${earned ? "is-earned" : "is-locked"}">
             <img class="badge-art" src="${room.badgeImage}" alt="${room.badge}, ${room.title}" />
-            ${earned ? "" : '<span class="badge-icon" aria-label="Badge terkunci"></span>'}
+            ${earned ? "" : '<span class="badge-icon" role="img" aria-label="Badge terkunci"></span>'}
           </div>
           <strong>${room.badge}</strong>
           <small>${earned ? "Sudah didapat" : "Jawab kuis untuk membuka"}</small>
@@ -401,10 +514,15 @@ function renderProfile() {
 }
 
 function showExploration(targetId, updateHistory = true) {
-  const validViews = ["malangsari", "tour", "archive", "profile"];
+  // Old saved links still work, but all navigation uses the canonical site name.
+  if (targetId === "tour") {
+    targetId = "kendenglembu";
+    history.replaceState({ targetId }, "", `#${targetId}`);
+  }
+  const validViews = ["malangsari", "kendenglembu", "archive", "profile"];
   const routeKey = validViews.includes(targetId) ? targetId : "malangsari";
   const pageKey = routeKey === "archive" ? "archive" : routeKey === "profile" ? "profile" : "malangsari";
-  const visibleSections = pageKey === "malangsari" ? ["malangsari", "tour"] : [pageKey];
+  const visibleSections = pageKey === "malangsari" ? ["malangsari", "kendenglembu"] : [pageKey];
 
   pageSections.forEach((section) => {
     section.hidden = !visibleSections.includes(section.id);
@@ -417,7 +535,34 @@ function showExploration(targetId, updateHistory = true) {
   document.body.classList.remove("home-locked");
   document.body.classList.add("exploration-active");
   document.querySelector("#missionSite").textContent =
-    routeKey === "tour" ? "Kendenglembu · Banyuwangi, Jawa Timur" : "Malangsari · Banyuwangi, Jawa Timur";
+    routeKey === "kendenglembu" ? "Kendenglembu · Banyuwangi, Jawa Timur" : "Malangsari · Banyuwangi, Jawa Timur";
+  document.querySelector("#malangsari").setAttribute("aria-label", `Progress misi ${routeKey === "kendenglembu" ? "Kendenglembu" : "Malangsari"}`);
+  updateNavigation(routeKey);
+  window.scrollTo({ top: 0, left: 0, behavior: "instant" });
+
+  if (pageKey === "malangsari") {
+    requestAnimationFrame(() => {
+      if (explorationContent.hidden || !["malangsari", "kendenglembu"].includes(explorationContent.dataset.view)) return;
+      if (!tourCreated) {
+        createTour();
+        tourCreated = Boolean(viewer);
+      } else {
+        viewer.resize();
+        maybeShowViewerHint();
+        startCompass();
+      }
+    });
+  }
+
+  if (updateHistory && location.hash !== `#${routeKey}`) {
+    history.pushState({ view: "exploration", targetId: routeKey }, "", `#${routeKey}`);
+  }
+}
+
+function updateNavigation(routeKey) {
+  globalNav.hidden = routeKey === "home";
+  const titles = { home: "Beranda", malangsari: "Malangsari", kendenglembu: "Kendenglembu", archive: "Arsip", profile: "Badge", about: "About" };
+  document.title = `${titles[routeKey]} | Lithera`;
   document.querySelectorAll("[data-explore-route]").forEach((link) => {
     const isActive = link.dataset.exploreRoute === routeKey;
     link.classList.toggle("is-active", isActive);
@@ -427,30 +572,25 @@ function showExploration(targetId, updateHistory = true) {
       link.removeAttribute("aria-current");
     }
   });
-  window.scrollTo(0, 0);
-
-  if (pageKey === "malangsari") {
-    requestAnimationFrame(() => {
-      if (!tourCreated) {
-        createTour();
-        tourCreated = true;
-      } else {
-        viewer.resize();
-      }
-    });
-  }
-
-  if (updateHistory) {
-    history.pushState({ view: "exploration", targetId: routeKey }, "", `#${routeKey}`);
-  }
 }
 
 function transitionTo(renderPage) {
+  clearTimeout(transitionTimer);
+  clearTimeout(quizTimer);
+  hideViewerHint();
   document.body.classList.add("page-is-exiting");
-  window.setTimeout(() => {
+  transitionTimer = window.setTimeout(() => {
     renderPage();
-    requestAnimationFrame(() => document.body.classList.remove("page-is-exiting"));
-  }, 190);
+    requestAnimationFrame(() => {
+      document.body.classList.remove("page-is-exiting");
+      maybeShowViewerHint();
+      const heading = !homeScreen.hidden ? document.querySelector(".lithera-logo")
+        : !aboutPage.hidden ? aboutPage.querySelector("h1")
+        : explorationContent.querySelector("section:not([hidden]) h1, section:not([hidden]) h2");
+      if (heading && heading.tagName !== "A") heading.setAttribute("tabindex", "-1");
+      heading?.focus({ preventScroll: true });
+    });
+  }, reducedMotion.matches ? 0 : 190);
 }
 
 function showHome(updateHistory = true) {
@@ -459,9 +599,10 @@ function showHome(updateHistory = true) {
   homeScreen.hidden = false;
   document.body.classList.add("home-locked");
   document.body.classList.remove("exploration-active");
-  window.scrollTo(0, 0);
+  updateNavigation("home");
+  window.scrollTo({ top: 0, left: 0, behavior: "instant" });
 
-  if (updateHistory) {
+  if (updateHistory && location.hash !== "#home") {
     history.pushState({ view: "home" }, "", "#home");
   }
 }
@@ -515,9 +656,10 @@ function showAbout(updateHistory = true) {
   explorationContent.hidden = true;
   aboutPage.hidden = false;
   document.body.classList.remove("home-locked", "exploration-active");
-  window.scrollTo(0, 0);
+  updateNavigation("about");
+  window.scrollTo({ top: 0, left: 0, behavior: "instant" });
 
-  if (updateHistory) {
+  if (updateHistory && location.hash !== "#about") {
     history.pushState({ view: "about" }, "", "#about");
   }
 }
@@ -530,28 +672,13 @@ if (window.location.hash === "#about") {
   showHome(false);
 }
 
-document.querySelectorAll(".glass-menu a").forEach((link) => {
-  link.addEventListener("click", (event) => {
-    event.preventDefault();
-    transitionTo(() => showExploration(link.getAttribute("href").slice(1)));
-  });
-});
-
-document.querySelectorAll("[data-explore-route]").forEach((link) => {
-  link.addEventListener("click", (event) => {
-    event.preventDefault();
-    transitionTo(() => showExploration(link.dataset.exploreRoute));
-  });
-});
-
-document.querySelector(".explore-home").addEventListener("click", (event) => {
+document.addEventListener("click", (event) => {
+  const link = event.target.closest("a[href^='#']");
+  if (!link || event.button !== 0 || event.ctrlKey || event.metaKey || event.shiftKey || event.altKey) return;
+  const route = link.getAttribute("href").slice(1);
+  if (!["home", "about", "malangsari", "kendenglembu", "archive", "profile"].includes(route)) return;
   event.preventDefault();
-  transitionTo(() => showHome());
-});
-
-document.querySelector(".lithera-logo").addEventListener("click", (event) => {
-  event.preventDefault();
-  transitionTo(() => showHome());
+  transitionTo(() => route === "home" ? showHome() : route === "about" ? showAbout() : showExploration(route));
 });
 
 document.querySelector(".home-return-tag").addEventListener("click", (event) => {
@@ -559,18 +686,14 @@ document.querySelector(".home-return-tag").addEventListener("click", (event) => 
   transitionTo(() => showHome());
 });
 
-document.querySelector(".about-link").addEventListener("click", (event) => {
-  event.preventDefault();
-  transitionTo(() => showAbout());
-});
-
-document.querySelector(".about-back").addEventListener("click", (event) => {
-  event.preventDefault();
-  transitionTo(() => showHome());
-});
-
 window.addEventListener("popstate", () => {
   transitionTo(() => applyRoute(false));
+});
+window.addEventListener("hashchange", () => transitionTo(() => applyRoute(false)));
+history.scrollRestoration = "manual";
+window.addEventListener("load", () => {
+  // A hash represents a page here, not a native jump to its section element.
+  requestAnimationFrame(() => window.scrollTo({ top: 0, left: 0, behavior: "instant" }));
 });
 
 function applyRoute(updateHistory = false) {
@@ -583,12 +706,43 @@ function applyRoute(updateHistory = false) {
   }
 }
 
-document.querySelector("#openArchiveButton").addEventListener("click", () => openArchive(currentRoom.id));
+const viewerObserver = new IntersectionObserver(([entry]) => {
+  viewerInView = entry.isIntersecting && entry.intersectionRatio >= 0.25;
+  if (viewerInView) {
+    maybeShowViewerHint();
+    startCompass();
+  } else {
+    hideViewerHint();
+    cancelAnimationFrame(compassFrame);
+  }
+}, { threshold: [0, 0.25] });
+viewerObserver.observe(viewerShell);
+window.addEventListener("scroll", scheduleViewerHintCheck, { passive: true });
+window.addEventListener("resize", scheduleViewerHintCheck, { passive: true });
+document.addEventListener("visibilitychange", () => {
+  if (document.hidden) hideViewerHint();
+  else maybeShowViewerHint();
+  startCompass();
+});
+const viewerHelp = document.querySelector("#viewerHelp");
+viewerHelp.addEventListener("click", showViewerHint);
+viewerHint.addEventListener("pointerenter", () => clearTimeout(hintTimer));
+viewerHint.addEventListener("pointerleave", () => { hintTimer = setTimeout(hideViewerHint, 3000); });
+document.addEventListener("keydown", (event) => { if (event.key === "Escape") hideViewerHint(); });
+viewerCompass.addEventListener("click", () => viewer?.setYaw(0, reducedMotion.matches ? false : 500));
+
 document.querySelector("#closeArchiveButton").addEventListener("click", closeArchiveAndScheduleQuiz);
 floorArrowButton.addEventListener("click", handleArrowClick);
 floorArrowButton.addEventListener("dblclick", handleArrowDoubleClick);
+// Arrow taps must not start Pannellum's drag gesture underneath the control.
+floorArrowButton.addEventListener("mousedown", (event) => event.stopPropagation());
+floorArrowButton.addEventListener("touchstart", (event) => event.stopPropagation(), { passive: true });
+document.addEventListener("fullscreenchange", () => requestAnimationFrame(resetFloorArrow));
 viewerShell.addEventListener("pointermove", moveFloorArrow);
-viewerShell.addEventListener("pointerleave", hideFloorArrow);
+viewerShell.addEventListener("pointerleave", (event) => {
+  // A touch pointer leaves on release, before its click reaches the arrow.
+  if (event.pointerType !== "touch") resetFloorArrow();
+});
 floorNavZone.addEventListener("dblclick", enableTemporaryPeek);
 document.querySelector("#resetButton").addEventListener("click", () => {
   localStorage.removeItem(STORAGE_KEY);
