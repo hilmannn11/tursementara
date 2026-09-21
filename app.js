@@ -1,4 +1,5 @@
 const STORAGE_KEY = "bentengMissionBadges";
+const ROUTE_FORWARD_YAW = -10;
 
 const rooms = [
   {
@@ -62,14 +63,14 @@ const rooms = [
 
 const sceneLinks = {
   "titik-1": {
-    forward: { target: "titik-2", targetYaw: 0, label: "Maju ke Titik 2" },
+    forward: { target: "titik-2", targetYaw: ROUTE_FORWARD_YAW, label: "Maju ke Titik 2" },
   },
   "titik-2": {
-    forward: { target: "titik-3", targetYaw: 0, label: "Maju ke Titik 3" },
-    back: { target: "titik-1", targetYaw: 180, label: "Balik ke Titik 1" },
+    forward: { target: "titik-3", targetYaw: ROUTE_FORWARD_YAW, label: "Maju ke Titik 3" },
+    back: { target: "titik-1", targetYaw: ROUTE_FORWARD_YAW + 180, label: "Balik ke Titik 1" },
   },
   "titik-3": {
-    back: { target: "titik-2", targetYaw: 180, label: "Balik ke Titik 2" },
+    back: { target: "titik-2", targetYaw: ROUTE_FORWARD_YAW + 180, label: "Balik ke Titik 2" },
   },
 };
 
@@ -154,6 +155,7 @@ function createTour() {
       autoLoad: true,
       compass: false,
       hfov: 105,
+      yaw: ROUTE_FORWARD_YAW,
     },
     scenes: Object.fromEntries(
       rooms.map((room) => [
@@ -245,7 +247,7 @@ function scheduleViewerHintCheck() {
 function startCompass() {
   cancelAnimationFrame(compassFrame);
   if (!viewerInView || !viewer?.isLoaded() || explorationContent.hidden || document.hidden) return;
-  const yaw = Math.round(viewer.getYaw());
+  const yaw = Math.round(normalizeYaw(viewer.getYaw() - ROUTE_FORWARD_YAW));
   if (yaw !== lastCompassYaw) {
     viewerCompass.querySelector("img").style.transform = `rotate(${-yaw}deg)`;
     viewerCompass.setAttribute("aria-label", `Kompas relatif, ${yaw} derajat dari arah awal. Kembali ke arah awal; utara belum dikalibrasi.`);
@@ -297,19 +299,15 @@ function handleArrowDoubleClick(event) {
 
 function setActiveFloorDirection(direction, keepPosition = false) {
   const links = sceneLinks[currentRoom.id] || {};
-  let resolvedDirection = direction;
-  let nextStep = links[resolvedDirection];
-
-  if (!nextStep) {
-    resolvedDirection = links.forward ? "forward" : "back";
-    nextStep = links[resolvedDirection];
-  }
+  const resolvedDirection = direction;
+  const nextStep = links[resolvedDirection];
 
   activeFloorDirection = resolvedDirection;
   floorArrowButton.disabled = !nextStep;
   floorArrowButton.title = nextStep ? nextStep.label : "Tidak ada jalur di arah ini";
   floorArrowButton.setAttribute("aria-label", nextStep?.label || "Tidak ada jalur di arah ini");
   floorArrowButton.classList.toggle("is-hidden", !nextStep);
+  if (nextStep && isTouchViewport) floorArrowButton.classList.add("is-visible");
   floorArrowButton.classList.toggle("is-back", resolvedDirection === "back");
   floorArrowButton.style.setProperty("--arrow-rotation", resolvedDirection === "back" ? "0deg" : "0deg");
 
@@ -327,9 +325,9 @@ function moveFloorArrow(event) {
   }
 
   const rect = viewer.getContainer().getBoundingClientRect();
-  const activeTop = rect.top + rect.height * 0.42;
-  if (event.clientY < activeTop) {
-    resetFloorArrow();
+  const activeTop = rect.top + rect.height * 0.5;
+  if (event.clientY <= activeTop) {
+    floorArrowButton.classList.remove("is-visible");
     return;
   }
 
@@ -363,7 +361,7 @@ function normalizeYaw(yaw) {
 }
 
 function updateActiveDirectionFromYaw() {
-  const yaw = normalizeYaw(viewer?.getYaw?.() || 0);
+  const yaw = normalizeYaw((viewer?.getYaw?.() ?? ROUTE_FORWARD_YAW) - ROUTE_FORWARD_YAW);
   const direction = Math.abs(yaw) > 100 ? "back" : "forward";
   setActiveFloorDirection(direction, true);
 }
@@ -561,6 +559,14 @@ function showExploration(targetId, updateHistory = true) {
 
 function updateNavigation(routeKey) {
   globalNav.hidden = routeKey === "home";
+  document.querySelector("#siteChooser").hidden = !["malangsari", "kendenglembu"].includes(routeKey);
+  document.querySelectorAll("[data-site-route]").forEach((link) => {
+    const isActive = link.dataset.siteRoute === routeKey;
+    link.classList.toggle("is-active", isActive);
+    link.querySelector("[data-site-status]").textContent = isActive ? "Sedang dijelajahi" : "Jelajahi situs";
+    if (isActive) link.setAttribute("aria-current", "page");
+    else link.removeAttribute("aria-current");
+  });
   const titles = { home: "Beranda", malangsari: "Malangsari", kendenglembu: "Kendenglembu", archive: "Arsip", profile: "Badge", about: "About" };
   document.title = `${titles[routeKey]} | Lithera`;
   document.querySelectorAll("[data-explore-route]").forEach((link) => {
@@ -597,7 +603,7 @@ function showHome(updateHistory = true) {
   explorationContent.hidden = true;
   aboutPage.hidden = true;
   homeScreen.hidden = false;
-  document.body.classList.add("home-locked");
+  document.body.classList.remove("home-locked");
   document.body.classList.remove("exploration-active");
   updateNavigation("home");
   window.scrollTo({ top: 0, left: 0, behavior: "instant" });
@@ -650,6 +656,17 @@ slideDots.forEach((dot) => {
 
 updateSlideIndicator();
 restartHomeSlideTimer();
+
+const homeIntro = document.querySelector(".home-intro");
+if (homeIntro) {
+  homeIntro.classList.add("is-animated");
+  const homeIntroObserver = new IntersectionObserver(([entry], observer) => {
+    if (!entry.isIntersecting) return;
+    homeIntro.classList.add("is-visible");
+    observer.disconnect();
+  }, { threshold: 0.2 });
+  homeIntroObserver.observe(homeIntro);
+}
 
 function showAbout(updateHistory = true) {
   homeScreen.hidden = true;
@@ -729,7 +746,7 @@ viewerHelp.addEventListener("click", showViewerHint);
 viewerHint.addEventListener("pointerenter", () => clearTimeout(hintTimer));
 viewerHint.addEventListener("pointerleave", () => { hintTimer = setTimeout(hideViewerHint, 3000); });
 document.addEventListener("keydown", (event) => { if (event.key === "Escape") hideViewerHint(); });
-viewerCompass.addEventListener("click", () => viewer?.setYaw(0, reducedMotion.matches ? false : 500));
+viewerCompass.addEventListener("click", () => viewer?.setYaw(ROUTE_FORWARD_YAW, reducedMotion.matches ? false : 500));
 
 document.querySelector("#closeArchiveButton").addEventListener("click", closeArchiveAndScheduleQuiz);
 floorArrowButton.addEventListener("click", handleArrowClick);

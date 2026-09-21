@@ -6,7 +6,7 @@
     <title>Lithera</title>
     <meta name="description" content="Lithera: eksplorasi panorama 360 derajat, arsip dan referensi penelitian situs Kendenglembu dan Malangsari, Banyuwangi." />
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/pannellum@2.5.6/build/pannellum.css" />
-    <link rel="stylesheet" href="./styles.css?v=20260921-panorama-4" />
+    <link rel="stylesheet" href="./styles.css?v=20260921-site-choice-1" />
     <link rel="stylesheet" href="./ux.css?v=20260921-panorama-4" />
   </head>
   <body>
@@ -42,12 +42,19 @@
             <button class="slide-dot" type="button" data-slide="3" aria-label="Tampilkan gambar 4"></button>
           </div>
           <nav class="glass-menu" aria-label="Navigasi utama">
-            <a href="#malangsari"><span>Malangsari</span></a>
-            <a href="#kendenglembu"><span>Kendenglembu</span></a>
             <a href="#archive"><span>Arsip</span></a>
             <a href="#profile"><span>Badge</span></a>
           </nav>
         </div>
+        <section class="home-intro" aria-labelledby="homeTitle">
+          <div class="home-intro-inner">
+            <p class="home-intro-kicker">Arsip digital lanskap purba</p>
+            <h1 id="homeTitle">Lithera</h1>
+            <p class="home-intro-lead">Mengenal jejak masa lalu, lebih dekat.</p>
+            <p class="home-intro-description">Lithera adalah ruang eksplorasi digital untuk mengenal situs bersejarah di Banyuwangi. Melalui tur virtual dan arsip penelitian, jelajahi lanskap Kendenglembu dan Malangsari serta cerita yang tersimpan di dalamnya.</p>
+            <a class="home-tour-link" href="#malangsari">Coba Tur Virtual <span aria-hidden="true">&rarr;</span></a>
+          </div>
+        </section>
       </section>
 
       <nav id="globalNav" class="explore-nav" aria-label="Navigasi global" hidden>
@@ -55,9 +62,6 @@
         <div class="explore-nav-links">
           <a href="#malangsari" data-explore-route="malangsari">Malangsari</a>
           <a href="#kendenglembu" data-explore-route="kendenglembu">Kendenglembu</a>
-          <a href="#archive" data-explore-route="archive">Arsip</a>
-          <a href="#profile" data-explore-route="profile">Badge</a>
-          <a href="#about" data-explore-route="about">About</a>
         </div>
       </nav>
 
@@ -79,6 +83,31 @@
       </section>
 
       <div id="explorationContent" class="exploration-content" hidden>
+      <section id="siteChooser" class="site-chooser" aria-labelledby="siteChooserTitle" hidden>
+        <div class="site-chooser-inner">
+          <p class="site-chooser-label">2 situs di Banyuwangi</p>
+          <h2 id="siteChooserTitle">Pilih situs untuk dijelajahi</h2>
+          <p class="site-chooser-description">Kenali Malangsari dan Kendenglembu melalui tur virtual. Mulai dari salah satu situs, lalu jelajahi situs lainnya.</p>
+          <nav class="site-options" aria-label="Pilihan situs tur virtual">
+            <a class="site-option" href="#malangsari" data-site-route="malangsari">
+              <div class="site-option-image"><img src="./assets/home/home-3.png" alt="" /></div>
+              <div class="site-option-copy">
+                <h3>Malangsari</h3>
+                <p>Banyuwangi, Jawa Timur</p>
+                <span class="site-option-action"><span data-site-status>Jelajahi situs</span><span class="site-option-arrow" aria-hidden="true">&rarr;</span></span>
+              </div>
+            </a>
+            <a class="site-option" href="#kendenglembu" data-site-route="kendenglembu">
+              <div class="site-option-image"><img src="./assets/home/home-1.png" alt="" /></div>
+              <div class="site-option-copy">
+                <h3>Kendenglembu</h3>
+                <p>Banyuwangi, Jawa Timur</p>
+                <span class="site-option-action"><span data-site-status>Jelajahi situs</span><span class="site-option-arrow" aria-hidden="true">&rarr;</span></span>
+              </div>
+            </a>
+          </nav>
+        </div>
+      </section>
       <section id="malangsari" class="mission-strip" aria-label="Progress misi Malangsari">
         <div class="mission-copy">
           <button class="eyebrow home-return-tag" type="button" aria-label="Kembali ke home Lithera">Lithera</button>
@@ -199,7 +228,7 @@
     </svg>
 
     <script src="https://cdn.jsdelivr.net/npm/pannellum@2.5.6/build/pannellum.js"></script>
-    <script src="./app.js?v=20260921-panorama-4"></script>
+    <script src="./app.js?v=20260921-site-choice-1"></script>
     <script src="./literacy.js"></script>
   </body>
 </html>
