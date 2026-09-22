@@ -1,0 +1,30 @@
+.home-footer {
+  background: var(--brand-teal);
+  color: var(--brand-white);
+  padding: 36px 24px;
+  text-align: left;
+}
+
+.home-footer-inner { max-width: 1200px; margin: 0 auto; display: grid; grid-template-columns: 1fr 1fr; align-items: center; gap: 48px; }
+.home-footer h2 { margin: 0 0 12px; color: var(--brand-white); font-size: 14px; line-height: 1.4; text-transform: uppercase; }
+.home-footer address { color: #e0eeea; font-size: 13px; font-style: normal; line-height: 1.8; }
+.home-footer .about-phone { margin: 6px 0 0; }
+.home-footer .about-phone a { color: #e0eeea; font-size: 13px; text-underline-offset: 4px; }
+.home-footer .about-phone a:hover { color: var(--brand-coral); }
+.home-footer a:focus-visible { outline-color: var(--brand-coral); }
+.home-footer-logos { display: flex; flex-wrap: wrap; align-items: center; justify-content: flex-start; gap: 24px; }
+.home-footer-ministry, .home-footer-institution { display: flex; align-items: center; gap: 10px; }
+.home-footer-logos span { color: var(--brand-white); font-size: 10px; font-weight: 700; line-height: 1.4; text-transform: uppercase; }
+/* Keep a gold mark while blending away the supplied white backing. */
+.home-footer-ministry img { display: block; width: 48px; height: 48px; object-fit: contain; filter: grayscale(1) invert(1) sepia(1) saturate(2.5) brightness(1.7); mix-blend-mode: screen; }
+.home-footer-school { display: block; width: 57px; height: 50px; object-fit: contain; }
+
+@media (max-width: 900px) {
+  .home-footer-inner { grid-template-columns: minmax(220px, .8fr) minmax(0, 1fr); gap: 32px; }
+  .home-footer-logos { flex-direction: column; align-items: flex-start; gap: 20px; }
+}
+
+@media (max-width: 560px) {
+  .home-footer { padding: 30px 24px; }
+  .home-footer-inner { grid-template-columns: minmax(0, 1fr); gap: 28px; }
+}

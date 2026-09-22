@@ -10,6 +10,8 @@
     <link rel="stylesheet" href="./ux.css?v=20260921-panorama-4" />
     <link rel="stylesheet" href="./discovery.css?v=1" />
     <link rel="stylesheet" href="./theme.css?v=1" />
+    <link rel="stylesheet" href="./evolution-gallery.css?v=1" />
+    <link rel="stylesheet" href="./home-footer.css?v=2" />
   </head>
   <body>
     <main>
@@ -85,6 +87,28 @@
             </nav>
           </div>
         </section>
+        <footer class="home-footer" aria-labelledby="homeFooterTitle">
+          <div class="home-footer-inner">
+            <div class="home-footer-logos" role="group" aria-label="Logo instansi">
+              <div class="home-footer-ministry">
+                <img src="./assets/brand/ministry-culture.png" alt="Logo Kementerian Kebudayaan Republik Indonesia" width="148" height="148" loading="lazy" />
+                <span aria-hidden="true">Kementerian<br />Kebudayaan<br />Republik Indonesia</span>
+              </div>
+              <div class="home-footer-institution">
+                <img class="home-footer-school" src="./assets/brand/institution-mark.png" alt="Logo SMA Negeri 2 Taruna Bhayangkara" width="168" height="148" loading="lazy" />
+                <span aria-hidden="true">SMA Negeri 2<br />Taruna Bhayangkara</span>
+              </div>
+            </div>
+            <div class="home-footer-contact">
+              <h2 id="homeFooterTitle">Tentang Kami</h2>
+              <address>
+                Kembiritan, Jl. Pandan, Pandan, Kembiritan, Kec. Genteng,<br />
+                Kabupaten Banyuwangi, Jawa Timur 68465
+              </address>
+              <p class="about-phone"><a href="tel:+62333845821">(0333) 845821</a></p>
+            </div>
+          </div>
+        </footer>
       </section>
 
       <nav id="globalNav" class="explore-nav" aria-label="Navigasi global" hidden>
@@ -136,6 +160,43 @@
               </div>
             </a>
           </nav>
+          <div class="evolution-gallery" id="evolutionJourney" role="group" aria-label="Ilustrasi evolusi manusia">
+            <div class="evolution-slot" style="--tilt: -7deg; --lift: 26px; --delay: 0ms; --crop-x: 38; --crop-y: 258; --crop-w: 379; --crop-h: 533;">
+              <div class="evolution-entrance">
+                <button class="evolution-figure" type="button" aria-label="Perbesar ilustrasi primata" aria-pressed="false">
+                  <span class="evolution-cutout"><img src="./assets/evolution-walk-source.png" alt="" width="1962" height="802" decoding="async" draggable="false" /></span>
+                </button>
+              </div>
+            </div>
+            <div class="evolution-slot" style="--tilt: 5deg; --lift: -30px; --delay: 85ms; --crop-x: 457; --crop-y: 154; --crop-w: 321; --crop-h: 637;">
+              <div class="evolution-entrance">
+                <button class="evolution-figure" type="button" aria-label="Perbesar ilustrasi manusia purba pertama" aria-pressed="false">
+                  <span class="evolution-cutout"><img src="./assets/evolution-walk-source.png" alt="" width="1962" height="802" decoding="async" draggable="false" /></span>
+                </button>
+              </div>
+            </div>
+            <div class="evolution-slot" style="--tilt: -4deg; --lift: 34px; --delay: 170ms; --crop-x: 847; --crop-y: 101; --crop-w: 298; --crop-h: 690;">
+              <div class="evolution-entrance">
+                <button class="evolution-figure" type="button" aria-label="Perbesar ilustrasi manusia purba kedua" aria-pressed="false">
+                  <span class="evolution-cutout"><img src="./assets/evolution-walk-source.png" alt="" width="1962" height="802" decoding="async" draggable="false" /></span>
+                </button>
+              </div>
+            </div>
+            <div class="evolution-slot" style="--tilt: 6deg; --lift: -18px; --delay: 255ms; --crop-x: 1235; --crop-y: 60; --crop-w: 310; --crop-h: 731;">
+              <div class="evolution-entrance">
+                <button class="evolution-figure" type="button" aria-label="Perbesar ilustrasi manusia purba ketiga" aria-pressed="false">
+                  <span class="evolution-cutout"><img src="./assets/evolution-walk-source.png" alt="" width="1962" height="802" decoding="async" draggable="false" /></span>
+                </button>
+              </div>
+            </div>
+            <div class="evolution-slot" style="--tilt: -3deg; --lift: 12px; --delay: 340ms; --crop-x: 1631; --crop-y: 20; --crop-w: 309; --crop-h: 771;">
+              <div class="evolution-entrance">
+                <button class="evolution-figure" type="button" aria-label="Perbesar ilustrasi Homo sapiens" aria-pressed="false">
+                  <span class="evolution-cutout"><img src="./assets/evolution-walk-source.png" alt="" width="1962" height="802" decoding="async" draggable="false" /></span>
+                </button>
+              </div>
+            </div>
+          </div>
         </div>
       </section>
       <section id="malangsari" class="mission-strip" aria-label="Progress misi Malangsari">
@@ -295,5 +356,6 @@
     <script src="./app.js?v=20260921-theme-1"></script>
     <script src="./literacy.js"></script>
     <script src="./discovery.js?v=1"></script>
+    <script src="./evolution-gallery.js?v=1"></script>
   </body>
 </html>

@@ -1,0 +1,105 @@
+#evolutionJourney {
+  display: grid;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  align-items: end;
+  gap: clamp(12px, 2vw, 32px);
+  width: 100%;
+  margin-top: 28px;
+  padding: 56px 24px 82px;
+  isolation: isolate;
+}
+
+.evolution-slot {
+  position: relative;
+  min-width: 0;
+  transform: translateY(var(--lift));
+}
+
+.evolution-slot:has(.evolution-figure:is(:hover, :focus-visible, [aria-pressed="true"])) { z-index: 2; }
+
+.evolution-entrance { opacity: 1; }
+.evolution-gallery.has-motion .evolution-slot:not(.is-revealed) .evolution-entrance { opacity: 0; }
+.evolution-gallery.has-motion .evolution-slot.is-revealed .evolution-entrance {
+  animation: evolution-pop 780ms both;
+  animation-delay: var(--delay);
+}
+
+.evolution-figure {
+  display: block;
+  width: 100%;
+  max-width: 192px;
+  margin: 0 auto;
+  padding: 0;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  appearance: none;
+  transform: rotate(var(--tilt));
+  transform-origin: center 75%;
+  filter: brightness(.93) saturate(.88);
+  cursor: zoom-in;
+  touch-action: manipulation;
+  transition: transform 340ms cubic-bezier(.2, .75, .25, 1.2), filter 280ms ease;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.evolution-cutout {
+  position: relative;
+  display: block;
+  width: 100%;
+  aspect-ratio: var(--crop-w) / var(--crop-h);
+  overflow: hidden;
+  pointer-events: none;
+}
+
+.evolution-cutout img {
+  position: absolute;
+  display: block;
+  max-width: none;
+  width: calc(1962 / var(--crop-w) * 100%);
+  height: calc(802 / var(--crop-h) * 100%);
+  left: calc(-1 * var(--crop-x) / var(--crop-w) * 100%);
+  top: calc(-1 * var(--crop-y) / var(--crop-h) * 100%);
+  user-select: none;
+  -webkit-user-drag: none;
+}
+
+.evolution-figure:is(:focus-visible, [aria-pressed="true"]) {
+  transform: rotate(0) scale(1.12) translateY(-6px);
+  filter: brightness(1.06) saturate(1) drop-shadow(0 9px 6px rgba(23, 75, 72, .13));
+}
+.evolution-figure[aria-pressed="true"] { cursor: zoom-out; }
+.evolution-slot:focus-within .evolution-entrance { animation: none !important; opacity: 1 !important; }
+
+@media (hover: hover) and (pointer: fine) {
+  .evolution-figure:hover {
+    transform: rotate(0) scale(1.12) translateY(-6px);
+    filter: brightness(1.06) saturate(1) drop-shadow(0 9px 6px rgba(23, 75, 72, .13));
+  }
+}
+
+@keyframes evolution-pop {
+  0% { opacity: 0; transform: translateY(88px) scale(.72) rotate(-5deg); animation-timing-function: cubic-bezier(.18, .75, .25, 1); }
+  60% { opacity: 1; transform: translateY(-13px) scale(1.035) rotate(1.5deg); animation-timing-function: ease-in-out; }
+  82% { opacity: 1; transform: translateY(5px) scale(.99) rotate(-.7deg); animation-timing-function: ease-out; }
+  100% { opacity: 1; transform: translateY(0) scale(1) rotate(0); }
+}
+
+@media (max-width: 620px) {
+  #evolutionJourney {
+    grid-template-columns: repeat(6, minmax(0, 1fr));
+    gap: 40px 12px;
+    margin-top: 18px;
+    padding: 44px 16px 56px;
+  }
+  .evolution-slot { grid-column: span 2; transform: translateY(calc(var(--lift) * .45)); }
+  .evolution-slot:nth-child(4) { grid-column: 2 / span 2; }
+  .evolution-slot:nth-child(5) { grid-column: 5 / span 2; }
+  .evolution-figure { max-width: 130px; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .evolution-entrance { animation: none !important; opacity: 1 !important; }
+  .evolution-figure { transition: none; }
+  .evolution-figure:is(:hover, :focus-visible, [aria-pressed="true"]) { transform: rotate(0) scale(1.04); }
+}
