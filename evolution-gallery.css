@@ -4,8 +4,8 @@
   align-items: end;
   gap: clamp(12px, 2vw, 32px);
   width: 100%;
-  margin-top: 28px;
-  padding: 56px 24px 82px;
+  margin-top: 10px;
+  padding: 28px 24px 48px;
   isolation: isolate;
 }
 
@@ -27,7 +27,7 @@
 .evolution-figure {
   display: block;
   width: 100%;
-  max-width: 192px;
+  max-width: 120px;
   margin: 0 auto;
   padding: 0;
   border: 0;
@@ -89,13 +89,13 @@
   #evolutionJourney {
     grid-template-columns: repeat(6, minmax(0, 1fr));
     gap: 40px 12px;
-    margin-top: 18px;
-    padding: 44px 16px 56px;
+    margin-top: 8px;
+    padding: 24px 16px 38px;
   }
   .evolution-slot { grid-column: span 2; transform: translateY(calc(var(--lift) * .45)); }
   .evolution-slot:nth-child(4) { grid-column: 2 / span 2; }
   .evolution-slot:nth-child(5) { grid-column: 5 / span 2; }
-  .evolution-figure { max-width: 130px; }
+  .evolution-figure { max-width: 82px; }
 }
 
 @media (prefers-reduced-motion: reduce) {
