@@ -9,9 +9,9 @@
     <link rel="stylesheet" href="./styles.css?v=20260921-sites-page-1" />
     <link rel="stylesheet" href="./ux.css?v=20260921-panorama-4" />
     <link rel="stylesheet" href="./discovery.css?v=1" />
-    <link rel="stylesheet" href="./theme.css?v=1" />
+    <link rel="stylesheet" href="./theme.css?v=2" />
     <link rel="stylesheet" href="./evolution-gallery.css?v=3" />
-    <link rel="stylesheet" href="./home-footer.css?v=2" />
+    <link rel="stylesheet" href="./home-footer.css?v=7" />
   </head>
   <body>
     <main>
@@ -89,14 +89,18 @@
         </section>
         <footer class="home-footer" aria-labelledby="homeFooterTitle">
           <div class="home-footer-inner">
-            <div class="home-footer-logos" role="group" aria-label="Logo instansi">
-              <div class="home-footer-ministry">
-                <img src="./assets/brand/ministry-culture.png" alt="Logo Kementerian Kebudayaan Republik Indonesia" width="148" height="148" loading="lazy" />
-                <span aria-hidden="true">Kementerian<br />Kebudayaan<br />Republik Indonesia</span>
+            <div class="home-footer-logos" role="list" aria-label="Instansi pendukung">
+              <div class="home-footer-logo-item home-footer-ministry" role="listitem" tabindex="0" aria-label="Kementerian Kebudayaan RI">
+                <img src="./assets/brand/ministry-culture.png" alt="" width="148" height="148" loading="lazy" />
+                <span aria-hidden="true"><em>Kementerian Kebudayaan RI</em></span>
               </div>
-              <div class="home-footer-institution">
-                <img class="home-footer-school" src="./assets/brand/institution-mark.png" alt="Logo SMA Negeri 2 Taruna Bhayangkara" width="168" height="148" loading="lazy" />
-                <span aria-hidden="true">SMA Negeri 2<br />Taruna Bhayangkara</span>
+              <div class="home-footer-logo-item home-footer-province" role="listitem" tabindex="0" aria-label="Disbudpar Provinsi Jawa Timur">
+                <img src="./assets/brand/east-java-government.png" alt="" width="640" height="359" loading="lazy" />
+                <span aria-hidden="true"><em>Disbudpar Provinsi Jawa Timur</em></span>
+              </div>
+              <div class="home-footer-logo-item home-footer-institution" role="listitem" tabindex="0" aria-label="SMAN 2 Taruna Bhayangkara">
+                <img src="./assets/brand/institution-mark.png" alt="" width="168" height="148" loading="lazy" />
+                <span aria-hidden="true"><em>SMAN 2 Taruna Bhayangkara</em></span>
               </div>
             </div>
             <div class="home-footer-contact">
@@ -206,11 +210,11 @@
           <p id="missionSite" class="mission-site">Malangsari · Banyuwangi, Jawa Timur</p>
           <h1>Sejarah yang bisa dijelajahi.</h1>
         </div>
-        <aside class="mission-panel">
+        <a class="mission-panel" href="#profile" aria-label="Lihat koleksi badge">
           <span class="panel-label">Progress Misi</span>
           <strong id="heroProgress">0/3 badge</strong>
           <div class="progress-track" role="progressbar" aria-label="Progress misi" aria-valuemin="0" aria-valuemax="3" aria-valuenow="0"><span id="heroProgressBar"></span></div>
-        </aside>
+        </a>
       </section>
 
       <section id="kendenglembu" class="tour-section">
@@ -346,6 +350,10 @@
     </dialog>
 
     <svg class="liquid-filter-defs" width="0" height="0" aria-hidden="true">
+      <filter id="ministry-transparent" color-interpolation-filters="sRGB">
+        <feColorMatrix type="matrix" values="1 0 0 0 0  0 1 0 0 0  0 0 1 0 0  -1 -1 -1 0 3" />
+        <feComposite in2="SourceAlpha" operator="in" />
+      </filter>
       <filter id="liquid-lens">
         <feTurbulence type="fractalNoise" baseFrequency="0.008" numOctaves="2" result="noise" />
         <feDisplacementMap in="SourceGraphic" in2="noise" scale="18" xChannelSelector="R" yChannelSelector="G" />
@@ -353,7 +361,7 @@
     </svg>
 
     <script src="https://cdn.jsdelivr.net/npm/pannellum@2.5.6/build/pannellum.js"></script>
-    <script src="./app.js?v=20260921-theme-1"></script>
+    <script src="./app.js?v=20260922-badge-navigation"></script>
     <script src="./literacy.js"></script>
     <script src="./discovery.js?v=1"></script>
     <script src="./evolution-gallery.js?v=1"></script>

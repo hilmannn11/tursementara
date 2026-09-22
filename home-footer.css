@@ -1,30 +1,143 @@
 .home-footer {
   background: var(--brand-teal);
   color: var(--brand-white);
-  padding: 36px 24px;
-  text-align: left;
+  padding: 34px 24px;
 }
 
-.home-footer-inner { max-width: 1200px; margin: 0 auto; display: grid; grid-template-columns: 1fr 1fr; align-items: center; gap: 48px; }
-.home-footer h2 { margin: 0 0 12px; color: var(--brand-white); font-size: 14px; line-height: 1.4; text-transform: uppercase; }
-.home-footer address { color: #e0eeea; font-size: 13px; font-style: normal; line-height: 1.8; }
-.home-footer .about-phone { margin: 6px 0 0; }
-.home-footer .about-phone a { color: #e0eeea; font-size: 13px; text-underline-offset: 4px; }
-.home-footer .about-phone a:hover { color: var(--brand-coral); }
-.home-footer a:focus-visible { outline-color: var(--brand-coral); }
-.home-footer-logos { display: flex; flex-wrap: wrap; align-items: center; justify-content: flex-start; gap: 24px; }
-.home-footer-ministry, .home-footer-institution { display: flex; align-items: center; gap: 10px; }
-.home-footer-logos span { color: var(--brand-white); font-size: 10px; font-weight: 700; line-height: 1.4; text-transform: uppercase; }
-/* Keep a gold mark while blending away the supplied white backing. */
-.home-footer-ministry img { display: block; width: 48px; height: 48px; object-fit: contain; filter: grayscale(1) invert(1) sepia(1) saturate(2.5) brightness(1.7); mix-blend-mode: screen; }
-.home-footer-school { display: block; width: 57px; height: 50px; object-fit: contain; }
-
-@media (max-width: 900px) {
-  .home-footer-inner { grid-template-columns: minmax(220px, .8fr) minmax(0, 1fr); gap: 32px; }
-  .home-footer-logos { flex-direction: column; align-items: flex-start; gap: 20px; }
+.home-footer-inner {
+  max-width: 1200px;
+  margin: 0 auto;
+  display: grid;
+  grid-template-columns: minmax(370px, 1.2fr) minmax(0, 1fr);
+  align-items: center;
+  gap: 36px;
 }
 
-@media (max-width: 560px) {
-  .home-footer { padding: 30px 24px; }
+.home-footer-contact h2 { margin: 0 0 12px; color: var(--brand-white); font-size: 14px; line-height: 1.4; text-transform: uppercase; }
+.home-footer-contact address { color: #e0eeea; font-size: 13px; font-style: normal; line-height: 1.8; }
+.home-footer-contact .about-phone { margin: 6px 0 0; }
+.home-footer-contact a { color: #e0eeea; font-size: 13px; text-underline-offset: 4px; }
+.home-footer-contact a:hover { color: var(--brand-coral); }
+
+.home-footer-logos {
+  display: flex;
+  justify-content: flex-start;
+  gap: 12px;
+  align-items: center;
+  min-height: 74px;
+}
+
+.home-footer-logo-item {
+  position: relative;
+  display: flex;
+  flex: 0 0 auto;
+  align-items: center;
+  justify-items: start;
+  min-width: 0;
+  border-radius: 6px;
+  outline: none;
+  background: var(--brand-teal);
+  transition: opacity 650ms ease;
+}
+
+.home-footer-logo-item img {
+  display: block;
+  width: 58px;
+  height: 58px;
+  object-fit: contain;
+  flex: 0 0 auto;
+  transform-origin: center 80%;
+  transition: transform 750ms cubic-bezier(.22, 1, .36, 1);
+}
+
+.home-footer-ministry img {
+  width: 54px;
+  height: 54px;
+  /* Remove the white backing through alpha, without a composited black layer. */
+  filter: url(#ministry-transparent);
+}
+
+.home-footer-province img {
+  width: 62px;
+  height: 62px;
+  object-fit: cover;
+  object-position: center;
+  clip-path: polygon(20% 21%, 28% 15%, 31% 10%, 50% 7%, 69% 10%, 72% 15%, 80% 21%, 80% 58%, 77% 69%, 72% 77%, 79% 83%, 70% 88%, 60% 92%, 50% 94%, 40% 92%, 30% 88%, 21% 83%, 28% 77%, 23% 69%, 20% 58%);
+}
+
+.home-footer-logo-item span {
+  display: block;
+  width: 0;
+  max-height: 64px;
+  overflow: hidden;
+  flex: 0 0 auto;
+  color: var(--brand-white);
+  font-size: 11px;
+  font-weight: 750;
+  line-height: 1.35;
+  opacity: 0;
+  pointer-events: none;
+  transform: translateX(-8px);
+  transition: width 750ms cubic-bezier(.22, 1, .36, 1), margin 750ms cubic-bezier(.22, 1, .36, 1), opacity 550ms ease, transform 750ms cubic-bezier(.22, 1, .36, 1);
+}
+
+.home-footer-logo-item span em { display: block; width: 136px; font-style: normal; }
+
+.home-footer-logos:has(.home-footer-logo-item:is(:hover, :focus)) .home-footer-logo-item:not(:is(:hover, :focus)) {
+  opacity: .28;
+}
+
+.home-footer-logo-item:is(:hover, :focus) {
+  z-index: 3;
+}
+
+.home-footer-logo-item:is(:hover, :focus) img {
+  transform: translateY(-3px) rotate(-3deg) scale(1.06);
+  animation: footer-logo-sway 1200ms ease-in-out both;
+}
+
+@keyframes footer-logo-sway {
+  0% { transform: translateY(0) rotate(0) scale(1); }
+  45% { transform: translateY(-4px) rotate(-5deg) scale(1.06); }
+  72% { transform: translateY(-2px) rotate(2deg) scale(1.06); }
+  100% { transform: translateY(-3px) rotate(-3deg) scale(1.06); }
+}
+
+.home-footer-logo-item:is(:hover, :focus) span {
+  opacity: 1;
+  width: 136px;
+  margin-left: 8px;
+  transform: translateX(0);
+}
+
+/* Hover takes precedence over a previously clicked logo. */
+.home-footer-logos:has(.home-footer-logo-item:hover) .home-footer-logo-item:focus:not(:hover) { opacity: .28; }
+.home-footer-logos:has(.home-footer-logo-item:hover) .home-footer-logo-item:focus:not(:hover) span { width: 0; margin-left: 0; opacity: 0; transform: translateX(-8px); }
+.home-footer-logos:has(.home-footer-logo-item:hover) .home-footer-logo-item:focus:not(:hover) img { transform: none; animation: none; }
+
+.home-footer-logo-item:focus-visible {
+  box-shadow: 0 0 0 3px var(--brand-coral);
+}
+
+@media (max-width: 700px) {
   .home-footer-inner { grid-template-columns: minmax(0, 1fr); gap: 28px; }
+}
+
+@media (max-width: 680px) {
+  .home-footer { padding: 28px 16px; }
+  .home-footer-logos { min-height: 64px; }
+  .home-footer-logo-item { justify-items: center; }
+  .home-footer-inner { gap: 24px; }
+  .home-footer-logo-item img { width: 48px; height: 48px; }
+  .home-footer-ministry img { width: 44px; height: 44px; }
+  .home-footer-province img { width: 52px; height: 52px; }
+  .home-footer-logos { gap: 8px; }
+  .home-footer-logo-item:is(:hover, :focus) span { width: 110px; }
+  .home-footer-logo-item span em { width: 110px; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .home-footer-logo-item,
+  .home-footer-logo-item img,
+  .home-footer-logo-item span { transition: none; animation: none !important; }
 }

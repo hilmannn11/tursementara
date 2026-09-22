@@ -105,7 +105,9 @@ a, button { -webkit-tap-highlight-color: rgba(23, 75, 72, .14); }
 .mission-panel .panel-label { color: var(--muted); }
 .mission-panel strong { font-size: 36px; }
 .mission-panel::after, .room-panel::after { display: none; }
-.mission-panel:hover { transform: none; box-shadow: var(--brand-shadow); }
+.mission-panel:hover { transform: none; box-shadow: var(--brand-shadow); border-color: var(--brand-teal); }
+.mission-panel, a.badge-challenge { text-decoration: none; }
+.mission-panel:focus-visible { outline: 3px solid var(--brand-blue); outline-offset: 4px; }
 .progress-track { background: #dbe8e3; box-shadow: none; }
 .progress-track span, .progress-track span[data-level] { background: var(--brand-berry); box-shadow: none; transition: width 500ms var(--ease-out); }
 .progress-track span[data-level="3"] { background: var(--brand-teal); }

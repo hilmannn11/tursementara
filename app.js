@@ -512,15 +512,12 @@ function renderProfile() {
           </div>
           <strong>${room.badge}</strong>
           <p class="badge-caption">${["Langkah pertama, cerita pertama.", "Rasa penasaran membawamu lebih jauh.", "Satu penemuan melengkapi perjalanan."][rooms.indexOf(room)]}</p>
-          <small>${earned ? "Sudah didapat" : "Jawab kuis untuk membuka"}</small>
-          <button class="badge-challenge" type="button" data-badge-room="${room.id}" aria-label="${earned ? "Ulangi" : "Mulai"} tantangan ${room.badge}">${earned ? "Coba lagi" : "Mulai tantangan"}<span aria-hidden="true">&rarr;</span></button>
+          <small>${earned ? "Sudah didapat" : "Temukan di tur virtual"}</small>
+          <a class="badge-challenge" href="#sites" aria-label="Jelajahi tur virtual untuk badge ${room.badge}">Jelajahi tur virtual<span aria-hidden="true">&rarr;</span></a>
         </article>
       `;
     })
     .join("");
-  document.querySelectorAll("[data-badge-room]").forEach((button) => {
-    button.addEventListener("click", () => openQuiz(button.dataset.badgeRoom));
-  });
 }
 
 function showExploration(targetId, updateHistory = true) {
