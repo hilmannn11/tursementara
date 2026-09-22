@@ -16,9 +16,9 @@ const rooms = [
         "Titik ini menjadi awal perjalanan virtual. Narasi arsip bisa diganti dengan penjelasan sejarah lokasi, fungsi ruang, atau cerita pengunjung.",
     },
     quiz: {
-      question: "Siapa saja orang yang ada di dalam sini?",
-      options: ["MBG", "Entah gatau", "Rahmat Toyota", "Kungskik, Abay, dan orang Rusia"],
-      answer: 3,
+      question: "Apa peran Titik 1 dalam jalur virtual?",
+      options: ["Awal perjalanan virtual", "Titik akhir perjalanan", "Halaman koleksi badge", "Pintu keluar situs"],
+      answer: 0,
     },
   },
   {
@@ -35,8 +35,8 @@ const rooms = [
         "Titik kedua dapat memuat cerita lanjutan, foto pembanding, peta posisi, atau informasi bangunan di sekitar jalur.",
     },
     quiz: {
-      question: "Gacor ga ni web jadinya?",
-      options: ["Gacor banget mas Hilman", "B aja", "Ga", "Anjay"],
+      question: "Informasi apa yang dapat melengkapi arsip di Titik 2?",
+      options: ["Foto pembanding dan peta posisi", "Daftar permainan", "Jadwal pertandingan", "Katalog belanja"],
       answer: 0,
     },
   },
@@ -54,8 +54,8 @@ const rooms = [
         "Titik akhir pada contoh ini bisa menjadi tempat arsip tambahan, refleksi, atau pintu menuju rute berikutnya jika foto panorama baru sudah tersedia.",
     },
     quiz: {
-      question: "Apa yang dibutuhkan agar jalur virtual bisa diperpanjang?",
-      options: ["Foto panorama titik berikutnya", "Menghapus semua arsip", "Mematikan hotspot"],
+      question: "Apa yang diperlukan agar rute dari Titik 3 dapat dilanjutkan?",
+      options: ["Foto panorama baru", "Menghapus semua arsip", "Mematikan hotspot", "Mengunci halaman tur"],
       answer: 0,
     },
   },
