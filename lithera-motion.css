@@ -1,0 +1,31 @@
+/* Editorial motion for the home and site cards. The panorama remains untouched. */
+@media (prefers-reduced-motion: no-preference) {
+  @media (hover: hover) and (pointer: fine) {
+    #home .home-image-space {
+      transform: translate3d(var(--hero-x, 0px), var(--hero-y, 0px), 0) scale(1.035);
+      transition: transform 420ms cubic-bezier(.2, .7, .2, 1);
+      will-change: transform;
+    }
+
+    .discovery-card.is-in-view .discovery-art {
+      transform: perspective(900px) rotateX(var(--art-rotate-x, 0deg)) rotateY(var(--art-rotate-y, 0deg));
+      transition: clip-path 1000ms cubic-bezier(.2, .7, .2, 1), transform 260ms ease-out;
+      will-change: transform;
+    }
+  }
+
+  .modern-ready .discovery-card:not(.is-in-view) .discovery-art,
+  .modern-ready .site-option:not(.is-in-view) .site-option-image {
+    clip-path: inset(0 0 100% 0);
+  }
+
+  .discovery-art,
+  .site-option-image {
+    clip-path: inset(0 0 0 0);
+    transition: clip-path 1000ms cubic-bezier(.2, .7, .2, 1);
+  }
+
+  .discovery-card[data-stagger="2"] .discovery-art {
+    transition-delay: 130ms;
+  }
+}
