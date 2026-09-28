@@ -610,10 +610,6 @@ body.exploration-active .cursor-glow {
   animation: site-choice-in 650ms ease backwards;
 }
 
-.site-option:nth-child(2) {
-  animation-delay: 130ms;
-}
-
 .site-option-image {
   overflow: hidden;
   min-height: 180px;
@@ -915,12 +911,12 @@ section:not(.home-screen):not(.mission-strip) {
   color: #fff;
 }
 
-#malangsari:not([hidden]) > div > .eyebrow,
+#tourIntro:not([hidden]) > div > .eyebrow,
 #kendenglembu:not([hidden]) .section-heading .eyebrow {
   animation: enter-up 520ms 40ms both cubic-bezier(0.22, 1, 0.36, 1);
 }
 
-#malangsari:not([hidden]) > div > h1,
+#tourIntro:not([hidden]) > div > h1,
 #kendenglembu:not([hidden]) .section-heading h2 {
   animation: enter-up 560ms 110ms both cubic-bezier(0.22, 1, 0.36, 1);
 }
@@ -929,11 +925,11 @@ section:not(.home-screen):not(.mission-strip) {
   animation: enter-up 560ms 180ms both cubic-bezier(0.22, 1, 0.36, 1);
 }
 
-#malangsari:not([hidden]) .mission-panel {
+#tourIntro:not([hidden]) .mission-panel {
   animation: enter-up 580ms 210ms both cubic-bezier(0.22, 1, 0.36, 1);
 }
 
-#malangsari:not([hidden]) .progress-track span {
+#tourIntro:not([hidden]) .progress-track span {
   animation: progress-fill 1s 320ms cubic-bezier(0.4, 0, 0.2, 1) both;
 }
 

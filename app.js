@@ -1,14 +1,18 @@
 const STORAGE_KEY = "bentengMissionBadges";
+const QUIZ_STORAGE_KEY = "bentengMissionVerifiedQuizzesV2";
+const LEGACY_QUIZ_COUNT_KEY = "bentengMissionLegacyBadgeCount";
 const ROUTE_FORWARD_YAW = -10;
+const FIRST_SCENE_YAW = 79;
+const forwardYawFor = (roomId) => roomId === "titik-1" ? FIRST_SCENE_YAW : ROUTE_FORWARD_YAW;
 
 const rooms = [
   {
     id: "titik-1",
     title: "Titik 1",
     description: "Awal jalur virtual. Klik panah di lantai untuk berjalan maju ke titik berikutnya.",
-    panorama: "./assets/panoramas/titik-1.png",
+    panorama: "./assets/panoramas/titik-1.webp",
     badge: "The Wanderer",
-    badgeImage: "./assets/badges/homo-erectus.png",
+    badgeImage: "./assets/badges/homo-erectus.webp",
     archive: {
       title: "Arsip Titik 1",
       type: "Foto panorama dan catatan lokasi",
@@ -25,9 +29,9 @@ const rooms = [
     id: "titik-2",
     title: "Titik 2",
     description: "Titik lanjutan. Arahkan pandangan ke jalur depan, lalu klik panah untuk maju lagi.",
-    panorama: "./assets/panoramas/titik-2.png",
+    panorama: "./assets/panoramas/titik-2.webp",
     badge: "The Survivor",
-    badgeImage: "./assets/badges/homo-neanderthal.png",
+    badgeImage: "./assets/badges/homo-neanderthal.webp",
     archive: {
       title: "Arsip Titik 2",
       type: "Foto panorama dan catatan lokasi",
@@ -44,9 +48,9 @@ const rooms = [
     id: "titik-3",
     title: "Titik 3",
     description: "Titik akhir jalur contoh. Nanti titik ini bisa disambungkan lagi ke panorama berikutnya.",
-    panorama: "./assets/panoramas/titik-3.png",
+    panorama: "./assets/panoramas/titik-3.webp",
     badge: "The Thinker",
-    badgeImage: "./assets/badges/homo-sapiens.png",
+    badgeImage: "./assets/badges/homo-sapiens.webp",
     archive: {
       title: "Arsip Titik 3",
       type: "Foto panorama dan catatan lokasi",
@@ -63,11 +67,11 @@ const rooms = [
 
 const sceneLinks = {
   "titik-1": {
-    forward: { target: "titik-2", targetYaw: ROUTE_FORWARD_YAW, label: "Maju ke Titik 2" },
+    forward: { target: "titik-2", yaw: FIRST_SCENE_YAW, pitch: -25, targetYaw: ROUTE_FORWARD_YAW, label: "Maju ke Titik 2" },
   },
   "titik-2": {
     forward: { target: "titik-3", targetYaw: ROUTE_FORWARD_YAW, label: "Maju ke Titik 3" },
-    back: { target: "titik-1", targetYaw: ROUTE_FORWARD_YAW + 180, label: "Balik ke Titik 1" },
+    back: { target: "titik-1", targetYaw: FIRST_SCENE_YAW, label: "Balik ke Titik 1" },
   },
   "titik-3": {
     back: { target: "titik-2", targetYaw: ROUTE_FORWARD_YAW + 180, label: "Balik ke Titik 2" },
@@ -78,68 +82,106 @@ let currentRoom = rooms[0];
 let viewer;
 let tourCreated = false;
 let quizTimer;
-let walkClickTimer;
 let quizAnswered = false;
 let activeArchiveRoomId = rooms[0].id;
 let transitionTimer;
-const isTouchViewport = window.matchMedia("(pointer: coarse)").matches || "ontouchstart" in window;
 
 const archiveModal = document.querySelector("#archiveModal");
 const quizModal = document.querySelector("#quizModal");
+const badgeToast = document.querySelector("#badgeToast");
+const badgeToastName = document.querySelector("#badgeToastName");
+let badgeToastTimer;
+let badgeToastHideTimer;
+let pendingBadgeToast = null;
 const archiveModalContent = document.querySelector("#archiveModalContent");
 const quizContent = document.querySelector("#quizContent");
 const viewerShell = document.querySelector(".viewer-shell");
-const floorNavZone = document.querySelector("#floorNavZone");
-const floorArrowButton = document.querySelector("#floorArrowButton");
+const tourFloorArrow = document.querySelector("#tourFloorArrow");
+const tourViewControls = document.querySelector("#tourViewControls");
 const explorationContent = document.querySelector("#explorationContent");
 const homeScreen = document.querySelector("#home");
 const aboutPage = document.querySelector("#aboutPage");
-const pageSections = ["malangsari", "kendenglembu", "archive", "profile"].map((id) => document.querySelector(`#${id}`));
+const pageSections = ["tourIntro", "kendenglembu", "archive", "profile"].map((id) => document.querySelector(`#${id}`));
 const globalNav = document.querySelector("#globalNav");
 const viewerHint = document.querySelector("#viewerHint");
 const viewerTools = document.querySelector("#viewerTools");
 const viewerError = document.querySelector("#viewerError");
-const viewerCompass = document.querySelector("#viewerCompass");
 const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)");
 let viewerHintShown = false;
 let hintCheckFrame;
 let viewerInView = false;
 let hintTimer;
-let compassFrame;
-let lastCompassYaw;
-let peekTimer;
-let activeFloorDirection = "forward";
+let floorPointerStart;
+let floorPointerDragged = false;
 
 function getBadges() {
-  return JSON.parse(localStorage.getItem(STORAGE_KEY) || "[]");
+  let saved;
+  try {
+    saved = JSON.parse(localStorage.getItem(STORAGE_KEY) || "[]");
+  } catch {
+    saved = [];
+  }
+  const earnedCount = Array.isArray(saved) ? rooms.filter((room) => saved.includes(room.id)).length : 0;
+  const badges = rooms.slice(0, earnedCount).map((room) => room.id);
+  if (JSON.stringify(saved) !== JSON.stringify(badges)) {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(badges));
+  }
+  return badges;
 }
 
-function saveBadge(roomId) {
-  const badges = new Set(getBadges());
-  badges.add(roomId);
-  localStorage.setItem(STORAGE_KEY, JSON.stringify([...badges]));
+function getCompletedQuizzes() {
+  let saved;
+  const stored = localStorage.getItem(QUIZ_STORAGE_KEY);
+  try {
+    saved = JSON.parse(stored || "null");
+  } catch {
+    saved = null;
+  }
+  // Older visits recorded badge count but not which quiz earned each badge.
+  // Keep those badges, then require that many distinct verified quizzes
+  // before another badge can be earned. Do not guess the old question IDs.
+  if (!Array.isArray(saved)) {
+    const legacyCount = getBadges().length;
+    if (legacyCount) localStorage.setItem(LEGACY_QUIZ_COUNT_KEY, String(legacyCount));
+    saved = [];
+  }
+  const completed = rooms.filter((room) => saved.includes(room.id)).map((room) => room.id);
+  if (JSON.stringify(saved) !== JSON.stringify(completed)) {
+    localStorage.setItem(QUIZ_STORAGE_KEY, JSON.stringify(completed));
+  }
+  return completed;
+}
+
+function saveNextBadge() {
+  const badges = getBadges();
+  const nextRoom = rooms[badges.length];
+  if (!nextRoom) return null;
+  badges.push(nextRoom.id);
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(badges));
   renderProfile();
+  return nextRoom;
+}
+
+function hideBadgeToast() {
+  clearTimeout(badgeToastTimer);
+  clearTimeout(badgeToastHideTimer);
+  badgeToast.classList.remove("is-visible");
+  badgeToastHideTimer = window.setTimeout(() => { badgeToast.hidden = true; }, reducedMotion.matches ? 0 : 240);
+}
+
+function showBadgeToast(room) {
+  clearTimeout(badgeToastTimer);
+  clearTimeout(badgeToastHideTimer);
+  badgeToastName.textContent = room.badge;
+  badgeToast.hidden = false;
+  requestAnimationFrame(() => badgeToast.classList.add("is-visible"));
+  badgeToastTimer = window.setTimeout(hideBadgeToast, 4000);
 }
 
 function updateRoomPanel(roomId) {
+  hideFloorArrow();
   currentRoom = rooms.find((room) => room.id === roomId) || rooms[0];
   document.querySelector("#panorama").setAttribute("aria-label", `Viewer panorama 360 derajat, ${currentRoom.title}`);
-  updateWalkButton();
-}
-
-function updateWalkButton() {
-  updateActiveDirectionFromYaw();
-}
-
-function positionMobileArrow() {
-  if (!isTouchViewport) {
-    return;
-  }
-
-  floorArrowButton.classList.add("is-visible");
-  floorArrowButton.style.setProperty("--arrow-x", "50%");
-  floorArrowButton.style.setProperty("--arrow-y", "57%");
-  floorArrowButton.style.setProperty("--arrow-scale", "0.68");
 }
 
 function createTour() {
@@ -150,11 +192,13 @@ function createTour() {
   viewer = pannellum.viewer("panorama", {
     default: {
       firstScene: rooms[0].id,
-      sceneFadeDuration: 650,
+      sceneFadeDuration: 450,
       autoLoad: true,
       compass: false,
-      hfov: 105,
-      yaw: ROUTE_FORWARD_YAW,
+      showZoomCtrl: false,
+      showFullscreenCtrl: false,
+      hfov: 95,
+      yaw: FIRST_SCENE_YAW,
     },
     scenes: Object.fromEntries(
       rooms.map((room) => [
@@ -169,6 +213,7 @@ function createTour() {
               yaw: -32,
               type: "info",
               text: "Buka arsip",
+              cssClass: "tour-info-hotspot",
               clickHandlerFunc: () => openArchive(room.id),
             },
           ],
@@ -178,34 +223,34 @@ function createTour() {
   });
 
   viewer.on("scenechange", (sceneId) => updateRoomPanel(sceneId));
-  // Keep overlays inside Pannellum's container, including in fullscreen mode.
-  viewer.getContainer().append(floorNavZone, viewerTools, viewerHint, viewerError);
   viewer.on("load", () => {
     viewerError.hidden = true;
     viewerTools.hidden = false;
-    resetFloorArrow();
+    tourViewControls.hidden = false;
     maybeShowViewerHint();
-    startCompass();
-    viewer.getContainer().querySelectorAll(".pnlm-hotspot").forEach((marker) => {
+    viewer.getContainer().querySelectorAll(".tour-info-hotspot").forEach((marker) => {
       marker.tabIndex = 0;
       marker.setAttribute("role", "button");
-      marker.setAttribute("aria-label", "Buka arsip di titik ini");
-      marker.addEventListener("keydown", (event) => {
-        if (event.key === "Enter" || event.key === " ") {
-          event.preventDefault();
-          openArchive(currentRoom.id);
-        }
-      });
+      const label = "Buka arsip di titik ini";
+      marker.setAttribute("aria-label", label);
+      marker.title = label;
     });
   });
+  viewer.getContainer().addEventListener("keydown", (event) => {
+    if (event.key !== "Enter" && event.key !== " ") return;
+    const marker = event.target.closest(".tour-info-hotspot");
+    if (!marker) return;
+    event.preventDefault();
+    openArchive(currentRoom.id);
+  });
   viewer.on("error", () => {
+    hideFloorArrow();
     hideViewerHint();
     viewerTools.hidden = true;
+    tourViewControls.hidden = true;
     viewerError.hidden = false;
-    cancelAnimationFrame(compassFrame);
   });
   updateRoomPanel(rooms[0].id);
-  positionMobileArrow();
 }
 
 function hideViewerHint() {
@@ -214,23 +259,20 @@ function hideViewerHint() {
 }
 
 function showViewerHint() {
-  if (!viewer?.isLoaded() || document.hidden) return;
+  if (viewerTools.hidden || document.hidden) return;
   clearTimeout(hintTimer);
   viewerHintShown = true;
   viewerHint.hidden = false;
-  // Only an explicit help-button click can replay the guide after its first use.
   hintTimer = setTimeout(hideViewerHint, 3000);
 }
 
 function maybeShowViewerHint() {
-  const site = explorationContent.dataset.view;
   if (viewerHintShown || document.body.classList.contains("page-is-exiting")) return;
-  if (!viewerInView || explorationContent.hidden || !viewer?.isLoaded() || document.hidden) return;
-  if (!["malangsari", "kendenglembu"].includes(site)) return;
+  if (!viewerInView || explorationContent.hidden || viewerTools.hidden || document.hidden) return;
+  if (explorationContent.dataset.view !== "kendenglembu") return;
   const rect = viewerShell.getBoundingClientRect();
   const navBottom = document.fullscreenElement ? 0 : globalNav.getBoundingClientRect().bottom;
   const hintTop = rect.top + parseFloat(getComputedStyle(viewerHint).top);
-  // Do not spend the one-time guide while only the viewer's edge is on screen.
   if (rect.top > innerHeight * 0.55 || hintTop < navBottom + 8 || hintTop + 120 > innerHeight) return;
   showViewerHint();
 }
@@ -243,126 +285,55 @@ function scheduleViewerHintCheck() {
   });
 }
 
-function startCompass() {
-  cancelAnimationFrame(compassFrame);
-  if (!viewerInView || !viewer?.isLoaded() || explorationContent.hidden || document.hidden) return;
-  const yaw = Math.round(normalizeYaw(viewer.getYaw() - ROUTE_FORWARD_YAW));
-  if (yaw !== lastCompassYaw) {
-    viewerCompass.querySelector("img").style.transform = `rotate(${-yaw}deg)`;
-    viewerCompass.setAttribute("aria-label", `Kompas relatif, ${yaw} derajat dari arah awal. Kembali ke arah awal; utara belum dikalibrasi.`);
-    lastCompassYaw = yaw;
-    updateActiveDirectionFromYaw();
-  }
-  compassFrame = requestAnimationFrame(startCompass);
-}
-
 function walk(direction) {
   const nextStep = sceneLinks[currentRoom.id]?.[direction];
   if (!nextStep) {
     return;
   }
-
+  hideFloorArrow();
   viewer.loadScene(nextStep.target, null, nextStep.targetYaw);
-}
-
-function revealFloorArrow() {
-  if (!viewer?.isLoaded()) return;
-  positionMobileArrow();
-  updateWalkButton();
-  floorArrowButton.classList.add("is-visible");
-}
-
-function enableTemporaryPeek(event) {
-  event?.preventDefault();
-  event?.stopPropagation();
-  floorNavZone.classList.add("peek-mode");
-  floorArrowButton.classList.add("is-peeking");
-  clearTimeout(peekTimer);
-  peekTimer = setTimeout(() => {
-    floorNavZone.classList.remove("peek-mode");
-    floorArrowButton.classList.remove("is-peeking");
-  }, 1600);
-}
-
-function handleArrowClick(event) {
-  event.stopPropagation();
-  const direction = activeFloorDirection;
-  clearTimeout(walkClickTimer);
-  walkClickTimer = setTimeout(() => walk(direction), 220);
-}
-
-function handleArrowDoubleClick(event) {
-  clearTimeout(walkClickTimer);
-  enableTemporaryPeek(event);
-}
-
-function setActiveFloorDirection(direction, keepPosition = false) {
-  const links = sceneLinks[currentRoom.id] || {};
-  const resolvedDirection = direction;
-  const nextStep = links[resolvedDirection];
-
-  activeFloorDirection = resolvedDirection;
-  floorArrowButton.disabled = !nextStep;
-  floorArrowButton.title = nextStep ? nextStep.label : "Tidak ada jalur di arah ini";
-  floorArrowButton.setAttribute("aria-label", nextStep?.label || "Tidak ada jalur di arah ini");
-  floorArrowButton.classList.toggle("is-hidden", !nextStep);
-  if (nextStep && isTouchViewport) floorArrowButton.classList.add("is-visible");
-  floorArrowButton.classList.toggle("is-back", resolvedDirection === "back");
-  floorArrowButton.style.setProperty("--arrow-rotation", resolvedDirection === "back" ? "0deg" : "0deg");
-
-  if (!keepPosition) {
-    floorArrowButton.style.setProperty("--arrow-y", "46%");
-  }
-}
-
-function moveFloorArrow(event) {
-  if (!viewer?.isLoaded()) return;
-  if (isTouchViewport) {
-    positionMobileArrow();
-    updateActiveDirectionFromYaw();
-    return;
-  }
-
-  const rect = viewer.getContainer().getBoundingClientRect();
-  const activeTop = rect.top + rect.height * 0.5;
-  if (event.clientY <= activeTop) {
-    floorArrowButton.classList.remove("is-visible");
-    return;
-  }
-
-  const zone = floorNavZone.getBoundingClientRect();
-  const x = ((event.clientX - zone.left) / zone.width) * 100;
-  const y = ((event.clientY - zone.top) / zone.height) * 100;
-  const centerX = rect.left + rect.width / 2;
-  const centerY = rect.top + rect.height / 2;
-  const normalizedX = (event.clientX - centerX) / (rect.width / 2);
-  const normalizedY = (event.clientY - centerY) / (rect.height / 2);
-  const axisDistance = Math.min(1, Math.hypot(normalizedX, normalizedY));
-  const arrowScale = 0.78 - axisDistance * 0.2;
-
-  floorArrowButton.classList.add("is-visible");
-  floorArrowButton.style.setProperty("--arrow-x", `${Math.min(Math.max(x, 15), 85)}%`);
-  floorArrowButton.style.setProperty("--arrow-y", `${Math.min(Math.max(y, 22), 68)}%`);
-  floorArrowButton.style.setProperty("--arrow-scale", arrowScale.toFixed(2));
-  updateActiveDirectionFromYaw();
-}
-
-function resetFloorArrow() {
-  if (!viewer?.isLoaded()) return;
-  floorArrowButton.style.setProperty("--arrow-x", "50%");
-  floorArrowButton.style.setProperty("--arrow-y", "46%");
-  floorArrowButton.style.setProperty("--arrow-scale", "0.68");
-  revealFloorArrow();
 }
 
 function normalizeYaw(yaw) {
   return ((((yaw + 180) % 360) + 360) % 360) - 180;
 }
 
-function updateActiveDirectionFromYaw() {
-  const yaw = normalizeYaw((viewer?.getYaw?.() ?? ROUTE_FORWARD_YAW) - ROUTE_FORWARD_YAW);
-  const direction = Math.abs(yaw) > 100 ? "back" : "forward";
-  setActiveFloorDirection(direction, true);
+function hideFloorArrow() {
+  tourFloorArrow.hidden = true;
+}
+
+function floorDirection() {
+  const links = sceneLinks[currentRoom.id] || {};
+  const yaw = viewer.getYaw();
+  return Object.keys(links).sort((first, second) => {
+    const bearing = (direction) => links[direction].yaw ?? forwardYawFor(currentRoom.id) + (direction === "back" ? 180 : 0);
+    return Math.abs(normalizeYaw(yaw - bearing(first))) - Math.abs(normalizeYaw(yaw - bearing(second)));
+  })[0];
+}
+
+function floorPoint(event) {
+  if (!viewer?.isLoaded() || document.hidden || explorationContent.hidden || archiveModal.open || quizModal.open) return null;
+  if (!(event.target instanceof Element) || !event.target.closest("#panorama") || event.target.closest(".tour-info-hotspot")) return null;
+  const rect = viewerShell.getBoundingClientRect();
+  const x = event.clientX - rect.left;
+  const y = event.clientY - rect.top;
+  if (x < 0 || x > rect.width || y < rect.height * 0.52 || y > rect.height - 72) return null;
+  return { x, y };
+}
+
+function showFloorArrow(event) {
+  const point = floorPoint(event);
+  const direction = point && floorDirection();
+  if (!direction) {
+    hideFloorArrow();
+    return;
+  }
+  const centerY = viewerShell.clientHeight / 2;
+  const depth = Math.min(1, Math.max(0, (point.y - centerY) / (viewerShell.clientHeight * 0.35)));
+  tourFloorArrow.style.setProperty("--floor-scale", String(0.72 + depth * 0.4));
+  tourFloorArrow.style.left = `${point.x}px`;
+  tourFloorArrow.style.top = `${point.y}px`;
+  tourFloorArrow.hidden = false;
 }
 
 function openArchive(roomId) {
@@ -395,17 +366,21 @@ function closeArchiveAndScheduleQuiz() {
 
 function openQuiz(roomId) {
   const room = rooms.find((item) => item.id === roomId);
+  const alreadyCompleted = getCompletedQuizzes().includes(room.id);
+  const legacyUnknown = !alreadyCompleted && Number(localStorage.getItem(LEGACY_QUIZ_COUNT_KEY)) > 0;
 
-  quizAnswered = false;
+  quizAnswered = alreadyCompleted;
+  pendingBadgeToast = null;
 
   quizContent.innerHTML = `
     <div class="dialog-toolbar">
       <h2 id="quizTitle">${room.title}</h2>
-      <button id="quizCloseButton" class="quiz-close-button" type="button" aria-label="Tutup kuis" aria-describedby="quizCloseHint" disabled><img src="./assets/icons/x.svg" alt="" width="22" height="22" /></button>
+      <button id="quizCloseButton" class="quiz-close-button" type="button" aria-label="Tutup kuis" aria-describedby="quizCloseHint" ${alreadyCompleted ? "" : "disabled"}><img src="./assets/icons/x.svg" alt="" width="22" height="22" /></button>
     </div>
     <div class="dialog-body">
     <p class="eyebrow">Kuis Misi</p>
-    <p id="quizCloseHint" class="quiz-close-hint">Jawab dengan benar untuk mengaktifkan tombol tutup.</p>
+    <p id="quizStatus" class="quiz-status ${alreadyCompleted ? "is-complete" : legacyUnknown ? "is-legacy" : "is-pending"}" role="status">${alreadyCompleted ? "✓ Sudah dijawab" : legacyUnknown ? "Riwayat soal lama belum tercatat" : "○ Belum dijawab"}</p>
+    <p id="quizCloseHint" class="quiz-close-hint">${alreadyCompleted ? "Kuis ini sudah selesai. Kamu boleh mencoba lagi, tetapi progres tidak bertambah." : legacyUnknown ? "Badge lama tetap tersimpan. Progres berikutnya bertambah setelah lebih banyak kuis berbeda tercatat." : "Jawab dengan benar untuk mengaktifkan tombol tutup."}</p>
     <p id="quizQuestion">${room.quiz.question}</p>
     <div class="quiz-options">
       ${room.quiz.options
@@ -436,13 +411,30 @@ function checkAnswer(room, selectedIndex) {
 
   if (selectedIndex === room.quiz.answer) {
     quizAnswered = true;
-    saveBadge(room.id);
+    const completed = getCompletedQuizzes();
+    const firstCorrectAnswer = !completed.includes(room.id);
+    let unlockedBadge = null;
+    if (firstCorrectAnswer) {
+      const updated = [...completed, room.id];
+      localStorage.setItem(QUIZ_STORAGE_KEY, JSON.stringify(updated));
+      if (updated.length > getBadges().length) unlockedBadge = saveNextBadge();
+    }
+    if (unlockedBadge) pendingBadgeToast = unlockedBadge;
     selectedButton.classList.add("is-correct");
     options.forEach((button) => (button.disabled = true));
     feedback.className = "quiz-feedback is-success";
-    feedback.textContent = `Benar. Badge "${room.badge}" berhasil dikumpulkan. Kamu bisa menutup kuis.`;
+    feedback.textContent = !firstCorrectAnswer
+      ? "Benar. Kuis ini sudah pernah dijawab; progres tidak bertambah. Coba kuis di titik lain untuk melanjutkan."
+      : unlockedBadge
+        ? `Benar. Badge "${unlockedBadge.badge}" berhasil dikumpulkan. Kamu bisa menutup kuis.`
+        : getBadges().length === rooms.length
+          ? "Benar. Semua badge sudah terkumpul. Kamu bisa menutup kuis."
+          : "Benar. Kuis ini sekarang tercatat. Jawab kuis berbeda untuk melanjutkan progres badge.";
+    const status = quizContent.querySelector("#quizStatus");
+    status.className = "quiz-status is-complete";
+    status.textContent = "✓ Sudah dijawab";
     quizContent.querySelector("#quizCloseButton").disabled = false;
-    quizContent.querySelector("#quizCloseHint").textContent = "Kuis selesai. Tombol tutup sudah aktif.";
+    quizContent.querySelector("#quizCloseHint").textContent = "Kuis selesai. Mengulang kuis ini tidak menambah progres.";
     quizContent.querySelector("#quizCloseButton").focus({ preventScroll: true });
   } else {
     selectedButton.classList.add("is-wrong");
@@ -507,7 +499,7 @@ function renderProfile() {
         <article class="badge-card ${earned ? "earned" : ""}">
           <span class="badge-state">${earned ? "Terkumpul" : "Belum terbuka"}</span>
           <div class="badge-visual ${earned ? "is-earned" : "is-locked"}">
-            <img class="badge-art" src="${room.badgeImage}" alt="${room.badge}, ${room.title}" />
+            <img class="badge-art" src="${room.badgeImage}" alt="${room.badge}" loading="lazy" decoding="async" />
             ${earned ? "" : '<span class="badge-icon" role="img" aria-label="Badge terkunci"></span>'}
           </div>
           <strong>${room.badge}</strong>
@@ -521,15 +513,13 @@ function renderProfile() {
 }
 
 function showExploration(targetId, updateHistory = true) {
-  // Old saved links still work, but all navigation uses the canonical site name.
-  if (targetId === "tour") {
-    targetId = "kendenglembu";
-    history.replaceState({ targetId }, "", `#${targetId}`);
-  }
-  const validViews = ["sites", "malangsari", "kendenglembu", "archive", "profile"];
-  const routeKey = validViews.includes(targetId) ? targetId : "malangsari";
-  const pageKey = ["sites", "archive", "profile"].includes(routeKey) ? routeKey : "malangsari";
-  const visibleSections = pageKey === "malangsari" ? ["malangsari", "kendenglembu"] : [pageKey];
+  // Preserve old shared links without presenting Malangsari as a virtual tour.
+  const oldRoutes = { tour: "kendenglembu", malangsari: "archive" };
+  const validViews = ["sites", "kendenglembu", "archive", "profile"];
+  const routeKey = validViews.includes(oldRoutes[targetId] || targetId) ? (oldRoutes[targetId] || targetId) : "sites";
+  const isTour = routeKey === "kendenglembu";
+  if (routeKey !== targetId) history.replaceState({ targetId: routeKey }, "", `#${routeKey}`);
+  const visibleSections = isTour ? ["tourIntro", "kendenglembu"] : [routeKey];
 
   pageSections.forEach((section) => {
     section.hidden = !visibleSections.includes(section.id);
@@ -541,23 +531,20 @@ function showExploration(targetId, updateHistory = true) {
   explorationContent.dataset.view = routeKey;
   document.body.classList.remove("home-locked");
   document.body.classList.add("exploration-active");
-  document.querySelector("#missionSite").textContent =
-    routeKey === "kendenglembu" ? "Kendenglembu · Banyuwangi, Jawa Timur" : "Malangsari · Banyuwangi, Jawa Timur";
-  document.querySelector("#malangsari").setAttribute("aria-label", `Progress misi ${routeKey === "kendenglembu" ? "Kendenglembu" : "Malangsari"}`);
   updateNavigation(routeKey);
-  window.scrollTo({ top: 0, left: 0, behavior: "instant" });
+  if (!isTour) window.scrollTo({ top: 0, left: 0, behavior: "instant" });
 
-  if (pageKey === "malangsari") {
+  if (isTour) {
     requestAnimationFrame(() => {
-      if (explorationContent.hidden || !["malangsari", "kendenglembu"].includes(explorationContent.dataset.view)) return;
+      if (explorationContent.hidden || explorationContent.dataset.view !== "kendenglembu") return;
       if (!tourCreated) {
         createTour();
         tourCreated = Boolean(viewer);
       } else {
         viewer.resize();
         maybeShowViewerHint();
-        startCompass();
       }
+      requestAnimationFrame(scrollTourIntoView);
     });
   }
 
@@ -566,19 +553,25 @@ function showExploration(targetId, updateHistory = true) {
   }
 }
 
+function scrollTourIntoView() {
+  if (explorationContent.hidden || explorationContent.dataset.view !== "kendenglembu") return;
+  const top = viewerShell.getBoundingClientRect().top + window.scrollY - globalNav.getBoundingClientRect().height - 10;
+  window.scrollTo({ top: Math.max(0, top), left: 0, behavior: "instant" });
+}
+
 function updateNavigation(routeKey) {
   globalNav.hidden = routeKey === "home";
   restartHomeSlideTimer();
-  globalNav.querySelector(".explore-nav-links").hidden = ["sites", "archive", "profile"].includes(routeKey);
+  globalNav.querySelector(".explore-nav-links").hidden = ["about", "sites", "archive", "profile"].includes(routeKey);
   document.querySelector("#siteChooser").hidden = routeKey !== "sites";
   document.querySelectorAll("[data-site-route]").forEach((link) => {
     const isActive = link.dataset.siteRoute === routeKey;
     link.classList.toggle("is-active", isActive);
-    link.querySelector("[data-site-status]").textContent = isActive ? "Sedang dijelajahi" : "Jelajahi situs";
+    link.querySelector("[data-site-status]").textContent = isActive ? "Sedang dijelajahi" : "Mulai tur 360°";
     if (isActive) link.setAttribute("aria-current", "page");
     else link.removeAttribute("aria-current");
   });
-  const titles = { home: "Beranda", sites: "Pilih Situs", malangsari: "Malangsari", kendenglembu: "Kendenglembu", archive: "Arsip", profile: "Badge", about: "About" };
+  const titles = { home: "Beranda", sites: "Tur Virtual", kendenglembu: "Kendenglembu", archive: "Arsip", profile: "Badge", about: "About" };
   document.title = `${titles[routeKey]} | Lithera`;
   document.querySelectorAll("[data-explore-route]").forEach((link) => {
     const isActive = link.dataset.exploreRoute === routeKey;
@@ -594,6 +587,8 @@ function updateNavigation(routeKey) {
 function transitionTo(renderPage) {
   clearTimeout(transitionTimer);
   clearTimeout(quizTimer);
+  hideBadgeToast();
+  hideFloorArrow();
   hideViewerHint();
   document.body.classList.add("page-is-exiting");
   transitionTimer = window.setTimeout(() => {
@@ -603,6 +598,7 @@ function transitionTo(renderPage) {
       maybeShowViewerHint();
       const heading = !homeScreen.hidden ? document.querySelector(".lithera-logo")
         : !aboutPage.hidden ? aboutPage.querySelector("h1")
+        : explorationContent.dataset.view === "kendenglembu" ? document.querySelector("#kendenglembu h2")
         : explorationContent.querySelector("section:not([hidden]) h1, section:not([hidden]) h2");
       if (heading && heading.tagName !== "A") heading.setAttribute("tabindex", "-1");
       heading?.focus({ preventScroll: true });
@@ -611,6 +607,8 @@ function transitionTo(renderPage) {
 }
 
 function showHome(updateHistory = true) {
+  hideFloorArrow();
+  hideViewerHint();
   explorationContent.hidden = true;
   aboutPage.hidden = true;
   homeScreen.hidden = false;
@@ -628,6 +626,7 @@ const homeSlides = [...document.querySelectorAll(".home-slide")];
 const slideDots = [...document.querySelectorAll(".slide-dot")];
 const slidePlace = document.querySelector("#slidePlace");
 const slideLocation = document.querySelector("#slideLocation");
+const slideNumber = document.querySelector("#slideNumber");
 let activeHomeSlide = 0;
 let homeSlideTimer;
 let homeSlideHovered = false;
@@ -643,6 +642,7 @@ function showHomeSlide(index) {
   homeSlides[activeHomeSlide].classList.add("is-active");
   slidePlace.textContent = homeSlides[activeHomeSlide].dataset.place;
   slideLocation.textContent = "Banyuwangi, Jawa Timur, Indonesia";
+  if (slideNumber) slideNumber.textContent = String(activeHomeSlide + 1).padStart(2, "0");
   updateSlideIndicator();
 }
 
@@ -702,6 +702,8 @@ if (homeIntro) {
 }
 
 function showAbout(updateHistory = true) {
+  hideFloorArrow();
+  hideViewerHint();
   homeScreen.hidden = true;
   explorationContent.hidden = true;
   aboutPage.hidden = false;
@@ -726,7 +728,7 @@ document.addEventListener("click", (event) => {
   const link = event.target.closest("a[href^='#']");
   if (!link || event.button !== 0 || event.ctrlKey || event.metaKey || event.shiftKey || event.altKey) return;
   const route = link.getAttribute("href").slice(1);
-  if (!["home", "about", "sites", "malangsari", "kendenglembu", "archive", "profile"].includes(route)) return;
+  if (!["home", "about", "sites", "kendenglembu", "archive", "profile"].includes(route)) return;
   event.preventDefault();
   transitionTo(() => route === "home" ? showHome() : route === "about" ? showAbout() : showExploration(route));
 });
@@ -743,7 +745,10 @@ window.addEventListener("hashchange", () => transitionTo(() => applyRoute(false)
 history.scrollRestoration = "manual";
 window.addEventListener("load", () => {
   // A hash represents a page here, not a native jump to its section element.
-  requestAnimationFrame(() => window.scrollTo({ top: 0, left: 0, behavior: "instant" }));
+  requestAnimationFrame(() => {
+    if (window.location.hash === "#kendenglembu") scrollTourIntoView();
+    else window.scrollTo({ top: 0, left: 0, behavior: "instant" });
+  });
 });
 
 function applyRoute(updateHistory = false) {
@@ -758,44 +763,82 @@ function applyRoute(updateHistory = false) {
 
 const viewerObserver = new IntersectionObserver(([entry]) => {
   viewerInView = entry.isIntersecting && entry.intersectionRatio >= 0.25;
-  if (viewerInView) {
-    maybeShowViewerHint();
-    startCompass();
-  } else {
+  if (viewerInView) maybeShowViewerHint();
+  else {
+    hideFloorArrow();
     hideViewerHint();
-    cancelAnimationFrame(compassFrame);
   }
 }, { threshold: [0, 0.25] });
 viewerObserver.observe(viewerShell);
-window.addEventListener("scroll", scheduleViewerHintCheck, { passive: true });
+window.addEventListener("scroll", () => { hideFloorArrow(); scheduleViewerHintCheck(); }, { passive: true });
 window.addEventListener("resize", scheduleViewerHintCheck, { passive: true });
 document.addEventListener("visibilitychange", () => {
-  if (document.hidden) hideViewerHint();
-  else maybeShowViewerHint();
-  startCompass();
+  if (document.hidden) {
+    hideFloorArrow();
+    hideViewerHint();
+  } else maybeShowViewerHint();
 });
 const viewerHelp = document.querySelector("#viewerHelp");
 viewerHelp.addEventListener("click", showViewerHint);
 viewerHint.addEventListener("pointerenter", () => clearTimeout(hintTimer));
 viewerHint.addEventListener("pointerleave", () => { hintTimer = setTimeout(hideViewerHint, 3000); });
 document.addEventListener("keydown", (event) => { if (event.key === "Escape") hideViewerHint(); });
-viewerCompass.addEventListener("click", () => viewer?.setYaw(ROUTE_FORWARD_YAW, reducedMotion.matches ? false : 500));
+
+viewerShell.addEventListener("pointerdown", (event) => {
+  floorPointerStart = { x: event.clientX, y: event.clientY };
+  floorPointerDragged = false;
+  if (event.pointerType === "touch") showFloorArrow(event);
+});
+viewerShell.addEventListener("pointermove", (event) => {
+  if (event.buttons) {
+    if (floorPointerStart && Math.hypot(event.clientX - floorPointerStart.x, event.clientY - floorPointerStart.y) > 8) {
+      floorPointerDragged = true;
+    }
+    hideFloorArrow();
+    return;
+  }
+  showFloorArrow(event);
+});
+viewerShell.addEventListener("pointerleave", hideFloorArrow);
+viewerShell.addEventListener("pointercancel", hideFloorArrow);
+viewerShell.addEventListener("click", (event) => {
+  const point = floorPoint(event);
+  if (point && !floorPointerDragged) {
+    const direction = floorDirection();
+    if (direction) walk(direction);
+  }
+  floorPointerStart = null;
+  floorPointerDragged = false;
+}, true);
 
 document.querySelector("#closeArchiveButton").addEventListener("click", closeArchiveAndScheduleQuiz);
-floorArrowButton.addEventListener("click", handleArrowClick);
-floorArrowButton.addEventListener("dblclick", handleArrowDoubleClick);
-// Arrow taps must not start Pannellum's drag gesture underneath the control.
-floorArrowButton.addEventListener("mousedown", (event) => event.stopPropagation());
-floorArrowButton.addEventListener("touchstart", (event) => event.stopPropagation(), { passive: true });
-document.addEventListener("fullscreenchange", () => requestAnimationFrame(resetFloorArrow));
-viewerShell.addEventListener("pointermove", moveFloorArrow);
-viewerShell.addEventListener("pointerleave", (event) => {
-  // A touch pointer leaves on release, before its click reaches the arrow.
-  if (event.pointerType !== "touch") resetFloorArrow();
+for (const overlay of [tourViewControls, viewerTools]) {
+  overlay.addEventListener("pointerdown", (event) => event.stopPropagation());
+  overlay.addEventListener("mousedown", (event) => event.stopPropagation());
+  overlay.addEventListener("touchstart", (event) => event.stopPropagation(), { passive: true });
+}
+document.querySelector("#tourZoomIn").addEventListener("click", () => {
+  if (viewer?.isLoaded()) viewer.setHfov(Math.max(45, viewer.getHfov() - 15));
 });
-floorNavZone.addEventListener("dblclick", enableTemporaryPeek);
+document.querySelector("#tourZoomOut").addEventListener("click", () => {
+  if (viewer?.isLoaded()) viewer.setHfov(Math.min(120, viewer.getHfov() + 15));
+});
+document.querySelector("#tourFullscreen").addEventListener("click", () => {
+  if (document.fullscreenElement) document.exitFullscreen();
+  else viewerShell.requestFullscreen();
+});
+document.addEventListener("fullscreenchange", () => {
+  const active = !!document.fullscreenElement;
+  const button = document.querySelector("#tourFullscreen");
+  button.setAttribute("aria-label", active ? "Keluar layar penuh" : "Layar penuh");
+  button.title = active ? "Keluar layar penuh" : "Layar penuh";
+  requestAnimationFrame(() => viewer?.resize());
+});
 document.querySelector("#resetButton").addEventListener("click", () => {
   localStorage.removeItem(STORAGE_KEY);
+  localStorage.removeItem(QUIZ_STORAGE_KEY);
+  localStorage.removeItem("bentengMissionCompletedQuizzes");
+  localStorage.removeItem(LEGACY_QUIZ_COUNT_KEY);
   renderProfile();
 });
 
@@ -808,6 +851,11 @@ quizModal.addEventListener("cancel", (event) => {
   if (!quizAnswered) {
     event.preventDefault();
   }
+});
+
+quizModal.addEventListener("close", () => {
+  if (pendingBadgeToast) showBadgeToast(pendingBadgeToast);
+  pendingBadgeToast = null;
 });
 
 renderArchiveGrid();
