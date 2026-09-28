@@ -4,59 +4,53 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Lithera</title>
-    <meta name="description" content="Lithera: tur panorama 360 derajat Kendenglembu serta arsip dan referensi penelitian Kendenglembu dan Malangsari, Banyuwangi." />
-    <link rel="preconnect" href="https://fonts.googleapis.com" />
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fraunces:ital,wght@1,500&amp;display=swap" />
+    <meta name="description" content="Lithera: eksplorasi panorama 360 derajat, arsip dan referensi penelitian situs Kendenglembu dan Malangsari, Banyuwangi." />
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/pannellum@2.5.6/build/pannellum.css" />
-    <link rel="stylesheet" href="./styles.css?v=20260928-single-tour-1" />
+    <link rel="stylesheet" href="./styles.css?v=20260921-sites-page-1" />
     <link rel="stylesheet" href="./ux.css?v=20260921-panorama-4" />
     <link rel="stylesheet" href="./discovery.css?v=1" />
-    <link rel="stylesheet" href="./theme.css?v=20260928-single-tour-1" />
-    <link rel="stylesheet" href="./evolution-gallery.css?v=6" />
+    <link rel="stylesheet" href="./theme.css?v=2" />
+    <link rel="stylesheet" href="./evolution-gallery.css?v=3" />
     <link rel="stylesheet" href="./home-footer.css?v=7" />
-    <link rel="stylesheet" href="./modern.css?v=20260928-single-tour-1" />
-    <link rel="stylesheet" href="./street-view.css?v=7" />
-    <link rel="stylesheet" href="./home-cinematic.css?v=1" />
   </head>
   <body>
     <main>
       <section id="home" class="home-screen">
         <header class="home-header">
           <div class="brand-lockup">
-            <a class="lithera-logo" href="#home" aria-label="Lithera beranda">L<span class="logo-i"><span class="logo-i-stem">ı</span><span class="logo-i-dot"></span></span>thera</a>
-            <span class="brand-subtitle">Digital archive of ancient landscapes</span>
+            <a class="lithera-logo" href="#home" aria-label="Lithera beranda">l<span class="logo-i"><span class="logo-i-stem">ı</span><span class="logo-i-dot"></span></span>thera</a>
+            <div class="brand-meta">
+              <span class="brand-subtitle">Digital Archive of Ancient Landscapes</span>
+              <a class="about-link" href="#about">about</a>
+            </div>
           </div>
-          <nav class="home-nav" aria-label="Navigasi beranda">
-            <a class="about-link" href="#about" aria-label="Tentang Lithera" title="Tentang Lithera"><span aria-hidden="true">!</span></a>
-          </nav>
+          <img class="institution-logo" src="./assets/brand/institution-mark.png" alt="Lambang institusi" />
         </header>
         <div class="home-stage">
           <div class="home-image-space" role="group" aria-label="Slideshow situs sejarah">
             <img class="home-slide is-active" src="./assets/home/home-1.png" data-place="Kendenglembu" alt="Kendenglembu, Banyuwangi, dengan susunan batu di area hijau" />
             <img class="home-slide" src="./assets/home/home-2.png" data-place="Kendenglembu" alt="Kendenglembu, Banyuwangi, dengan reruntuhan bangunan batu" />
+            <img class="home-slide" src="./assets/home/home-3.png" data-place="Malangsari" alt="Malangsari, Banyuwangi, dengan situs batu di tengah hutan berkabut" />
+            <img class="home-slide" src="./assets/home/home-4.jpg" data-place="Malangsari" alt="Malangsari, Banyuwangi, dengan gerbang masuk situs" />
           </div>
           <div class="slide-caption" aria-live="polite">
             <strong id="slidePlace">Kendenglembu</strong>
             <span id="slideLocation">Banyuwangi, Jawa Timur, Indonesia</span>
           </div>
-          <span class="slide-number" aria-hidden="true"><span id="slideNumber">01</span> / 02</span>
           <div class="slide-indicators" role="group" aria-label="Indikator slideshow">
             <button class="slide-dot is-active" type="button" data-slide="0" aria-label="Tampilkan gambar 1"></button>
             <button class="slide-dot" type="button" data-slide="1" aria-label="Tampilkan gambar 2"></button>
+            <button class="slide-dot" type="button" data-slide="2" aria-label="Tampilkan gambar 3"></button>
+            <button class="slide-dot" type="button" data-slide="3" aria-label="Tampilkan gambar 4"></button>
           </div>
-          <div class="home-slide-progress" aria-hidden="true"><span></span></div>
         </div>
         <section class="home-intro" aria-labelledby="homeTitle">
           <div class="home-intro-inner">
-            <p class="home-intro-kicker"><span></span> Arsip digital zaman praaksara</p>
-            <h1 id="homeTitle">Masa lalu,<br /><em>terasa dekat.</em></h1>
-            <p class="home-intro-lead">Satu tur virtual. Banyak cerita untuk ditemukan.</p>
-            <p class="home-intro-description">Jelajahi Kendenglembu melalui tur 360°, baca arsip penelitian situs bersejarah, lalu kumpulkan badge dari setiap penemuan.</p>
-            <div class="hero-actions">
-              <a class="home-tour-link" href="#sites">Mulai tur virtual <span aria-hidden="true">&rarr;</span></a>
-              <a class="home-archive-link" href="#archive">Lihat arsip <span aria-hidden="true">↗</span></a>
-            </div>
+            <p class="home-intro-kicker">Arsip digital zaman praaksara</p>
+            <h1 id="homeTitle">Lithera</h1>
+            <p class="home-intro-lead">Mengenal jejak masa lalu, lebih dekat.</p>
+            <p class="home-intro-description">Lithera adalah arsip digital interaktif yang membawa Anda ke pusat situs purbakala Kendenglembu dan Malangsari. Masuk ke dalam tur virtual 360°, bedah arsip penelitian autentik, dan selesaikan kuis sejarah untuk mengklaim sertifikat penjelajah Anda.</p>
+            <a class="home-tour-link" href="#sites">Coba Tur Virtual 360°<span aria-hidden="true">&rarr;</span></a>
           </div>
         </section>
         <section class="home-discover" aria-labelledby="discoverTitle">
@@ -79,9 +73,9 @@
               </a>
               <a class="discovery-card discovery-badges" href="#profile" data-reveal>
                 <div class="discovery-art badge-art-stage" aria-hidden="true">
-                  <img src="./assets/badges/homo-erectus.webp" alt="" loading="lazy" />
-                  <img src="./assets/badges/homo-neanderthal.webp" alt="" loading="lazy" />
-                  <img src="./assets/badges/homo-sapiens.webp" alt="" loading="lazy" />
+                  <img src="./assets/badges/homo-erectus.png" alt="" loading="lazy" />
+                  <img src="./assets/badges/homo-neanderthal.png" alt="" loading="lazy" />
+                  <img src="./assets/badges/homo-sapiens.png" alt="" loading="lazy" />
                 </div>
                 <div class="discovery-card-copy">
                   <span class="discovery-kicker"><span id="homeBadgeCount">0</span> dari 3 badge terkumpul</span>
@@ -124,16 +118,10 @@
       <nav id="globalNav" class="explore-nav" aria-label="Navigasi global" hidden>
         <a class="explore-home" href="#home" aria-label="Kembali ke home Lithera">Lithera</a>
         <div class="explore-nav-links">
-          <a href="#archive" data-explore-route="archive">Arsip</a>
+          <a href="#malangsari" data-explore-route="malangsari">Malangsari</a>
+          <a href="#kendenglembu" data-explore-route="kendenglembu">Kendenglembu</a>
         </div>
       </nav>
-      <aside id="badgeToast" class="badge-toast" role="status" aria-live="polite" hidden>
-        <a href="#profile" aria-label="Lihat badge yang baru dibuka di halaman badge">
-          <span class="badge-toast-icon" aria-hidden="true">✓</span>
-          <span class="badge-toast-copy"><strong>Berhasil membuka badge</strong><span id="badgeToastName"></span></span>
-          <span class="badge-toast-arrow" aria-hidden="true">↗</span>
-        </a>
-      </aside>
 
       <section id="aboutPage" class="about-page" hidden>
         <div class="about-page-inner">
@@ -155,65 +143,71 @@
       <div id="explorationContent" class="exploration-content" hidden>
       <section id="siteChooser" class="site-chooser" aria-labelledby="siteChooserTitle" hidden>
         <div class="site-chooser-inner">
-          <p class="site-chooser-label">Tur virtual 360° · Banyuwangi</p>
-          <h2 id="siteChooserTitle">Jelajahi Kendenglembu</h2>
-          <p class="site-chooser-description">Panorama 360° saat ini tersedia untuk Kendenglembu. Cerita situs lainnya dapat dibaca melalui arsip penelitian.</p>
-          <nav class="site-options site-options--single" aria-label="Tur virtual Kendenglembu">
+          <p class="site-chooser-label">2 situs di Banyuwangi</p>
+          <h2 id="siteChooserTitle">Pilih situs untuk dijelajahi</h2>
+          <p class="site-chooser-description">Kenali Malangsari dan Kendenglembu melalui tur virtual. Mulai dari salah satu situs, lalu jelajahi situs lainnya.</p>
+          <nav class="site-options" aria-label="Pilihan situs tur virtual">
+            <a class="site-option" href="#malangsari" data-site-route="malangsari">
+              <div class="site-option-image"><img src="./assets/home/home-3.png" alt="" /></div>
+              <div class="site-option-copy">
+                <h3>Malangsari</h3>
+                <p>Banyuwangi, Jawa Timur</p>
+                <span class="site-option-action"><span data-site-status>Jelajahi situs</span><span class="site-option-arrow" aria-hidden="true">&rarr;</span></span>
+              </div>
+            </a>
             <a class="site-option" href="#kendenglembu" data-site-route="kendenglembu">
-              <div class="site-option-image"><img loading="lazy" decoding="async" src="./assets/home/home-1.png" alt="" /></div>
+              <div class="site-option-image"><img src="./assets/home/home-1.png" alt="" /></div>
               <div class="site-option-copy">
                 <h3>Kendenglembu</h3>
                 <p>Banyuwangi, Jawa Timur</p>
-                <span class="site-option-action"><span data-site-status>Mulai tur 360°</span><span class="site-option-arrow" aria-hidden="true">&rarr;</span></span>
+                <span class="site-option-action"><span data-site-status>Jelajahi situs</span><span class="site-option-arrow" aria-hidden="true">&rarr;</span></span>
               </div>
             </a>
           </nav>
-          <a class="site-archive-link" href="#archive">Baca arsip penelitian <span aria-hidden="true">↗</span></a>
           <div class="evolution-gallery" id="evolutionJourney" role="group" aria-label="Ilustrasi evolusi manusia">
             <div class="evolution-slot" style="--tilt: -7deg; --lift: 26px; --delay: 0ms; --crop-x: 38; --crop-y: 258; --crop-w: 379; --crop-h: 533;">
               <div class="evolution-entrance">
                 <button class="evolution-figure" type="button" aria-label="Perbesar ilustrasi primata" aria-pressed="false">
-                  <span class="evolution-cutout"><img loading="lazy" src="./assets/evolution-walk-source.webp" alt="" width="1962" height="802" decoding="async" draggable="false" /></span>
+                  <span class="evolution-cutout"><img src="./assets/evolution-walk-source.png" alt="" width="1962" height="802" decoding="async" draggable="false" /></span>
                 </button>
               </div>
             </div>
             <div class="evolution-slot" style="--tilt: 5deg; --lift: -30px; --delay: 85ms; --crop-x: 457; --crop-y: 154; --crop-w: 321; --crop-h: 637;">
               <div class="evolution-entrance">
                 <button class="evolution-figure" type="button" aria-label="Perbesar ilustrasi manusia purba pertama" aria-pressed="false">
-                  <span class="evolution-cutout"><img loading="lazy" src="./assets/evolution-walk-source.webp" alt="" width="1962" height="802" decoding="async" draggable="false" /></span>
+                  <span class="evolution-cutout"><img src="./assets/evolution-walk-source.png" alt="" width="1962" height="802" decoding="async" draggable="false" /></span>
                 </button>
               </div>
             </div>
             <div class="evolution-slot" style="--tilt: -4deg; --lift: 34px; --delay: 170ms; --crop-x: 847; --crop-y: 101; --crop-w: 298; --crop-h: 690;">
               <div class="evolution-entrance">
                 <button class="evolution-figure" type="button" aria-label="Perbesar ilustrasi manusia purba kedua" aria-pressed="false">
-                  <span class="evolution-cutout"><img loading="lazy" src="./assets/evolution-walk-source.webp" alt="" width="1962" height="802" decoding="async" draggable="false" /></span>
+                  <span class="evolution-cutout"><img src="./assets/evolution-walk-source.png" alt="" width="1962" height="802" decoding="async" draggable="false" /></span>
                 </button>
               </div>
             </div>
             <div class="evolution-slot" style="--tilt: 6deg; --lift: -18px; --delay: 255ms; --crop-x: 1235; --crop-y: 60; --crop-w: 310; --crop-h: 731;">
               <div class="evolution-entrance">
                 <button class="evolution-figure" type="button" aria-label="Perbesar ilustrasi manusia purba ketiga" aria-pressed="false">
-                  <span class="evolution-cutout"><img loading="lazy" src="./assets/evolution-walk-source.webp" alt="" width="1962" height="802" decoding="async" draggable="false" /></span>
+                  <span class="evolution-cutout"><img src="./assets/evolution-walk-source.png" alt="" width="1962" height="802" decoding="async" draggable="false" /></span>
                 </button>
               </div>
             </div>
             <div class="evolution-slot" style="--tilt: -3deg; --lift: 12px; --delay: 340ms; --crop-x: 1631; --crop-y: 20; --crop-w: 309; --crop-h: 771;">
               <div class="evolution-entrance">
                 <button class="evolution-figure" type="button" aria-label="Perbesar ilustrasi Homo sapiens" aria-pressed="false">
-                  <span class="evolution-cutout"><img loading="lazy" src="./assets/evolution-walk-source.webp" alt="" width="1962" height="802" decoding="async" draggable="false" /></span>
+                  <span class="evolution-cutout"><img src="./assets/evolution-walk-source.png" alt="" width="1962" height="802" decoding="async" draggable="false" /></span>
                 </button>
               </div>
             </div>
-            <p class="evolution-hint"><span class="evolution-hint-desktop">Arahkan kursor untuk melihat mereka berjalan. Klik untuk memperbesar.</span><span class="evolution-hint-touch">Ketuk figur untuk melihatnya berjalan dan memperbesar.</span></p>
           </div>
         </div>
       </section>
-      <section id="tourIntro" class="mission-strip" aria-label="Progress misi Kendenglembu">
+      <section id="malangsari" class="mission-strip" aria-label="Progress misi Malangsari">
         <div class="mission-copy">
-          <a class="site-picker-back" href="#sites">&larr; Kembali ke awal tur</a>
+          <a class="site-picker-back" href="#sites">&larr; Pilih situs lain</a>
           <button class="eyebrow home-return-tag" type="button" aria-label="Kembali ke home Lithera">Lithera</button>
-          <p class="mission-site">Kendenglembu · Banyuwangi, Jawa Timur</p>
+          <p id="missionSite" class="mission-site">Malangsari · Banyuwangi, Jawa Timur</p>
           <h1>Sejarah yang bisa dijelajahi.</h1>
         </div>
         <a class="mission-panel" href="#profile" aria-label="Lihat koleksi badge">
@@ -227,23 +221,21 @@
         <div class="section-heading tour-heading">
           <p class="eyebrow">Tur Virtual 360</p>
           <h2>Masuk ke titik eksplorasi</h2>
-          <p>Geser untuk melihat sekitar. Arahkan kursor ke bagian bawah panorama, lalu klik panah yang muncul untuk berpindah titik.</p>
+          <p>Ikuti panah di dalam panorama untuk berjalan maju dari satu titik ke titik berikutnya.</p>
         </div>
         <div class="tour-layout">
           <div class="viewer-shell">
             <div id="panorama" role="region" aria-label="Viewer panorama 360 derajat"></div>
-            <div id="tourFloorArrow" class="tour-floor-arrow" aria-hidden="true" hidden></div>
+            <div id="floorNavZone" class="floor-nav-zone" role="group" aria-label="Zona panah navigasi">
+              <button id="floorArrowButton" class="floor-arrow is-hidden" type="button" aria-label="Jalan maju" disabled></button>
+            </div>
             <div id="viewerTools" class="viewer-tools" hidden>
               <button id="viewerHelp" class="viewer-tool" type="button" aria-label="Tampilkan panduan panorama" title="Panduan panorama"><img src="./assets/icons/circle-help.svg" alt="" width="22" height="22" /></button>
-            </div>
-            <div id="tourViewControls" class="tour-view-controls" role="group" aria-label="Kontrol tampilan panorama" hidden>
-              <button id="tourZoomIn" type="button" aria-label="Perbesar panorama" title="Perbesar">+</button>
-              <button id="tourZoomOut" type="button" aria-label="Perkecil panorama" title="Perkecil">−</button>
-              <button id="tourFullscreen" type="button" aria-label="Layar penuh" title="Layar penuh">⛶</button>
+              <button id="viewerCompass" class="viewer-tool" type="button" aria-label="Kompas relatif. Kembali ke arah awal panorama; utara belum dikalibrasi." title="Arah relatif · kembali ke pandangan awal (bukan utara geografis)"><img src="./assets/icons/compass.svg" alt="" width="24" height="24" /></button>
             </div>
             <div id="viewerHint" class="viewer-hint" role="status" aria-live="polite" hidden>
               <img src="./assets/icons/hand.svg" alt="" width="28" height="28" />
-              <span>Geser untuk melihat sekitar · Arahkan kursor ke bawah, lalu klik panah untuk berjalan · Gulir atau cubit untuk zoom</span>
+              <span>Geser untuk memutar 360° • Klik penanda untuk berpindah</span>
             </div>
             <p id="viewerError" class="viewer-error" role="alert" hidden>Panorama belum dapat dimuat. Periksa koneksi lalu muat ulang halaman. Arsip tetap dapat diakses lewat menu Arsip.</p>
           </div>
@@ -262,7 +254,7 @@
             <h1>Arsip &amp; cerita</h1>
             <p>Selalu ada cerita di balik sebuah tempat. Temukan jejaknya melalui penelitian dan catatan perjalanan.</p>
           </div>
-          <div class="archive-heading-photo" aria-hidden="true"><img loading="lazy" decoding="async" src="./assets/home/home-3.png" alt="" /><span>Malangsari &amp; Kendenglembu</span></div>
+          <div class="archive-heading-photo" aria-hidden="true"><img src="./assets/home/home-3.png" alt="" /><span>Malangsari &amp; Kendenglembu</span></div>
         </div>
         <div class="archive-tabs" role="tablist" aria-label="Jenis arsip">
           <button id="researchTab" type="button" role="tab" aria-selected="true" aria-controls="researchPanel">Penelitian <span>02</span></button>
@@ -272,7 +264,7 @@
           <div class="collection-section-label"><h2 id="researchTitle">Dari catatan para peneliti</h2><span>Terbuka untuk semua</span></div>
           <div class="research-grid">
           <article class="research-entry">
-            <img class="research-cover" loading="lazy" decoding="async" src="./assets/home/home-1.png" alt="" />
+            <img class="research-cover" src="./assets/home/home-1.png" alt="" />
             <p class="reference-location">Kendenglembu</p>
             <h4>Awal kolonisasi Austronesia di tenggara Pulau Jawa: Perspektif Situs Kendenglembu</h4>
             <p>Penelitian ini membandingkan data arkeologi dan linguistik mengenai migrasi penutur <span class="glossary-entry"><button class="glossary-term" type="button" aria-expanded="false" aria-describedby="termAustronesia">Austronesia</button><span id="termAustronesia" class="glossary-tooltip" role="tooltip" hidden>Dalam artikel ini, Austronesia merujuk pada kelompok bahasa dan masyarakat penuturnya, bukan spesies manusia. Kajian migrasinya menggabungkan bukti bahasa dan arkeologi.</span></span>. Temuan Kendenglembu membuka hipotesis jalur dari Sulawesi Barat; ini merupakan interpretasi penelitian, bukan kesimpulan tunggal tentang asal-usul penduduk.</p>
@@ -280,7 +272,7 @@
             <div class="reference-actions"><a href="https://ejournal.brin.go.id/amerta/article/view/3521" target="_blank" rel="noopener noreferrer">Baca sumber jurnal <span class="sr-only">(tab baru)</span></a><button class="cite-button" type="button" data-cite="kendenglembu"><img src="./assets/icons/copy.svg" alt="" width="16" height="16" />Kutip / Cite<span class="sr-only"> penelitian Kendenglembu</span></button></div>
           </article>
           <article class="research-entry">
-            <img class="research-cover" loading="lazy" decoding="async" src="./assets/home/home-3.png" alt="" />
+            <img class="research-cover" src="./assets/home/home-3.png" alt="" />
             <p class="reference-location">Malangsari</p>
             <h4>Hasil ekskavasi Situs Malangsari, Banyuwangi: Data baru dolmen di Jawa Timur</h4>
             <p>Ekskavasi di Petak D55, Blok Sidomaju, Afdeling Mulyosari menemukan konstruksi <span class="glossary-entry"><button class="glossary-term" type="button" aria-expanded="false" aria-describedby="termDolmen">dolmen</button><span id="termDolmen" class="glossary-tooltip" role="tooltip" hidden>Monumen batu besar yang dibahas sebagai konstruksi kubur dalam penelitian Malangsari. Fungsi dan konteks tiap temuan ditafsirkan melalui penelitian, bukan dari bentuknya saja.</span></span> yang masih utuh, tetapi tanpa sisa manusia atau artefak. Penulis menafsirkannya sebagai indikasi pembukaan sebelumnya dan menekankan perlunya penelitian lebih lanjut.</p>
@@ -306,7 +298,7 @@
           <div>
             <p class="discovery-kicker">Sedikit penasaran, banyak penemuan</p>
             <h1>Koleksi penjelajah</h1>
-            <p>Tiga tantangan, tiga badge untuk dikoleksi. Setiap kuis berbeda yang dijawab benar dihitung satu kali.</p>
+            <p>Tiga tantangan, tiga badge untuk dikoleksi. Setiap jawaban benar menambah satu cerita dalam perjalananmu.</p>
           </div>
           <div class="collection-count" role="group" aria-label="Jumlah badge terkumpul">
             <div><strong id="profileBadgeCount">0</strong><span>/ 3</span></div>
@@ -323,7 +315,7 @@
             <div id="badgeGrid" class="badge-grid"></div>
           </div>
           <div class="reward-panel">
-            <div class="certificate-art" aria-hidden="true"><span>LITHERA</span><strong>Sertifikat<br />Penjelajah</strong><img loading="lazy" decoding="async" src="./assets/badges/homo-sapiens.webp" alt="" /><small>3 tantangan &middot; 1 perjalanan</small></div>
+            <div class="certificate-art" aria-hidden="true"><span>LITHERA</span><strong>Sertifikat<br />Penjelajah</strong><img src="./assets/badges/homo-sapiens.png" alt="" /><small>3 tantangan &middot; 1 perjalanan</small></div>
             <div class="reward-copy">
               <p class="discovery-kicker">Pencapaian berikutnya</p>
               <h3>Satu koleksi, satu pencapaian.</h3>
@@ -369,11 +361,9 @@
     </svg>
 
     <script src="https://cdn.jsdelivr.net/npm/pannellum@2.5.6/build/pannellum.js"></script>
-    <script src="./app.js?v=20260928-home-cinematic-1"></script>
+    <script src="./app.js?v=20260922-archive-quizzes"></script>
     <script src="./literacy.js"></script>
     <script src="./discovery.js?v=1"></script>
     <script src="./evolution-gallery.js?v=1"></script>
-    <script src="./evolution-walk.js?v=10"></script>
-    <script src="./modern.js?v=1"></script>
   </body>
 </html>

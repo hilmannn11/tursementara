@@ -2,28 +2,15 @@
   const journey = document.querySelector('#evolutionJourney');
   if (!journey) return;
   const chooser = document.querySelector('#siteChooser');
-  const slots = [...journey.querySelectorAll('.evolution-slot')];
-  const buttons = slots.map(slot => slot.querySelector('.evolution-figure'));
-  const canvases = slots.map(slot => {
-    const canvas = document.createElement('canvas');
-    canvas.className = 'evolution-walk-canvas';
-    canvas.setAttribute('aria-hidden', 'true');
-    slot.querySelector('.evolution-cutout').append(canvas);
-    return canvas;
-  });
-  const contexts = canvases.map(canvas => canvas.getContext('2d'));
-  if (contexts.some(context => !context)) return;
-  let context;
+  const stage = journey.querySelector('.evolution-stage');
+  const canvas = journey.querySelector('canvas');
+  const context = canvas.getContext('2d');
+  if (!context) return;
   const motion = matchMedia('(prefers-reduced-motion: reduce)');
-  const desktopHover = matchMedia('(hover: hover) and (pointer: fine)');
   const source = new Image();
   const TAU = Math.PI * 2;
-  const period = 1.16;
+  const period = 1.08;
   const stance = .62;
-  const smoothstep = value => {
-    const t = Math.max(0, Math.min(1, value));
-    return t * t * (3 - 2 * t);
-  };
   const distance = (a, b) => Math.hypot(b[0] - a[0], b[1] - a[1]);
   const angle = (a, b) => Math.atan2(b[1] - a[1], b[0] - a[0]);
   const add = (a, b) => [a[0] + b[0], a[1] + b[1]];
@@ -96,17 +83,16 @@
     }
   ];
 
-  const rigs = [];
-  let current = -1;
-  let requested = -1;
+  let rigs = [];
+  let current = 0;
   let phase = 0;
+  let worldX = 90;
   let width = 0;
   let height = 0;
   let pixelRatio = 1;
   let scale = .26;
-  let visible = true;
-  let sourceLoaded = false;
-  let sourceRequested = false;
+  let visible = false;
+  let paused = false;
   let frame = 0;
   let previousTime = 0;
 
@@ -145,23 +131,7 @@
     return { image, x, y };
   }
 
-  function jointPatch(mask, point, radius) {
-    const x = Math.floor(point[0] - radius - 1);
-    const y = Math.floor(point[1] - radius - 1);
-    const image = document.createElement('canvas');
-    image.width = image.height = radius * 2 + 3;
-    const ctx = image.getContext('2d');
-    ctx.translate(-x, -y);
-    polygonPath(ctx, mask);
-    ctx.clip();
-    ctx.beginPath();
-    ctx.arc(point[0], point[1], radius, 0, TAU);
-    ctx.clip();
-    ctx.drawImage(source, 0, 0);
-    return { image, x: x - point[0], y: y - point[1] };
-  }
-
-  function makeLimb(limb, shade = 0) {
+  function makeLimb(limb) {
     const { points, mask } = limb;
     const parts = points.slice(0, -1).map((point, i) => {
       const planes = [];
@@ -169,19 +139,7 @@
       if (i < points.length - 2) planes.push({ at: points[i + 1], direction: subtract(points[i + 2], point), side: -1 });
       return texture(mask, planes);
     });
-    const joints = points.slice(1, -1).map((point, i) => jointPatch(mask, point, i ? 16 : 24));
-    // Bake depth into the cached ink once. Keep it opaque so the nearer leg
-    // completely covers the farther leg wherever their silhouettes cross.
-    if (shade) [...parts, ...joints].forEach(({ image }) => {
-      const ctx = image.getContext('2d');
-      ctx.save();
-      ctx.resetTransform();
-      ctx.globalCompositeOperation = 'source-atop';
-      ctx.fillStyle = `rgba(23, 42, 38, ${shade})`;
-      ctx.fillRect(0, 0, image.width, image.height);
-      ctx.restore();
-    });
-    return { ...limb, parts, joints, lengths: points.slice(1).map((p, i) => distance(points[i], p)) };
+    return { ...limb, parts, lengths: points.slice(1).map((p, i) => distance(points[i], p)) };
   }
 
   function drawBone(part, from, to, targetFrom, targetTo) {
@@ -196,7 +154,6 @@
 
   function drawLimb(limb, points) {
     limb.parts.forEach((part, i) => drawBone(part, limb.points[i], limb.points[i + 1], points[i], points[i + 1]));
-    limb.joints.forEach((joint, i) => context.drawImage(joint.image, points[i + 1][0] + joint.x, points[i + 1][1] + joint.y));
   }
 
   function kneePosition(hip, foot, upper, lower) {
@@ -208,173 +165,118 @@
 
   function legPose(rig, limb, offset, bob, stride) {
     const cycle = (phase + offset) % 1;
-    const swinging = cycle >= stance;
-    const swing = swinging ? (cycle - stance) / (1 - stance) : 0;
+    const swing = Math.max(0, (cycle - stance) / (1 - stance));
+    const swingCurve = 3 * swing ** 2 - 2 * swing ** 3;
     const tangent = -(1 - stance) / stance;
-    const swingTravel = smoothstep(swing) + tangent * (2 * swing ** 3 - 3 * swing ** 2 + swing);
-    const x = swinging ? stride * (-.5 + swingTravel) : stride * (.5 - cycle / stance);
-    // The foot stays on the ground through stance, rolls onto its toe, then
-    // lifts during swing before the next heel contact.
-    const heelContact = 1 - smoothstep(cycle / .12);
-    const toeOff = smoothstep((cycle - (stance - .17)) / .17);
-    const footPitch = swinging
-      ? .32 * (1 - smoothstep(swing / .3)) - .16 * smoothstep((swing - .58) / .42)
-      : -.16 * heelContact + .32 * toeOff;
-    const lift = swinging ? Math.sin(Math.PI * swing) ** 1.4 * Math.min(19, rig.reach * .1) : 0;
-    // Keep each leg attached to its own hip in the source drawing. Using the
-    // body's center for both hips makes the legs separate from the silhouette.
-    const hipX = (limb.points[0][0] - rig.hip[0]) * rig.hipSpread;
-    const hipY = limb.points[0][1] - rig.hip[1];
-    const hip = [hipX, -rig.reach + bob + hipY];
-    const baseFootAngle = angle(limb.points[2], limb.points[3]);
-    const footAngle = baseFootAngle + footPitch;
-    const footLength = limb.lengths[2];
-    const groundAnkleY = -footLength * Math.sin(baseFootAngle + Math.max(0, footPitch));
-    const ankle = [hipX + x, groundAnkleY - lift];
+    const swingTravel = swingCurve + tangent * (2 * swing ** 3 - 3 * swing ** 2 + swing);
+    const x = cycle < stance ? stride * (.5 - cycle / stance) : stride * (-.5 + swingTravel);
+    const lift = Math.sin(Math.PI * swing) ** 2 * 45;
+    const hip = [0, -rig.reach + bob];
+    const ankle = [x, -20 - lift];
     const knee = kneePosition(hip, ankle, limb.lengths[0], limb.lengths[1]);
-    const toe = [ankle[0] + footLength * Math.cos(footAngle), ankle[1] + footLength * Math.sin(footAngle)];
+    const toeTilt = cycle < stance ? Math.max(0, cycle / stance - .78) * 1.1 : -.15 * Math.sin(Math.PI * swing);
+    const footAngle = angle(limb.points[2], limb.points[3]) + toeTilt;
+    const toe = [ankle[0] + limb.lengths[2] * Math.cos(footAngle), ankle[1] + limb.lengths[2] * Math.sin(footAngle)];
     return [hip, knee, ankle, toe];
   }
 
   function armPose(rig, limb, offset, bodyOffset) {
     const shoulder = add(subtract(limb.points[0], rig.hip), bodyOffset);
-    const swing = Math.sin((phase + offset) * TAU);
-    const upperAngle = angle(limb.points[0], limb.points[1]) + swing * .16;
-    const forearmAngle = angle(limb.points[1], limb.points[2]) + swing * .11;
-    const handAngle = angle(limb.points[2], limb.points[3]) + swing * .08;
+    const swing = Math.sin((phase + offset) * TAU) * .38;
+    const upperAngle = Math.PI / 2 + swing;
+    const forearmAngle = upperAngle - .25 - .12 * Math.cos((phase + offset) * TAU);
     const elbow = add(shoulder, [Math.cos(upperAngle) * limb.lengths[0], Math.sin(upperAngle) * limb.lengths[0]]);
     const wrist = add(elbow, [Math.cos(forearmAngle) * limb.lengths[1], Math.sin(forearmAngle) * limb.lengths[1]]);
-    const hand = add(wrist, [Math.cos(handAngle) * limb.lengths[2], Math.sin(handAngle) * limb.lengths[2]]);
+    const hand = add(wrist, [Math.cos(forearmAngle) * limb.lengths[2], Math.sin(forearmAngle) * limb.lengths[2]]);
     return [shoulder, elbow, wrist, hand];
   }
 
   function draw() {
-    if (current < 0) return;
-    context = contexts[current];
     context.setTransform(pixelRatio, 0, 0, pixelRatio, 0, 0);
     context.clearRect(0, 0, width, height);
     const rig = rigs[current];
     if (!rig || !width) return;
-    const slot = slots[current];
-    const cropX = Number(slot.style.getPropertyValue('--crop-x'));
-    const cropY = Number(slot.style.getPropertyValue('--crop-y'));
-    const bob = Math.cos(phase * TAU * 2) * 3;
+    const bob = Math.cos(phase * TAU * 2) * 3.5;
     const bodyOffset = [0, -rig.reach + bob];
-    const stride = rig.reach * .44;
-    const pelvisSway = Math.sin(phase * TAU) * 3;
+    const stride = rig.reach * .82;
     context.save();
-    context.translate((rig.hip[0] - cropX + pelvisSway) * scale, (rig.groundY - cropY) * scale);
+    context.translate(motion.matches ? width / 2 : worldX, height - 18);
     context.scale(scale, scale);
     const rearArm = rig.arms[1] || rig.arms[0];
     drawLimb(rearArm, armPose(rig, rearArm, .5, bodyOffset));
-    // Camera depth belongs to the anatomical side, never to the foot's X
-    // position. Draw the entire far leg (including its joint patches) first.
-    drawLimb(rig.farLeg, legPose(rig, rig.farLeg, 0, bob, stride));
-    drawLimb(rig.nearLeg, legPose(rig, rig.nearLeg, .5, bob, stride));
+    drawLimb(rig.legs[0], legPose(rig, rig.legs[0], .5, bob, stride));
+    drawLimb(rig.legs[1], legPose(rig, rig.legs[1], 0, bob, stride));
     context.drawImage(rig.core.image, rig.core.x - rig.hip[0], rig.core.y - rig.hip[1] + bodyOffset[1]);
     drawLimb(rig.arms[0], armPose(rig, rig.arms[0], 0, bodyOffset));
     context.restore();
+    context.save();
+    context.globalCompositeOperation = 'source-atop';
+    context.fillStyle = 'rgba(23, 75, 72, .82)';
+    context.fillRect(0, 0, width, height);
+    context.restore();
   }
 
-  const canRun = () => current >= 0 && visible && !chooser.hidden && !chooser.closest('[hidden]') && !document.hidden && !motion.matches;
+  const canRun = () => rigs.length && visible && !chooser.hidden && !chooser.closest('[hidden]') && !document.hidden && !motion.matches && !paused;
 
   function tick(time) {
     frame = 0;
     if (!canRun()) return;
     const elapsed = previousTime ? Math.min((time - previousTime) / 1000, .05) : 0;
     previousTime = time;
+    const rig = rigs[current];
     phase = (phase + elapsed / period) % 1;
+    // Match body travel to the planted foot's backward motion to prevent skating.
+    worldX += elapsed * (rig.reach * .82 / (period * stance)) * scale;
+    if (worldX > width + 160 * scale) {
+      current = (current + 1) % rigs.length;
+      worldX = -160 * scale;
+      phase = 0;
+    }
     draw();
     frame = requestAnimationFrame(tick);
   }
 
-  function stop() {
-    requested = -1;
+  function sync() {
     cancelAnimationFrame(frame);
     frame = 0;
     previousTime = 0;
-    if (current >= 0) slots[current].classList.remove('is-walking');
-    current = -1;
+    const running = Boolean(canRun());
+    journey.classList.toggle('is-running', running);
+    stage.setAttribute('aria-pressed', String(paused));
+    stage.setAttribute('aria-label', motion.matches ? 'Ilustrasi figur evolusi manusia' : paused ? 'Putar animasi figur berjalan' : 'Jeda animasi figur berjalan');
+    stage.disabled = motion.matches;
+    draw();
+    if (running) frame = requestAnimationFrame(tick);
   }
 
   function resize() {
-    if (current < 0) return;
-    const cutout = slots[current].querySelector('.evolution-cutout');
-    width = cutout.clientWidth;
-    height = cutout.clientHeight;
+    if (!stage.clientWidth || !stage.clientHeight) return;
+    const oldWidth = width;
+    width = stage.clientWidth;
+    height = stage.clientHeight;
     if (!width || !height) return;
     pixelRatio = Math.min(devicePixelRatio || 1, 2);
-    canvases[current].width = Math.round(width * pixelRatio);
-    canvases[current].height = Math.round(height * pixelRatio);
-    scale = width / Number(slots[current].style.getPropertyValue('--crop-w'));
+    canvas.width = Math.round(width * pixelRatio);
+    canvas.height = Math.round(height * pixelRatio);
+    scale = (height - 34) / 760;
+    if (oldWidth) worldX *= width / oldWidth;
+    else worldX = Math.min(90, width * .25);
     draw();
   }
 
-  function activate(index) {
-    if (!sourceLoaded || requested !== index || !visible || chooser.hidden || chooser.closest('[hidden]') || document.hidden || motion.matches) return;
-    if (!rigs[index]) {
-      const figure = figures[index];
-      // In the source drawing leg 0 is on the same visible side as arm 0.
-      const nearLeg = makeLimb(figure.legs[0]);
-      const farLeg = makeLimb(figure.legs[1], .1);
-      const legs = [nearLeg, farLeg];
-      const groundY = legs.reduce((sum, leg) => sum + leg.points[3][1], 0) / legs.length;
-      rigs[index] = { ...figure, core: texture(figure.body, [], figure.garment), nearLeg, farLeg, arms: figure.arms.map(limb => makeLimb(limb)), groundY, reach: groundY - figure.hip[1], hipSpread: index === 0 ? .8 : .65 };
-    }
-    if (current !== index) {
-      if (current >= 0) slots[current].classList.remove('is-walking');
-      current = index;
-      phase = 0;
-    }
-    cancelAnimationFrame(frame);
-    frame = 0;
-    previousTime = 0;
+  stage.addEventListener('click', () => { paused = !paused; sync(); });
+  new IntersectionObserver(([entry]) => { visible = entry.isIntersecting; sync(); }, { threshold: .12 }).observe(stage);
+  new ResizeObserver(resize).observe(stage);
+  new MutationObserver(sync).observe(chooser, { attributes: true, attributeFilter: ['hidden'] });
+  document.addEventListener('visibilitychange', sync);
+  motion.addEventListener('change', sync);
+  source.addEventListener('load', () => {
+    rigs = figures.map(figure => {
+      const legs = figure.legs.map(makeLimb);
+      return { ...figure, core: texture(figure.body, [], figure.garment), legs, arms: figure.arms.map(makeLimb), reach: Math.min(...legs.map(leg => leg.lengths[0] + leg.lengths[1])) * .89 + 20 };
+    });
     resize();
-    slots[index].classList.add('is-walking');
-    frame = requestAnimationFrame(tick);
-  }
-
-  function start(index) {
-    if (motion.matches) return;
-    requested = index;
-    if (sourceLoaded) return activate(index);
-    if (sourceRequested) return;
-    sourceRequested = true;
-    source.onload = () => { sourceLoaded = true; if (requested >= 0) activate(requested); };
-    source.onerror = () => { sourceRequested = false; };
-    source.src = './assets/evolution-walk-source.webp';
-  }
-
-  buttons.forEach((button, index) => {
-    let lastPointerType = '';
-    button.addEventListener('pointerdown', event => { lastPointerType = event.pointerType; });
-    button.addEventListener('pointerenter', event => {
-      if (desktopHover.matches && event.pointerType === 'mouse') start(index);
-    });
-    button.addEventListener('pointerleave', event => {
-      if (desktopHover.matches && event.pointerType === 'mouse' && requested === index) stop();
-    });
-    button.addEventListener('click', event => {
-      if (desktopHover.matches && lastPointerType !== 'touch' && event.detail !== 0) return;
-      if (button.getAttribute('aria-pressed') === 'true') start(index);
-      else stop();
-    });
-  });
-
-  document.addEventListener('pointerdown', event => {
-    if (!journey.contains(event.target) && (!desktopHover.matches || event.pointerType === 'touch')) stop();
-  });
-  document.addEventListener('keydown', event => { if (event.key === 'Escape') stop(); });
-  document.addEventListener('visibilitychange', () => { if (document.hidden) stop(); });
-  motion.addEventListener('change', () => { if (motion.matches) stop(); });
-  new MutationObserver(() => { if (chooser.hidden || chooser.closest('[hidden]')) stop(); }).observe(chooser, { attributes: true, attributeFilter: ['hidden'] });
-  new IntersectionObserver(([entry]) => {
-    visible = entry.isIntersecting;
-    if (!visible) stop();
-    else if (!desktopHover.matches) {
-      const selected = buttons.findIndex(button => button.getAttribute('aria-pressed') === 'true');
-      if (selected >= 0) start(selected);
-    }
-  }, { threshold: .05 }).observe(journey);
-  new ResizeObserver(resize).observe(journey);
+    sync();
+  }, { once: true });
+  source.src = './assets/evolution-walk-source.png';
 })();

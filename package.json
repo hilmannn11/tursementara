@@ -1,7 +1,0 @@
-{
-  "name": "lithera",
-  "private": true,
-  "scripts": {
-    "dev": "python -m http.server 8000"
-  }
-}
