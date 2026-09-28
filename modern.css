@@ -135,8 +135,6 @@ button, a { touch-action: manipulation; }
 .site-option { overflow: hidden; border-radius: 24px; background: #fffdf8; border-color: rgba(24, 59, 54, .12); box-shadow: 0 18px 55px rgba(20, 48, 42, .09); transition: transform 450ms var(--ease-out), box-shadow 450ms var(--ease-out), border-color 250ms ease; }
 .site-options--single { max-width: 900px; grid-template-columns: minmax(0, 1fr); }
 .site-options--single .site-option-image { min-height: 250px; }
-.site-archive-link { display: inline-flex; align-items: center; gap: 10px; margin-top: 20px; padding: 8px 0; color: var(--brand-teal); font-size: 14px; font-weight: 700; text-decoration-thickness: 1px; text-underline-offset: 5px; }
-.site-archive-link:hover, .site-archive-link:focus-visible { color: var(--brand-berry); }
 .site-option:hover, .site-option:focus-visible { translate: none; transform: translateY(-8px); border-color: #c99070; box-shadow: 0 28px 70px rgba(20, 48, 42, .17); }
 .site-option-image { overflow: hidden; }
 .site-option-image img { transition: transform 800ms var(--ease-out); }
