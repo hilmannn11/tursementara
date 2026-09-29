@@ -305,14 +305,11 @@ function hideFloorArrow() {
 function floorDirection() {
   const links = sceneLinks[currentRoom.id] || {};
   const yaw = viewer.getYaw();
-  if (!links.forward && links.back) {
-    const backBearing = links.back.yaw ?? forwardYawFor(currentRoom.id) + 180;
-    if (Math.abs(normalizeYaw(yaw - backBearing)) > 70) return null;
-  }
-  return Object.keys(links).sort((first, second) => {
-    const bearing = (direction) => links[direction].yaw ?? forwardYawFor(currentRoom.id) + (direction === "back" ? 180 : 0);
-    return Math.abs(normalizeYaw(yaw - bearing(first))) - Math.abs(normalizeYaw(yaw - bearing(second)));
-  })[0];
+  const closest = Object.entries(links).map(([direction, link]) => {
+    const bearing = link.yaw ?? forwardYawFor(currentRoom.id) + (direction === "back" ? 180 : 0);
+    return { direction, distance: Math.abs(normalizeYaw(yaw - bearing)) };
+  }).sort((first, second) => first.distance - second.distance)[0];
+  return closest?.distance <= 70 ? closest.direction : null;
 }
 
 function floorPoint(event) {
@@ -335,7 +332,6 @@ function showFloorArrow(event) {
   const centerY = viewerShell.clientHeight / 2;
   const depth = Math.min(1, Math.max(0, (point.y - centerY) / (viewerShell.clientHeight * 0.35)));
   tourFloorArrow.style.setProperty("--floor-scale", String(0.72 + depth * 0.4));
-  tourFloorArrow.classList.toggle("is-back", direction === "back");
   tourFloorArrow.style.left = `${point.x}px`;
   tourFloorArrow.style.top = `${point.y}px`;
   tourFloorArrow.hidden = false;
