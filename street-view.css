@@ -60,6 +60,7 @@
   border-left: 9px solid #5a605b;
   transform: rotate(45deg);
 }
+.tour-floor-arrow.is-back::before { transform: rotate(225deg); }
 .viewer-shell .tour-info-hotspot {
   display: grid;
   place-items: center;
