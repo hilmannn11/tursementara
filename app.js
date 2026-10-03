@@ -3,6 +3,18 @@ const QUIZ_STORAGE_KEY = "bentengMissionVerifiedQuizzesV2";
 const LEGACY_QUIZ_COUNT_KEY = "bentengMissionLegacyBadgeCount";
 const ROUTE_FORWARD_YAW = 0;
 const ROUTE_BACK_YAW = 180;
+const PANORAMA_PIXEL_WIDTH = 8192;
+const PANORAMA_PIXEL_HEIGHT = 4096;
+const DEFAULT_TOUR_HFOV = 95;
+// Each box is [left, top, right, bottom] in the 8192 × 4096 source panorama.
+const PERSON_BLUR_BOXES = {
+  1: [[0, 1920, 310, 2990], [320, 1960, 620, 2840], [7970, 2070, 8192, 2610]],
+  2: [[7860, 1930, 8130, 2250]],
+  3: [[315, 2010, 410, 2280], [430, 1990, 540, 2280]],
+  4: [[965, 2050, 1040, 2220], [1135, 2030, 1250, 2350], [1280, 2050, 1400, 2330]],
+  6: [[1735, 2010, 1805, 2230], [1770, 2030, 1855, 2310], [1825, 2150, 1940, 2310]],
+  7: [[2875, 2080, 2985, 2260], [3020, 2090, 3110, 2280], [3160, 2090, 3245, 2250]],
+};
 const STONE_MODELS = {
   first: {
     url: "./assets/models/batu-cekungan.glb",
@@ -32,6 +44,7 @@ const rooms = [
     title: "Titik 1",
     description: "Awal jalur virtual. Klik panah di lantai untuk berjalan maju ke titik berikutnya.",
     panorama: panoramaAsset(1),
+    personBlurBoxes: PERSON_BLUR_BOXES[1],
     badge: "The Wanderer",
     badgeImage: "./assets/badges/homo-erectus.webp",
     archive: {
@@ -51,6 +64,7 @@ const rooms = [
     title: "Titik 2",
     description: "Titik lanjutan. Arahkan pandangan ke jalur depan, lalu klik panah untuk maju lagi.",
     panorama: panoramaAsset(2),
+    personBlurBoxes: PERSON_BLUR_BOXES[2],
     stoneHotspot: { pitch: -7, yaw: -57 },
     secondStoneHotspot: { pitch: -12, yaw: -51 },
     badge: "The Survivor",
@@ -72,6 +86,7 @@ const rooms = [
     title: "Titik 3",
     description: "Titik ketiga jalur virtual. Teruskan perjalanan ke panorama berikutnya.",
     panorama: panoramaAsset(3),
+    personBlurBoxes: PERSON_BLUR_BOXES[3],
     stoneHotspot: { pitch: -10, yaw: -54 },
     secondStoneHotspot: { pitch: -20, yaw: -54 },
     plaqueHotspot: { pitch: -4, yaw: 15 },
@@ -97,6 +112,7 @@ const rooms = [
       ? "Titik terakhir dalam rangkaian tujuh panorama. Putar pandangan ke belakang untuk kembali."
       : `Titik ${number} dalam jalur virtual. Lanjutkan ke panorama berikutnya atau kembali ke titik sebelumnya.`,
     panorama: panoramaAsset(number),
+    personBlurBoxes: PERSON_BLUR_BOXES[number] || [],
     ...(number === 4 ? { stoneHotspot: { pitch: -16, yaw: -44 } } : {}),
     ...(number === 4 ? { secondStoneHotspot: { pitch: -25, yaw: -54 } } : {}),
     ...(number === 5 ? { secondStoneHotspot: { pitch: -28, yaw: -93 } } : {}),
@@ -284,6 +300,18 @@ function createTour() {
               type: "info",
               cssClass: "tour-blocked-hotspot",
             }] : []),
+            ...(room.personBlurBoxes || []).map(([left, top, right, bottom]) => ({
+              pitch: (PANORAMA_PIXEL_HEIGHT / 2 - (top + bottom) / 2) * 180 / PANORAMA_PIXEL_HEIGHT,
+              yaw: ((left + right) / 2 - PANORAMA_PIXEL_WIDTH / 2) * 360 / PANORAMA_PIXEL_WIDTH,
+              type: "info",
+              scale: true,
+              cssClass: "tour-person-blur",
+              createTooltipFunc: (marker) => {
+                marker.dataset.blurWidthDegrees = String((right - left) * 360 / PANORAMA_PIXEL_WIDTH);
+                marker.dataset.blurHeightDegrees = String((bottom - top) * 180 / PANORAMA_PIXEL_HEIGHT);
+                sizePersonBlur(marker);
+              },
+            })),
           ],
         },
       ])
@@ -294,6 +322,7 @@ function createTour() {
   viewer.on("zoomchange", updateBlockedHotspotSize);
   viewer.on("load", () => {
     updateBlockedHotspotSize();
+    updatePersonBlurSizes();
     viewerError.hidden = true;
     viewerTools.hidden = false;
     tourViewControls.hidden = false;
@@ -312,6 +341,9 @@ function createTour() {
     viewer.getContainer().querySelectorAll(".tour-blocked-hotspot").forEach((marker) => {
       marker.setAttribute("role", "img");
       marker.setAttribute("aria-label", "Jalur ini tidak dapat dilalui");
+    });
+    viewer.getContainer().querySelectorAll(".tour-person-blur").forEach((marker) => {
+      marker.setAttribute("aria-hidden", "true");
     });
   });
   viewer.getContainer().addEventListener("keydown", (event) => {
@@ -385,6 +417,16 @@ function updateBlockedHotspotSize(hfov = viewer?.getHfov() ?? 95) {
   const baseSize = window.matchMedia("(max-width: 620px)").matches ? 78 : 112;
   const zoomScale = Math.max(0.45, Math.min(1, hfov / 95));
   viewerShell.style.setProperty("--blocked-hotspot-size", `${Math.round(baseSize * zoomScale)}px`);
+}
+
+function sizePersonBlur(marker) {
+  const pixelsPerDegree = viewerShell.clientWidth / DEFAULT_TOUR_HFOV;
+  marker.style.width = `${Number(marker.dataset.blurWidthDegrees) * pixelsPerDegree}px`;
+  marker.style.height = `${Number(marker.dataset.blurHeightDegrees) * pixelsPerDegree}px`;
+}
+
+function updatePersonBlurSizes() {
+  viewerShell.querySelectorAll(".tour-person-blur").forEach(sizePersonBlur);
 }
 
 function floorDirection() {
@@ -664,6 +706,7 @@ function showExploration(targetId, updateHistory = true) {
         tourCreated = Boolean(viewer);
       } else {
         viewer.resize();
+        updatePersonBlurSizes();
         maybeShowViewerHint();
       }
       requestAnimationFrame(scrollTourIntoView);
@@ -887,6 +930,7 @@ viewerObserver.observe(viewerShell);
 window.addEventListener("scroll", () => { hideFloorArrow(); scheduleViewerHintCheck(); }, { passive: true });
 window.addEventListener("resize", () => {
   updateBlockedHotspotSize();
+  updatePersonBlurSizes();
   scheduleViewerHintCheck();
 }, { passive: true });
 document.addEventListener("visibilitychange", () => {
@@ -949,7 +993,10 @@ document.addEventListener("fullscreenchange", () => {
   const button = document.querySelector("#tourFullscreen");
   button.setAttribute("aria-label", active ? "Keluar layar penuh" : "Layar penuh");
   button.title = active ? "Keluar layar penuh" : "Layar penuh";
-  requestAnimationFrame(() => viewer?.resize());
+  requestAnimationFrame(() => {
+    viewer?.resize();
+    updatePersonBlurSizes();
+  });
 });
 document.querySelector("#resetButton").addEventListener("click", () => {
   localStorage.removeItem(STORAGE_KEY);
