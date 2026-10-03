@@ -3,8 +3,17 @@ const QUIZ_STORAGE_KEY = "bentengMissionVerifiedQuizzesV2";
 const LEGACY_QUIZ_COUNT_KEY = "bentengMissionLegacyBadgeCount";
 const ROUTE_FORWARD_YAW = 0;
 const ROUTE_BACK_YAW = 180;
+const STONE_MODEL_URL = "./assets/models/batu-cekungan.glb";
+const STONE_POSTER_URL = "./assets/models/batu-cekungan-poster.png";
+const MODEL_VIEWER_URL = "https://ajax.googleapis.com/ajax/libs/model-viewer/4.3.1/model-viewer.min.js";
 const useHdPanoramas = !window.matchMedia("(max-width: 900px), (pointer: coarse)").matches;
 const panoramaAsset = (number) => `./assets/panoramas/${number}${useHdPanoramas ? "-hd" : ""}.webp`;
+let modelViewerImport;
+
+function loadModelViewer() {
+  modelViewerImport ||= import(MODEL_VIEWER_URL);
+  return modelViewerImport;
+}
 
 const rooms = [
   {
@@ -361,16 +370,25 @@ function showFloorArrow(event) {
 
 function openArchive(roomId) {
   const room = rooms.find((item) => item.id === roomId);
+  const hasStoneModel = !!room.stoneHotspot;
   activeArchiveRoomId = room.id;
   clearTimeout(quizTimer);
 
   archiveModalContent.innerHTML = `
     <p class="eyebrow">${room.title}</p>
     <h2 id="archiveTitle">${room.archive.title}</h2>
-    <div class="archive-meta">
-      <div class="archive-thumb">ARSIP</div>
+    <div class="archive-meta ${hasStoneModel ? "has-stone-model" : ""}">
+      ${hasStoneModel ? `
+        <div>
+          <div class="stone-model-frame">
+            <img class="stone-model-poster" src="${STONE_POSTER_URL}" alt="Pratinjau model batu cekungan" />
+            <model-viewer src="${STONE_MODEL_URL}" poster="${STONE_POSTER_URL}" alt="Model 3D batu cekungan yang dapat diputar" loading="eager" camera-controls touch-action="pan-y" camera-orbit="25deg 50deg auto" shadow-intensity="0.8" environment-image="neutral" ${reducedMotion.matches ? "" : 'auto-rotate rotation-per-second="12deg"'}></model-viewer>
+          </div>
+          <p class="stone-model-caption">Geser untuk memutar · cubit atau gulir untuk zoom. Bagian bawah batu diperkirakan dari foto.</p>
+        </div>
+      ` : '<div class="archive-thumb">ARSIP</div>'}
       <div>
-        <strong>${room.archive.type}</strong>
+        <strong>${hasStoneModel ? "Model 3D batu dan catatan lokasi" : room.archive.type}</strong>
         <p>${room.archive.body}</p>
       </div>
     </div>
@@ -378,12 +396,18 @@ function openArchive(roomId) {
   `;
 
   archiveModal.showModal();
+  if (hasStoneModel) {
+    const frame = archiveModalContent.querySelector(".stone-model-frame");
+    frame.querySelector("model-viewer").addEventListener("load", () => frame.classList.add("is-ready"), { once: true });
+    loadModelViewer().catch(() => frame.classList.add("is-unavailable"));
+  }
 }
 
 function closeArchiveAndScheduleQuiz() {
   archiveModal.close();
   clearTimeout(quizTimer);
   const roomId = activeArchiveRoomId;
+  archiveModalContent.replaceChildren();
   if (rooms.find((room) => room.id === roomId)?.quiz) {
     quizTimer = setTimeout(() => openQuiz(roomId), 650);
   }
