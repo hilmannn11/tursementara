@@ -73,7 +73,7 @@ const rooms = [
     panorama: panoramaAsset(3),
     stoneHotspot: { pitch: -10, yaw: -54 },
     secondStoneHotspot: { pitch: -20, yaw: -54 },
-    blockedHotspot: { pitch: -33, yaw: 51 },
+    blockedHotspot: { pitch: -28, yaw: 51 },
     badge: "The Thinker",
     badgeImage: "./assets/badges/homo-sapiens.webp",
     archive: {
