@@ -73,6 +73,7 @@ const rooms = [
     panorama: panoramaAsset(3),
     stoneHotspot: { pitch: -10, yaw: -54 },
     secondStoneHotspot: { pitch: -20, yaw: -54 },
+    blockedHotspot: { pitch: -33, yaw: 51 },
     badge: "The Thinker",
     badgeImage: "./assets/badges/homo-sapiens.webp",
     archive: {
@@ -256,15 +257,22 @@ function createTour() {
           type: "equirectangular",
           panorama: room.panorama,
           hotSpots: [
-            room.stoneHotspot && { ...room.stoneHotspot, model: "first" },
-            room.secondStoneHotspot && { ...room.secondStoneHotspot, model: "second" },
-          ].filter(Boolean).map(({ model, ...position }) => ({
-            ...position,
-            type: "info",
-            text: "Buka arsip batu",
-            cssClass: `tour-info-hotspot tour-info-hotspot--${model}`,
-            clickHandlerFunc: () => openArchive(room.id, model),
-          })),
+            ...[
+              room.stoneHotspot && { ...room.stoneHotspot, model: "first" },
+              room.secondStoneHotspot && { ...room.secondStoneHotspot, model: "second" },
+            ].filter(Boolean).map(({ model, ...position }) => ({
+              ...position,
+              type: "info",
+              text: "Buka arsip batu",
+              cssClass: `tour-info-hotspot tour-info-hotspot--${model}`,
+              clickHandlerFunc: () => openArchive(room.id, model),
+            })),
+            ...(room.blockedHotspot ? [{
+              ...room.blockedHotspot,
+              type: "info",
+              cssClass: "tour-blocked-hotspot",
+            }] : []),
+          ],
         },
       ])
     ),
@@ -284,6 +292,10 @@ function createTour() {
         : "Buka arsip batu cekungan pertama";
       marker.setAttribute("aria-label", label);
       marker.title = label;
+    });
+    viewer.getContainer().querySelectorAll(".tour-blocked-hotspot").forEach((marker) => {
+      marker.setAttribute("role", "img");
+      marker.setAttribute("aria-label", "Jalur ini tidak dapat dilalui");
     });
   });
   viewer.getContainer().addEventListener("keydown", (event) => {
@@ -355,6 +367,9 @@ function hideFloorArrow() {
 function floorDirection() {
   const links = sceneLinks[currentRoom.id] || {};
   const yaw = viewer.getYaw();
+  if (currentRoom.blockedHotspot && Math.abs(normalizeYaw(yaw - currentRoom.blockedHotspot.yaw)) <= 25) {
+    return null;
+  }
   const closest = Object.entries(links).map(([direction, link]) => {
     const bearing = link.yaw;
     return { direction, distance: Math.abs(normalizeYaw(yaw - bearing)) };

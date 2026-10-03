@@ -77,6 +77,18 @@
   font: 800 20px/1 Georgia, serif;
 }
 
+.viewer-shell .tour-blocked-hotspot {
+  width: 132px;
+  height: 132px;
+  border: 0;
+  background:
+    linear-gradient(45deg, transparent 43%, #eeeeee 44%, #eeeeee 56%, transparent 57%),
+    linear-gradient(-45deg, transparent 43%, #eeeeee 44%, #eeeeee 56%, transparent 57%) !important;
+  opacity: .4;
+  pointer-events: none;
+  z-index: 4;
+}
+
 .viewer-shell .viewer-tools { top: 16px; right: 16px; }
 .viewer-shell .viewer-hint { top: 80px; }
 
@@ -86,4 +98,5 @@
   .viewer-shell .viewer-tools { top: 10px; right: 10px; }
   .viewer-shell .viewer-tool { width: 38px; height: 38px; }
   .viewer-shell .viewer-hint { top: 64px; }
+  .viewer-shell .tour-blocked-hotspot { width: 90px; height: 90px; }
 }
