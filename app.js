@@ -3,8 +3,18 @@ const QUIZ_STORAGE_KEY = "bentengMissionVerifiedQuizzesV2";
 const LEGACY_QUIZ_COUNT_KEY = "bentengMissionLegacyBadgeCount";
 const ROUTE_FORWARD_YAW = 0;
 const ROUTE_BACK_YAW = 180;
-const STONE_MODEL_URL = "./assets/models/batu-cekungan.glb";
-const STONE_POSTER_URL = "./assets/models/batu-cekungan-poster.png";
+const STONE_MODELS = {
+  first: {
+    url: "./assets/models/batu-cekungan.glb",
+    poster: "./assets/models/batu-cekungan-poster.png",
+    alt: "Model 3D batu cekungan pertama yang dapat diputar",
+  },
+  second: {
+    url: "./assets/models/batu-cekungan-2.glb",
+    poster: "./assets/models/batu-cekungan-2-poster.png",
+    alt: "Model 3D batu cekungan kedua yang dapat diputar",
+  },
+};
 const MODEL_VIEWER_URL = "https://ajax.googleapis.com/ajax/libs/model-viewer/4.3.1/model-viewer.min.js";
 const useHdPanoramas = !window.matchMedia("(max-width: 900px), (pointer: coarse)").matches;
 const panoramaAsset = (number) => `./assets/panoramas/${number}${useHdPanoramas ? "-hd" : ""}.webp`;
@@ -41,6 +51,7 @@ const rooms = [
     description: "Titik lanjutan. Arahkan pandangan ke jalur depan, lalu klik panah untuk maju lagi.",
     panorama: panoramaAsset(2),
     stoneHotspot: { pitch: -7, yaw: -57 },
+    secondStoneHotspot: { pitch: -12, yaw: -51 },
     badge: "The Survivor",
     badgeImage: "./assets/badges/homo-neanderthal.webp",
     archive: {
@@ -61,6 +72,7 @@ const rooms = [
     description: "Titik ketiga jalur virtual. Teruskan perjalanan ke panorama berikutnya.",
     panorama: panoramaAsset(3),
     stoneHotspot: { pitch: -10, yaw: -54 },
+    secondStoneHotspot: { pitch: -20, yaw: -54 },
     badge: "The Thinker",
     badgeImage: "./assets/badges/homo-sapiens.webp",
     archive: {
@@ -83,6 +95,8 @@ const rooms = [
       : `Titik ${number} dalam jalur virtual. Lanjutkan ke panorama berikutnya atau kembali ke titik sebelumnya.`,
     panorama: panoramaAsset(number),
     ...(number === 4 ? { stoneHotspot: { pitch: -16, yaw: -44 } } : {}),
+    ...(number === 4 ? { secondStoneHotspot: { pitch: -25, yaw: -54 } } : {}),
+    ...(number === 5 ? { secondStoneHotspot: { pitch: -28, yaw: -93 } } : {}),
     archive: {
       title: `Arsip Titik ${number}`,
       type: "Foto panorama dan catatan lokasi",
@@ -241,13 +255,16 @@ function createTour() {
           title: room.title,
           type: "equirectangular",
           panorama: room.panorama,
-          hotSpots: room.stoneHotspot ? [{
-            ...room.stoneHotspot,
+          hotSpots: [
+            room.stoneHotspot && { ...room.stoneHotspot, model: "first" },
+            room.secondStoneHotspot && { ...room.secondStoneHotspot, model: "second" },
+          ].filter(Boolean).map(({ model, ...position }) => ({
+            ...position,
             type: "info",
             text: "Buka arsip batu",
-            cssClass: "tour-info-hotspot",
-            clickHandlerFunc: () => openArchive(room.id),
-          }] : [],
+            cssClass: `tour-info-hotspot tour-info-hotspot--${model}`,
+            clickHandlerFunc: () => openArchive(room.id, model),
+          })),
         },
       ])
     ),
@@ -262,7 +279,9 @@ function createTour() {
     viewer.getContainer().querySelectorAll(".tour-info-hotspot").forEach((marker) => {
       marker.tabIndex = 0;
       marker.setAttribute("role", "button");
-      const label = "Buka arsip batu pada titik ini";
+      const label = marker.classList.contains("tour-info-hotspot--second")
+        ? "Buka arsip batu cekungan kedua"
+        : "Buka arsip batu cekungan pertama";
       marker.setAttribute("aria-label", label);
       marker.title = label;
     });
@@ -272,7 +291,7 @@ function createTour() {
     const marker = event.target.closest(".tour-info-hotspot");
     if (!marker) return;
     event.preventDefault();
-    openArchive(currentRoom.id);
+    openArchive(currentRoom.id, marker.classList.contains("tour-info-hotspot--second") ? "second" : "first");
   });
   viewer.on("error", () => {
     hideFloorArrow();
@@ -368,9 +387,11 @@ function showFloorArrow(event) {
   tourFloorArrow.hidden = false;
 }
 
-function openArchive(roomId) {
+function openArchive(roomId, selectedModel) {
   const room = rooms.find((item) => item.id === roomId);
-  const hasStoneModel = !!room.stoneHotspot;
+  const modelId = selectedModel || (room.stoneHotspot ? "first" : room.secondStoneHotspot ? "second" : null);
+  const stoneModel = modelId && STONE_MODELS[modelId];
+  const hasStoneModel = !!stoneModel;
   activeArchiveRoomId = room.id;
   clearTimeout(quizTimer);
 
@@ -381,8 +402,8 @@ function openArchive(roomId) {
       ${hasStoneModel ? `
         <div>
           <div class="stone-model-frame">
-            <img class="stone-model-poster" src="${STONE_POSTER_URL}" alt="Pratinjau model batu cekungan" />
-            <model-viewer src="${STONE_MODEL_URL}" poster="${STONE_POSTER_URL}" alt="Model 3D batu cekungan yang dapat diputar" loading="eager" camera-controls touch-action="pan-y" camera-orbit="25deg 50deg auto" shadow-intensity="0.8" environment-image="neutral" ${reducedMotion.matches ? "" : 'auto-rotate rotation-per-second="12deg"'}></model-viewer>
+            <img class="stone-model-poster" src="${stoneModel.poster}" alt="Pratinjau ${stoneModel.alt}" />
+            <model-viewer src="${stoneModel.url}" poster="${stoneModel.poster}" alt="${stoneModel.alt}" loading="eager" camera-controls touch-action="pan-y" camera-orbit="25deg 50deg auto" shadow-intensity="0.8" environment-image="neutral" ${reducedMotion.matches ? "" : 'auto-rotate rotation-per-second="12deg"'}></model-viewer>
           </div>
           <p class="stone-model-caption">Geser untuk memutar · cubit atau gulir untuk zoom. Bagian bawah batu diperkirakan dari foto.</p>
         </div>
