@@ -16,6 +16,7 @@ const STONE_MODELS = {
   },
 };
 const MODEL_VIEWER_URL = "https://ajax.googleapis.com/ajax/libs/model-viewer/4.3.1/model-viewer.min.js";
+const PLAQUE_PHOTO = "./assets/photos/papan-cagar-budaya-kendenglembu.webp";
 const useHdPanoramas = !window.matchMedia("(max-width: 900px), (pointer: coarse)").matches;
 const panoramaAsset = (number) => `./assets/panoramas/${number}${useHdPanoramas ? "-hd" : ""}.webp`;
 let modelViewerImport;
@@ -73,6 +74,7 @@ const rooms = [
     panorama: panoramaAsset(3),
     stoneHotspot: { pitch: -10, yaw: -54 },
     secondStoneHotspot: { pitch: -20, yaw: -54 },
+    plaqueHotspot: { pitch: -4, yaw: 15 },
     blockedHotspot: { pitch: -28, yaw: 51 },
     badge: "The Thinker",
     badgeImage: "./assets/badges/homo-sapiens.webp",
@@ -98,6 +100,8 @@ const rooms = [
     ...(number === 4 ? { stoneHotspot: { pitch: -16, yaw: -44 } } : {}),
     ...(number === 4 ? { secondStoneHotspot: { pitch: -25, yaw: -54 } } : {}),
     ...(number === 5 ? { secondStoneHotspot: { pitch: -28, yaw: -93 } } : {}),
+    ...(number === 4 ? { plaqueHotspot: { pitch: -15, yaw: 40 } } : {}),
+    ...(number === 5 ? { plaqueHotspot: { pitch: -22, yaw: 157 } } : {}),
     archive: {
       title: `Arsip Titik ${number}`,
       type: "Foto panorama dan catatan lokasi",
@@ -267,6 +271,13 @@ function createTour() {
               cssClass: `tour-info-hotspot tour-info-hotspot--${model}`,
               clickHandlerFunc: () => openArchive(room.id, model),
             })),
+            ...(room.plaqueHotspot ? [{
+              ...room.plaqueHotspot,
+              type: "info",
+              text: "Lihat foto papan cagar budaya",
+              cssClass: "tour-info-hotspot tour-plaque-hotspot",
+              clickHandlerFunc: openPlaquePhoto,
+            }] : []),
             ...(room.blockedHotspot ? [{
               ...room.blockedHotspot,
               type: "info",
@@ -287,9 +298,11 @@ function createTour() {
     viewer.getContainer().querySelectorAll(".tour-info-hotspot").forEach((marker) => {
       marker.tabIndex = 0;
       marker.setAttribute("role", "button");
-      const label = marker.classList.contains("tour-info-hotspot--second")
-        ? "Buka arsip batu cekungan kedua"
-        : "Buka arsip batu cekungan pertama";
+      const label = marker.classList.contains("tour-plaque-hotspot")
+        ? "Lihat foto papan cagar budaya"
+        : marker.classList.contains("tour-info-hotspot--second")
+          ? "Buka arsip batu cekungan kedua"
+          : "Buka arsip batu cekungan pertama";
       marker.setAttribute("aria-label", label);
       marker.title = label;
     });
@@ -303,7 +316,8 @@ function createTour() {
     const marker = event.target.closest(".tour-info-hotspot");
     if (!marker) return;
     event.preventDefault();
-    openArchive(currentRoom.id, marker.classList.contains("tour-info-hotspot--second") ? "second" : "first");
+    if (marker.classList.contains("tour-plaque-hotspot")) openPlaquePhoto();
+    else openArchive(currentRoom.id, marker.classList.contains("tour-info-hotspot--second") ? "second" : "first");
   });
   viewer.on("error", () => {
     hideFloorArrow();
@@ -437,6 +451,20 @@ function openArchive(roomId, selectedModel) {
     frame.querySelector("model-viewer").addEventListener("load", () => frame.classList.add("is-ready"), { once: true });
     loadModelViewer().catch(() => frame.classList.add("is-unavailable"));
   }
+}
+
+function openPlaquePhoto() {
+  activeArchiveRoomId = null;
+  clearTimeout(quizTimer);
+  archiveModalContent.innerHTML = `
+    <p class="eyebrow">Dokumentasi situs</p>
+    <h2 id="archiveTitle" class="plaque-photo-title">Papan Cagar Budaya Kendenglembu</h2>
+    <a class="plaque-photo-link" href="${PLAQUE_PHOTO}" target="_blank" rel="noopener noreferrer" aria-label="Buka foto papan cagar budaya ukuran penuh di tab baru">
+      <img src="${PLAQUE_PHOTO}" alt="Papan bertuliskan Keputusan Bupati Banyuwangi Nomor 188/82/Kep/429.011/2025, Bangunan Cagar Budaya, Situs Kendenglembu Banyuwangi" decoding="async" />
+    </a>
+    <p class="plaque-photo-caption">Klik atau ketuk foto untuk melihat ukuran penuh.</p>
+  `;
+  archiveModal.showModal();
 }
 
 function closeArchiveAndScheduleQuiz() {

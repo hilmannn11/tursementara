@@ -89,6 +89,17 @@
   z-index: 4;
 }
 
+.plaque-photo-link {
+  display: block;
+  margin-top: 16px;
+  border-radius: 8px;
+  overflow: hidden;
+}
+.plaque-photo-title { font-size: clamp(1.5rem, 3vw, 2rem); line-height: 1.25; margin: 10px 0; }
+.plaque-photo-link:focus-visible { outline: 3px solid #183b36; outline-offset: 3px; }
+.plaque-photo-link img { display: block; width: 100%; height: auto; }
+.plaque-photo-caption { margin: 8px 0 0; color: #566159; font-size: 14px; }
+
 .viewer-shell .viewer-tools { top: 16px; right: 16px; }
 .viewer-shell .viewer-hint { top: 80px; }
 
