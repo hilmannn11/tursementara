@@ -229,16 +229,6 @@ function createTour() {
           title: room.title,
           type: "equirectangular",
           panorama: room.panorama,
-          hotSpots: [
-            {
-              pitch: 1,
-              yaw: -32,
-              type: "info",
-              text: "Buka arsip",
-              cssClass: "tour-info-hotspot",
-              clickHandlerFunc: () => openArchive(room.id),
-            },
-          ],
         },
       ])
     ),
@@ -250,20 +240,6 @@ function createTour() {
     viewerTools.hidden = false;
     tourViewControls.hidden = false;
     maybeShowViewerHint();
-    viewer.getContainer().querySelectorAll(".tour-info-hotspot").forEach((marker) => {
-      marker.tabIndex = 0;
-      marker.setAttribute("role", "button");
-      const label = "Buka arsip di titik ini";
-      marker.setAttribute("aria-label", label);
-      marker.title = label;
-    });
-  });
-  viewer.getContainer().addEventListener("keydown", (event) => {
-    if (event.key !== "Enter" && event.key !== " ") return;
-    const marker = event.target.closest(".tour-info-hotspot");
-    if (!marker) return;
-    event.preventDefault();
-    openArchive(currentRoom.id);
   });
   viewer.on("error", () => {
     hideFloorArrow();
@@ -336,7 +312,7 @@ function floorDirection() {
 
 function floorPoint(event) {
   if (!viewer?.isLoaded() || document.hidden || explorationContent.hidden || archiveModal.open || quizModal.open) return null;
-  if (!(event.target instanceof Element) || !event.target.closest("#panorama") || event.target.closest(".tour-info-hotspot")) return null;
+  if (!(event.target instanceof Element) || !event.target.closest("#panorama")) return null;
   const rect = viewerShell.getBoundingClientRect();
   const x = event.clientX - rect.left;
   const y = event.clientY - rect.top;
