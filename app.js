@@ -102,6 +102,7 @@ const rooms = [
     ...(number === 5 ? { secondStoneHotspot: { pitch: -28, yaw: -93 } } : {}),
     ...(number === 4 ? { plaqueHotspot: { pitch: -15, yaw: 40 } } : {}),
     ...(number === 5 ? { plaqueHotspot: { pitch: -22, yaw: 157 } } : {}),
+    ...(number === 4 ? { blockedHotspot: { pitch: -31, yaw: 97 } } : {}),
     archive: {
       title: `Arsip Titik ${number}`,
       type: "Foto panorama dan catatan lokasi",
@@ -290,7 +291,9 @@ function createTour() {
   });
 
   viewer.on("scenechange", (sceneId) => updateRoomPanel(sceneId));
+  viewer.on("zoomchange", updateBlockedHotspotSize);
   viewer.on("load", () => {
+    updateBlockedHotspotSize();
     viewerError.hidden = true;
     viewerTools.hidden = false;
     tourViewControls.hidden = false;
@@ -376,6 +379,12 @@ function normalizeYaw(yaw) {
 
 function hideFloorArrow() {
   tourFloorArrow.hidden = true;
+}
+
+function updateBlockedHotspotSize(hfov = viewer?.getHfov() ?? 95) {
+  const baseSize = window.matchMedia("(max-width: 620px)").matches ? 78 : 112;
+  const zoomScale = Math.max(0.45, Math.min(1, hfov / 95));
+  viewerShell.style.setProperty("--blocked-hotspot-size", `${Math.round(baseSize * zoomScale)}px`);
 }
 
 function floorDirection() {
@@ -876,7 +885,10 @@ const viewerObserver = new IntersectionObserver(([entry]) => {
 }, { threshold: [0, 0.25] });
 viewerObserver.observe(viewerShell);
 window.addEventListener("scroll", () => { hideFloorArrow(); scheduleViewerHintCheck(); }, { passive: true });
-window.addEventListener("resize", scheduleViewerHintCheck, { passive: true });
+window.addEventListener("resize", () => {
+  updateBlockedHotspotSize();
+  scheduleViewerHintCheck();
+}, { passive: true });
 document.addEventListener("visibilitychange", () => {
   if (document.hidden) {
     hideFloorArrow();
