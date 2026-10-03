@@ -91,12 +91,13 @@
 
 .viewer-shell .tour-person-blur {
   border: 0;
-  border-radius: 38%;
+  border-radius: 50%;
   background: rgba(255, 255, 255, .01) !important;
   -webkit-backdrop-filter: blur(28px);
   backdrop-filter: blur(28px);
-  -webkit-mask-image: radial-gradient(ellipse, #000 62%, transparent 100%);
-  mask-image: radial-gradient(ellipse, #000 62%, transparent 100%);
+  -webkit-mask-image: radial-gradient(ellipse, #000 75%, transparent 100%);
+  mask-image: radial-gradient(ellipse, #000 75%, transparent 100%);
+  opacity: .35;
   pointer-events: none;
   z-index: 5;
 }
