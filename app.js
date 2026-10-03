@@ -31,6 +31,7 @@ const rooms = [
     title: "Titik 2",
     description: "Titik lanjutan. Arahkan pandangan ke jalur depan, lalu klik panah untuk maju lagi.",
     panorama: panoramaAsset(2),
+    stoneHotspot: { pitch: -7, yaw: -57 },
     badge: "The Survivor",
     badgeImage: "./assets/badges/homo-neanderthal.webp",
     archive: {
@@ -50,6 +51,7 @@ const rooms = [
     title: "Titik 3",
     description: "Titik ketiga jalur virtual. Teruskan perjalanan ke panorama berikutnya.",
     panorama: panoramaAsset(3),
+    stoneHotspot: { pitch: -10, yaw: -54 },
     badge: "The Thinker",
     badgeImage: "./assets/badges/homo-sapiens.webp",
     archive: {
@@ -71,6 +73,7 @@ const rooms = [
       ? "Titik terakhir dalam rangkaian tujuh panorama. Putar pandangan ke belakang untuk kembali."
       : `Titik ${number} dalam jalur virtual. Lanjutkan ke panorama berikutnya atau kembali ke titik sebelumnya.`,
     panorama: panoramaAsset(number),
+    ...(number === 4 ? { stoneHotspot: { pitch: -16, yaw: -44 } } : {}),
     archive: {
       title: `Arsip Titik ${number}`,
       type: "Foto panorama dan catatan lokasi",
@@ -229,6 +232,13 @@ function createTour() {
           title: room.title,
           type: "equirectangular",
           panorama: room.panorama,
+          hotSpots: room.stoneHotspot ? [{
+            ...room.stoneHotspot,
+            type: "info",
+            text: "Buka arsip batu",
+            cssClass: "tour-info-hotspot",
+            clickHandlerFunc: () => openArchive(room.id),
+          }] : [],
         },
       ])
     ),
@@ -240,6 +250,20 @@ function createTour() {
     viewerTools.hidden = false;
     tourViewControls.hidden = false;
     maybeShowViewerHint();
+    viewer.getContainer().querySelectorAll(".tour-info-hotspot").forEach((marker) => {
+      marker.tabIndex = 0;
+      marker.setAttribute("role", "button");
+      const label = "Buka arsip batu pada titik ini";
+      marker.setAttribute("aria-label", label);
+      marker.title = label;
+    });
+  });
+  viewer.getContainer().addEventListener("keydown", (event) => {
+    if (event.key !== "Enter" && event.key !== " ") return;
+    const marker = event.target.closest(".tour-info-hotspot");
+    if (!marker) return;
+    event.preventDefault();
+    openArchive(currentRoom.id);
   });
   viewer.on("error", () => {
     hideFloorArrow();
@@ -312,7 +336,7 @@ function floorDirection() {
 
 function floorPoint(event) {
   if (!viewer?.isLoaded() || document.hidden || explorationContent.hidden || archiveModal.open || quizModal.open) return null;
-  if (!(event.target instanceof Element) || !event.target.closest("#panorama")) return null;
+  if (!(event.target instanceof Element) || !event.target.closest("#panorama") || event.target.closest(".tour-info-hotspot")) return null;
   const rect = viewerShell.getBoundingClientRect();
   const x = event.clientX - rect.left;
   const y = event.clientY - rect.top;
