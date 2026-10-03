@@ -1,16 +1,17 @@
 const STORAGE_KEY = "bentengMissionBadges";
 const QUIZ_STORAGE_KEY = "bentengMissionVerifiedQuizzesV2";
 const LEGACY_QUIZ_COUNT_KEY = "bentengMissionLegacyBadgeCount";
-const ROUTE_FORWARD_YAW = -10;
-const FIRST_SCENE_YAW = 79;
-const forwardYawFor = (roomId) => roomId === "titik-1" ? FIRST_SCENE_YAW : ROUTE_FORWARD_YAW;
+const ROUTE_FORWARD_YAW = 0;
+const ROUTE_BACK_YAW = 180;
+const useHdPanoramas = !window.matchMedia("(max-width: 900px), (pointer: coarse)").matches;
+const panoramaAsset = (number) => `./assets/panoramas/${number}${useHdPanoramas ? "-hd" : ""}.webp`;
 
 const rooms = [
   {
     id: "titik-1",
     title: "Titik 1",
     description: "Awal jalur virtual. Klik panah di lantai untuk berjalan maju ke titik berikutnya.",
-    panorama: "./assets/panoramas/titik-1.webp",
+    panorama: panoramaAsset(1),
     badge: "The Wanderer",
     badgeImage: "./assets/badges/homo-erectus.webp",
     archive: {
@@ -29,7 +30,7 @@ const rooms = [
     id: "titik-2",
     title: "Titik 2",
     description: "Titik lanjutan. Arahkan pandangan ke jalur depan, lalu klik panah untuk maju lagi.",
-    panorama: "./assets/panoramas/titik-2.webp",
+    panorama: panoramaAsset(2),
     badge: "The Survivor",
     badgeImage: "./assets/badges/homo-neanderthal.webp",
     archive: {
@@ -47,36 +48,57 @@ const rooms = [
   {
     id: "titik-3",
     title: "Titik 3",
-    description: "Titik akhir jalur contoh. Nanti titik ini bisa disambungkan lagi ke panorama berikutnya.",
-    panorama: "./assets/panoramas/titik-3.webp",
+    description: "Titik ketiga jalur virtual. Teruskan perjalanan ke panorama berikutnya.",
+    panorama: panoramaAsset(3),
     badge: "The Thinker",
     badgeImage: "./assets/badges/homo-sapiens.webp",
     archive: {
       title: "Arsip Titik 3",
       type: "Foto panorama dan catatan lokasi",
       body:
-        "Titik akhir pada contoh ini bisa menjadi tempat arsip tambahan, refleksi, atau pintu menuju rute berikutnya jika foto panorama baru sudah tersedia.",
+        "Titik ketiga menyambungkan awal perjalanan dengan bagian jalur berikutnya. Catatan sejarah lokasi dapat ditambahkan setelah diverifikasi.",
     },
     quiz: {
-      question: "Apa yang diperlukan agar rute dari Titik 3 dapat dilanjutkan?",
-      options: ["Foto panorama baru", "Menghapus semua arsip", "Mematikan hotspot", "Mengunci halaman tur"],
+      question: "Ke titik berapa perjalanan berlanjut setelah Titik 3?",
+      options: ["Titik 4", "Titik 1", "Titik 7", "Kembali ke awal situs"],
       answer: 0,
     },
   },
+  ...[4, 5, 6, 7].map((number) => ({
+    id: `titik-${number}`,
+    title: `Titik ${number}`,
+    description: number === 7
+      ? "Titik terakhir dalam rangkaian tujuh panorama. Putar pandangan ke belakang untuk kembali."
+      : `Titik ${number} dalam jalur virtual. Lanjutkan ke panorama berikutnya atau kembali ke titik sebelumnya.`,
+    panorama: panoramaAsset(number),
+    archive: {
+      title: `Arsip Titik ${number}`,
+      type: "Foto panorama dan catatan lokasi",
+      body: `Panorama ke-${number} dalam jalur virtual. Penjelasan sejarah dan identitas lokasi pada titik ini masih perlu dilengkapi dan diverifikasi.`,
+    },
+  })),
 ];
 
-const sceneLinks = {
-  "titik-1": {
-    forward: { target: "titik-2", yaw: FIRST_SCENE_YAW, pitch: -25, targetYaw: ROUTE_FORWARD_YAW, label: "Maju ke Titik 2" },
-  },
-  "titik-2": {
-    forward: { target: "titik-3", targetYaw: ROUTE_FORWARD_YAW, label: "Maju ke Titik 3" },
-    back: { target: "titik-1", targetYaw: FIRST_SCENE_YAW, label: "Balik ke Titik 1" },
-  },
-  "titik-3": {
-    back: { target: "titik-2", targetYaw: ROUTE_FORWARD_YAW + 180, label: "Balik ke Titik 2" },
-  },
-};
+const badgeRooms = rooms.filter((room) => room.badge);
+const quizRooms = rooms.filter((room) => room.quiz);
+const sceneLinks = Object.fromEntries(rooms.map((room, index) => [room.id, {
+  ...(index < rooms.length - 1 ? {
+    forward: {
+      target: rooms[index + 1].id,
+      yaw: ROUTE_FORWARD_YAW,
+      targetYaw: ROUTE_FORWARD_YAW,
+      label: `Maju ke Titik ${index + 2}`,
+    },
+  } : {}),
+  ...(index > 0 ? {
+    back: {
+      target: rooms[index - 1].id,
+      yaw: ROUTE_BACK_YAW,
+      targetYaw: ROUTE_BACK_YAW,
+      label: `Balik ke Titik ${index}`,
+    },
+  } : {}),
+}]));
 
 let currentRoom = rooms[0];
 let viewer;
@@ -121,8 +143,8 @@ function getBadges() {
   } catch {
     saved = [];
   }
-  const earnedCount = Array.isArray(saved) ? rooms.filter((room) => saved.includes(room.id)).length : 0;
-  const badges = rooms.slice(0, earnedCount).map((room) => room.id);
+  const earnedCount = Array.isArray(saved) ? badgeRooms.filter((room) => saved.includes(room.id)).length : 0;
+  const badges = badgeRooms.slice(0, earnedCount).map((room) => room.id);
   if (JSON.stringify(saved) !== JSON.stringify(badges)) {
     localStorage.setItem(STORAGE_KEY, JSON.stringify(badges));
   }
@@ -145,7 +167,7 @@ function getCompletedQuizzes() {
     if (legacyCount) localStorage.setItem(LEGACY_QUIZ_COUNT_KEY, String(legacyCount));
     saved = [];
   }
-  const completed = rooms.filter((room) => saved.includes(room.id)).map((room) => room.id);
+  const completed = quizRooms.filter((room) => saved.includes(room.id)).map((room) => room.id);
   if (JSON.stringify(saved) !== JSON.stringify(completed)) {
     localStorage.setItem(QUIZ_STORAGE_KEY, JSON.stringify(completed));
   }
@@ -154,7 +176,7 @@ function getCompletedQuizzes() {
 
 function saveNextBadge() {
   const badges = getBadges();
-  const nextRoom = rooms[badges.length];
+  const nextRoom = badgeRooms[badges.length];
   if (!nextRoom) return null;
   badges.push(nextRoom.id);
   localStorage.setItem(STORAGE_KEY, JSON.stringify(badges));
@@ -198,7 +220,7 @@ function createTour() {
       showZoomCtrl: false,
       showFullscreenCtrl: false,
       hfov: 95,
-      yaw: FIRST_SCENE_YAW,
+      yaw: ROUTE_FORWARD_YAW,
     },
     scenes: Object.fromEntries(
       rooms.map((room) => [
@@ -306,7 +328,7 @@ function floorDirection() {
   const links = sceneLinks[currentRoom.id] || {};
   const yaw = viewer.getYaw();
   const closest = Object.entries(links).map(([direction, link]) => {
-    const bearing = link.yaw ?? forwardYawFor(currentRoom.id) + (direction === "back" ? 180 : 0);
+    const bearing = link.yaw;
     return { direction, distance: Math.abs(normalizeYaw(yaw - bearing)) };
   }).sort((first, second) => first.distance - second.distance)[0];
   return closest?.distance <= 70 ? closest.direction : null;
@@ -362,7 +384,9 @@ function closeArchiveAndScheduleQuiz() {
   archiveModal.close();
   clearTimeout(quizTimer);
   const roomId = activeArchiveRoomId;
-  quizTimer = setTimeout(() => openQuiz(roomId), 650);
+  if (rooms.find((room) => room.id === roomId)?.quiz) {
+    quizTimer = setTimeout(() => openQuiz(roomId), 650);
+  }
 }
 
 function openQuiz(roomId) {
@@ -428,7 +452,7 @@ function checkAnswer(room, selectedIndex) {
       ? "Benar. Kuis ini sudah pernah dijawab; progres tidak bertambah. Coba kuis di titik lain untuk melanjutkan."
       : unlockedBadge
         ? `Benar. Badge "${unlockedBadge.badge}" berhasil dikumpulkan. Kamu bisa menutup kuis.`
-        : getBadges().length === rooms.length
+        : getBadges().length === badgeRooms.length
           ? "Benar. Semua badge sudah terkumpul. Kamu bisa menutup kuis."
           : "Benar. Kuis ini sekarang tercatat. Jawab kuis berbeda untuk melanjutkan progres badge.";
     const status = quizContent.querySelector("#quizStatus");
@@ -472,28 +496,28 @@ function renderArchiveGrid() {
 
 function renderProfile() {
   const badges = getBadges();
-  const percent = Math.round((badges.length / rooms.length) * 100);
-  document.querySelector("#heroProgress").textContent = `${badges.length}/${rooms.length} badge`;
+  const percent = Math.round((badges.length / badgeRooms.length) * 100);
+  document.querySelector("#heroProgress").textContent = `${badges.length}/${badgeRooms.length} badge`;
   const heroProgressBar = document.querySelector("#heroProgressBar");
   heroProgressBar.dataset.level = String(badges.length);
   heroProgressBar.style.width = `${percent}%`;
   heroProgressBar.parentElement.setAttribute("aria-valuenow", String(badges.length));
-  heroProgressBar.parentElement.setAttribute("aria-valuetext", `${badges.length} dari ${rooms.length} badge`);
+  heroProgressBar.parentElement.setAttribute("aria-valuetext", `${badges.length} dari ${badgeRooms.length} badge`);
   document.querySelector("#profileBadgeCount").textContent = badges.length;
   document.querySelector("#homeBadgeCount").textContent = badges.length;
   document.querySelector("#collectionProgress").value = badges.length;
   document.querySelector("#collectionPercent").textContent = `${percent}%`;
-  document.querySelector("#collectionMessage").textContent = badges.length === rooms.length
+  document.querySelector("#collectionMessage").textContent = badges.length === badgeRooms.length
     ? "Lengkap! Setiap tantangan sudah menjadi bagian dari koleksimu."
     : badges.length === 0 ? "Perjalanan besarmu dimulai dari satu badge."
-    : `Sudah ${badges.length} badge! Tinggal ${rooms.length - badges.length} lagi untuk melengkapi koleksimu.`;
-  document.querySelector(".reward-panel").classList.toggle("is-unlocked", badges.length === rooms.length);
+    : `Sudah ${badges.length} badge! Tinggal ${badgeRooms.length - badges.length} lagi untuk melengkapi koleksimu.`;
+  document.querySelector(".reward-panel").classList.toggle("is-unlocked", badges.length === badgeRooms.length);
   document.querySelector("#rewardText").textContent =
-    badges.length === rooms.length
+    badges.length === badgeRooms.length
       ? "Selamat. Sertifikat digital prototipe terbuka karena semua badge sudah terkumpul."
       : "Kumpulkan semua badge untuk membuka sertifikat digital.";
 
-  document.querySelector("#badgeGrid").innerHTML = rooms
+  document.querySelector("#badgeGrid").innerHTML = badgeRooms
     .map((room) => {
       const earned = badges.includes(room.id);
       return `
@@ -504,7 +528,7 @@ function renderProfile() {
             ${earned ? "" : '<span class="badge-icon" role="img" aria-label="Badge terkunci"></span>'}
           </div>
           <strong>${room.badge}</strong>
-          <p class="badge-caption">${["Langkah pertama, cerita pertama.", "Rasa penasaran membawamu lebih jauh.", "Satu penemuan melengkapi perjalanan."][rooms.indexOf(room)]}</p>
+          <p class="badge-caption">${["Langkah pertama, cerita pertama.", "Rasa penasaran membawamu lebih jauh.", "Satu penemuan melengkapi perjalanan."][badgeRooms.indexOf(room)]}</p>
           <small>${earned ? "Sudah didapat" : "Temukan di tur virtual"}</small>
           <a class="badge-challenge" href="#sites" aria-label="Jelajahi tur virtual untuk badge ${room.badge}">Jelajahi tur virtual<span aria-hidden="true">&rarr;</span></a>
         </article>
