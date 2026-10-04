@@ -36,9 +36,9 @@
   position: absolute;
   top: 50%;
   left: 50%;
-  width: 18px;
-  height: 18px;
-  background: url("./assets/brand/lithera-mark-transparent.png") center / contain no-repeat;
+  width: 24px;
+  height: 24px;
+  background: url("./assets/brand/lithera-mark-small.svg") center / contain no-repeat;
   pointer-events: none;
   opacity: 0;
   transform: translate(-50%, -20%) scale(.55);
@@ -47,7 +47,7 @@
 
 .explore-nav-links a[data-explore-route="archive"]:is(:hover, :focus-visible)::before {
   opacity: 1;
-  transform: translate(-50%, -155%) scale(1);
+  transform: translate(-50%, -115%) scale(1);
 }
 
 @media (prefers-reduced-motion: reduce) {
