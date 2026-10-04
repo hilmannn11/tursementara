@@ -4,6 +4,7 @@ const certificateContext = certificateCanvas.getContext("2d");
 const certificateName = document.querySelector("#certificateName");
 const certificateStatus = document.querySelector("#certificateStatus");
 let certificateBadgesPromise;
+let certificateBackgroundPromise;
 const certificateBadgePaths = [
   "./assets/badges/certificate-wanderer-bronze-relief.png",
   "./assets/badges/certificate-survivor-bronze-relief.png",
@@ -18,6 +19,16 @@ function loadCertificateBadges() {
     image.src = src;
   })));
   return certificateBadgesPromise;
+}
+
+function loadCertificateBackground() {
+  certificateBackgroundPromise ||= new Promise((resolve, reject) => {
+    const image = new Image();
+    image.onload = () => resolve(image);
+    image.onerror = reject;
+    image.src = "./assets/certificate-rock-background.png";
+  });
+  return certificateBackgroundPromise;
 }
 
 function getCertificateDate() {
@@ -43,20 +54,9 @@ function drawFittedName(name) {
 async function renderCertificate() {
   const context = certificateContext;
   const name = certificateName.value.trim() || "Nama Penjelajah";
-  const badges = await loadCertificateBadges();
+  const [badges, backgroundImage] = await Promise.all([loadCertificateBadges(), loadCertificateBackground()]);
   context.clearRect(0, 0, 1080, 1520);
-  const background = context.createLinearGradient(0, 0, 1080, 1520);
-  background.addColorStop(0, "#172d2a");
-  background.addColorStop(1, "#071714");
-  context.fillStyle = background;
-  context.fillRect(0, 0, 1080, 1520);
-  context.strokeStyle = "rgba(210, 177, 116, .32)";
-  context.lineWidth = 2;
-  for (let i = 0; i < 9; i += 1) {
-    context.beginPath();
-    context.ellipse(540, 1500, 320 + i * 90, 185 + i * 47, -.24, Math.PI, Math.PI * 2);
-    context.stroke();
-  }
+  context.drawImage(backgroundImage, 0, 0, 1080, 1520);
   context.fillStyle = "#f1e8d6";
   context.fillRect(76, 72, 928, 1376);
   context.strokeStyle = "#ba985c";
