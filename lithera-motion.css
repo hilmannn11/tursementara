@@ -29,3 +29,29 @@
     transition-delay: 130ms;
   }
 }
+
+/* A tiny Lithera mark rises above Arsip on hover or keyboard focus. */
+.explore-nav-links a[data-explore-route="archive"]::before {
+  content: "";
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 18px;
+  height: 18px;
+  background: url("./assets/brand/lithera-mark-transparent.png") center / contain no-repeat;
+  pointer-events: none;
+  opacity: 0;
+  transform: translate(-50%, -20%) scale(.55);
+  transition: opacity 180ms ease, transform 240ms cubic-bezier(.2, .75, .2, 1);
+}
+
+.explore-nav-links a[data-explore-route="archive"]:is(:hover, :focus-visible)::before {
+  opacity: 1;
+  transform: translate(-50%, -155%) scale(1);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .explore-nav-links a[data-explore-route="archive"]::before {
+    transition: none;
+  }
+}
