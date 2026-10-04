@@ -3,6 +3,7 @@
 .stone-observation { padding: 18px 20px; border-radius: 12px; background: #edf1e9; border-left: 3px solid #51796c; }
 .stone-observation h3 { margin: 0 0 8px; font-size: 1rem; }
 .stone-observation p { margin: 0; line-height: 1.8; }
+.plaque-observation { margin-top: 24px; }
 .stone-lesson-sections section { padding: 24px 0; border-bottom: 1px solid var(--line); }
 .stone-lesson-sections h3 { display: flex; align-items: baseline; gap: 12px; margin: 0 0 12px; font-size: 1.15rem; line-height: 1.5; }
 .stone-lesson-sections h3 > span { color: #637b71; font-size: .8rem; font-weight: 500; }

@@ -508,13 +508,49 @@ function openPlaquePhoto() {
   clearTimeout(quizTimer);
   archiveModalContent.innerHTML = `
     <p class="eyebrow">Dokumentasi situs</p>
-    <h2 id="archiveTitle" class="plaque-photo-title">Papan Cagar Budaya Kendenglembu</h2>
+    <h2 id="archiveTitle" class="plaque-photo-title" tabindex="-1">Papan Cagar Budaya Kendenglembu</h2>
     <a class="plaque-photo-link" href="${PLAQUE_PHOTO}" target="_blank" rel="noopener noreferrer" aria-label="Buka foto papan cagar budaya ukuran penuh di tab baru">
       <img src="${PLAQUE_PHOTO}" alt="Papan bertuliskan Keputusan Bupati Banyuwangi Nomor 188/82/Kep/429.011/2025, Bangunan Cagar Budaya, Situs Kendenglembu Banyuwangi" decoding="async" />
     </a>
     <p class="plaque-photo-caption">Klik atau ketuk foto untuk melihat ukuran penuh.</p>
+    <section class="stone-observation plaque-observation" aria-labelledby="plaqueReadingTitle">
+      <h3 id="plaqueReadingTitle">Membaca papan situs</h3>
+      <p>Papan pada foto memuat nama <strong>Situs Kendenglembu Banyuwangi</strong>, tulisan “Bangunan Cagar Budaya”, dan nomor Keputusan Bupati Banyuwangi <strong>188/82/Kep/429.011/2025</strong>. Tahun yang tercantum pada nomor keputusan tersebut perlu dibedakan dari usia tinggalan arkeologi yang dipelajari melalui penelitian.</p>
+    </section>
+    <div class="stone-lesson-sections">
+      <section aria-labelledby="plaqueLocationTitle">
+        <h3 id="plaqueLocationTitle"><span aria-hidden="true">01</span>Mengenal Kendenglembu</h3>
+        <p>Kendenglembu berada di Desa Karangharjo, Kecamatan Glenmore, Kabupaten Banyuwangi, pada lereng selatan Gunung Raung. Situs ini menyimpan bukti kehidupan masa Neolitik dan masa sejarah. Laporan Noerwidi menelusuri penelitian sejak laporan temuan pada 1936, penggalian van Heekeren pada 1941, serta penelitian Soejono pada 1969 dan Nitihaminoto pada 1986.</p>
+        <p class="stone-inline-source">Rujukan: <a href="${STONE_SOURCES.layers.url}" target="_blank" rel="noopener noreferrer">Noerwidi (2009), hlm. 26–28<span class="sr-only"> (tab baru)</span></a>.</p>
+      </section>
+      <section aria-labelledby="plaqueLayersTitle">
+        <h3 id="plaqueLayersTitle"><span aria-hidden="true">02</span>Lapisan tanah menyimpan urutan kehidupan</h3>
+        <p>Penggalian membedakan lapisan budaya Neolitik di bawah dan masa sejarah di atas. Temuan Neolitik meliputi beliung batu yang diasah, bakal alat, serpihan batu, dan gerabah. Lapisan masa sejarah memuat antara lain kepeng, pecahan bata, porselen, dan gerabah buatan roda putar. Perbedaan lapisan membantu peneliti memahami bahwa kawasan ini menyimpan jejak dari lebih dari satu masa.</p>
+        <p class="stone-inline-source">Rujukan: <a href="${STONE_SOURCES.layers.url}" target="_blank" rel="noopener noreferrer">Noerwidi (2009), hlm. 26–29<span class="sr-only"> (tab baru)</span></a>.</p>
+      </section>
+      <section aria-labelledby="plaqueWorkshopTitle">
+        <h3 id="plaqueWorkshopTitle"><span aria-hidden="true">03</span>Dari bahan batu menjadi alat</h3>
+        <p>Penelitian juga menemukan lokasi dengan banyak bahan batu, bakal alat, dan sisa pengerjaan, yang ditafsirkan sebagai perbengkelan. Di lokasi lain, gabungan temuannya menunjukkan kegiatan hunian. Hubungan tempat tinggal, pembuatan alat, dan sumber bahan membantu menjelaskan bagaimana masyarakat memanfaatkan lingkungan Kendenglembu.</p>
+        <p class="stone-inline-source">Rujukan: <a href="${STONE_SOURCES.layers.url}" target="_blank" rel="noopener noreferrer">Noerwidi (2009), hlm. 28–31<span class="sr-only"> (tab baru)</span></a>.</p>
+      </section>
+      <section aria-labelledby="plaqueLearningTitle">
+        <h3 id="plaqueLearningTitle"><span aria-hidden="true">04</span>Belajar sejarah melalui bukti</h3>
+        <p>Yudiana dan Mahfud membahas Kendenglembu sebagai sumber belajar sejarah di Banyuwangi. Pengunjung dapat belajar dengan mengamati benda, mencatat cirinya, bertanya kepada pengelola, lalu membandingkan informasi sebelum menyusun kesimpulan. Penulis juga menekankan penghargaan terhadap peninggalan melalui sikap tidak merusak. Dalam tur ini, coba amati bentuk kedua batu lumpang dan baca penjelasannya: ciri apa yang terlihat langsung, dan riwayat apa yang masih memerlukan bukti?</p>
+        <p class="stone-inline-source">Rujukan: <a href="${STONE_SOURCES.learning.url}" target="_blank" rel="noopener noreferrer">Yudiana &amp; Mahfud (2023), hlm. 115–117<span class="sr-only"> (tab baru)</span></a>.</p>
+      </section>
+    </div>
+    <section class="stone-references" aria-labelledby="plaqueSourcesTitle">
+      <h3 id="plaqueSourcesTitle">Daftar pustaka</h3>
+      <p>Penjelasan arkeologi dan pembelajaran dirangkum dari jurnal berikut. Tulisan pada papan dibaca dari foto dokumentasi.</p>
+      <ol>
+        <li><a href="${STONE_SOURCES.layers.url}" target="_blank" rel="noopener noreferrer">Noerwidi, S. (2009). Archaeological research at Kendeng Lembu, East Java, Indonesia. <em>Bulletin of the Indo-Pacific Prehistory Association, 29</em>, 26–32.<span class="sr-only"> (tab baru)</span></a></li>
+        <li><a href="${STONE_SOURCES.learning.url}" target="_blank" rel="noopener noreferrer">Yudiana, I. K., &amp; Mahfud. (2023). Situs Neolitik Kendenglembu sebagai sumber belajar sejarah SMA di Kabupaten Banyuwangi. <em>Santhet: Jurnal Sejarah, Pendidikan dan Humaniora, 7</em>(1), 108–120.<span class="sr-only"> (tab baru)</span></a></li>
+      </ol>
+    </section>
   `;
   archiveModal.showModal();
+  archiveModalContent.scrollTop = 0;
+  archiveModalContent.querySelector("#archiveTitle").focus({ preventScroll: true });
 }
 
 function closeArchiveAndScheduleQuiz() {
