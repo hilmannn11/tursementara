@@ -113,8 +113,10 @@ const rooms = [
 ];
 
 const badgeRooms = rooms.filter((room) => room.badge);
-const stoneQuestions = Object.values(STONE_LESSONS).flatMap((lesson) => lesson.questions);
-const QUESTIONS_PER_BADGE = stoneQuestions.length / badgeRooms.length;
+const QUIZ_LESSONS = { ...STONE_LESSONS, plaque: PLAQUE_LESSON };
+const lessonQuestions = Object.values(QUIZ_LESSONS).flatMap((lesson) => lesson.questions);
+// Adding lessons preserves the existing two-answer badge milestones.
+const QUESTIONS_PER_BADGE = 2;
 const sceneLinks = Object.fromEntries(rooms.map((room, index) => [room.id, {
   ...(index < rooms.length - 1 ? {
     forward: {
@@ -201,7 +203,7 @@ function getCompletedQuizzes() {
     if (legacyCount) localStorage.setItem(LEGACY_QUIZ_COUNT_KEY, String(legacyCount));
     saved = [];
   }
-  const completed = stoneQuestions.filter((question) => saved.includes(question.id)).map((question) => question.id);
+  const completed = lessonQuestions.filter((question) => saved.includes(question.id)).map((question) => question.id);
   if (JSON.stringify(saved) !== JSON.stringify(completed)) {
     localStorage.setItem(QUIZ_STORAGE_KEY, JSON.stringify(completed));
   }
@@ -277,7 +279,7 @@ function createTour() {
             ...(room.plaqueHotspot ? [{
               ...room.plaqueHotspot,
               type: "info",
-              text: "Lihat foto papan cagar budaya",
+              text: "Baca informasi situs dan SK Bupati",
               cssClass: "tour-info-hotspot tour-plaque-hotspot",
               clickHandlerFunc: openPlaquePhoto,
             }] : []),
@@ -317,7 +319,7 @@ function createTour() {
       marker.tabIndex = 0;
       marker.setAttribute("role", "button");
       const label = marker.classList.contains("tour-plaque-hotspot")
-        ? "Lihat foto papan cagar budaya"
+        ? "Baca informasi situs dan SK Bupati"
         : marker.classList.contains("tour-info-hotspot--second")
           ? "Buka arsip batu cekungan kedua"
           : "Buka arsip batu cekungan pertama";
@@ -504,7 +506,7 @@ function openArchive(roomId, selectedModel) {
 }
 
 function openPlaquePhoto() {
-  activeLessonId = null;
+  activeLessonId = "plaque";
   clearTimeout(quizTimer);
   archiveModalContent.innerHTML = `
     <p class="eyebrow">Dokumentasi situs</p>
@@ -516,6 +518,19 @@ function openPlaquePhoto() {
     <section class="stone-observation plaque-observation" aria-labelledby="plaqueReadingTitle">
       <h3 id="plaqueReadingTitle">Membaca papan situs</h3>
       <p>Papan pada foto memuat nama <strong>Situs Kendenglembu Banyuwangi</strong>, tulisan “Bangunan Cagar Budaya”, dan nomor Keputusan Bupati Banyuwangi <strong>188/82/Kep/429.011/2025</strong>. Tahun yang tercantum pada nomor keputusan tersebut perlu dibedakan dari usia tinggalan arkeologi yang dipelajari melalui penelitian.</p>
+    </section>
+    <section class="plaque-decree" aria-labelledby="plaqueDecreeTitle">
+      <p class="eyebrow">Surat keputusan bupati</p>
+      <h3 id="plaqueDecreeTitle">Penetapan Situs Kendenglembu sebagai Situs Cagar Budaya</h3>
+      <dl class="plaque-decree-meta">
+        <div><dt>Nomor keputusan</dt><dd>188/82/KEP/429.011/2025</dd></div>
+        <div><dt>Tanggal penetapan</dt><dd>28 April 2025</dd></div>
+        <div><dt>Bupati</dt><dd>Ipuk Fiestiandani Azwar Anas</dd></div>
+      </dl>
+      <p>Dalam <strong>Diktum Kesatu</strong>, Kendenglembu Banyuwangi ditetapkan sebagai <strong>Situs Cagar Budaya</strong>. <strong>Diktum Kedua</strong> menyatakan lampiran berisi deskripsi dan data cagar budaya sebagai bagian yang menyatu dengan keputusan. Menurut <strong>Diktum Ketiga</strong>, keputusan mulai berlaku pada tanggal penetapan.</p>
+      <p>Penetapan ini berkaitan dengan perlindungan dan pelestarian warisan yang penting bagi sejarah serta ilmu pengetahuan. Tanggal keputusan menunjukkan penetapan status situs; usia artefak ditelusuri melalui bukti arkeologi.</p>
+      <a class="button secondary plaque-document-link" href="${PLAQUE_LESSON.document}" target="_blank" rel="noopener noreferrer">Baca salinan SK lengkap <span>(PDF · 6 halaman · tab baru)</span></a>
+      <p class="stone-inline-source">Rujukan daftar pustaka KTI: <a href="${STONE_SOURCES.decree.url}" target="_blank" rel="noopener noreferrer">Pemerintah Kabupaten Banyuwangi (2025b), JDIH Banyuwangi<span class="sr-only"> (tab baru)</span></a>.</p>
     </section>
     <div class="stone-lesson-sections">
       <section aria-labelledby="plaqueLocationTitle">
@@ -541,16 +556,19 @@ function openPlaquePhoto() {
     </div>
     <section class="stone-references" aria-labelledby="plaqueSourcesTitle">
       <h3 id="plaqueSourcesTitle">Daftar pustaka</h3>
-      <p>Penjelasan arkeologi dan pembelajaran dirangkum dari jurnal berikut. Tulisan pada papan dibaca dari foto dokumentasi.</p>
+      <p>Rujukan berikut tercantum dalam daftar pustaka dokumen penelitian. Tulisan pada papan dibaca dari foto dokumentasi.</p>
       <ol>
+        <li><a href="${STONE_SOURCES.decree.url}" target="_blank" rel="noopener noreferrer">${STONE_SOURCES.decree.label}<span class="sr-only"> (tab baru)</span></a></li>
         <li><a href="${STONE_SOURCES.layers.url}" target="_blank" rel="noopener noreferrer">Noerwidi, S. (2009). Archaeological research at Kendeng Lembu, East Java, Indonesia. <em>Bulletin of the Indo-Pacific Prehistory Association, 29</em>, 26–32.<span class="sr-only"> (tab baru)</span></a></li>
         <li><a href="${STONE_SOURCES.learning.url}" target="_blank" rel="noopener noreferrer">Yudiana, I. K., &amp; Mahfud. (2023). Situs Neolitik Kendenglembu sebagai sumber belajar sejarah SMA di Kabupaten Banyuwangi. <em>Santhet: Jurnal Sejarah, Pendidikan dan Humaniora, 7</em>(1), 108–120.<span class="sr-only"> (tab baru)</span></a></li>
       </ol>
     </section>
+    <div class="stone-quiz-invitation"><p><strong>Uji pemahamanmu</strong><br />3 soal tentang penetapan situs, lampiran, dan tanggal berlakunya SK. Setiap 2 soal berbeda yang benar membuka 1 badge, hingga 3 badge.</p><button type="button" class="button primary" id="startPlaqueQuiz">${quizReviewContext ? "Kembali ke soal" : "Mulai kuis situs dan SK"}</button></div>
   `;
   archiveModal.showModal();
   archiveModalContent.scrollTop = 0;
   archiveModalContent.querySelector("#archiveTitle").focus({ preventScroll: true });
+  archiveModalContent.querySelector("#startPlaqueQuiz").addEventListener("click", closeArchiveAndScheduleQuiz);
 }
 
 function closeArchiveAndScheduleQuiz() {
@@ -568,14 +586,14 @@ function closeArchiveAndScheduleQuiz() {
     }, 150);
     return;
   }
-  if (STONE_LESSONS[lessonId]) {
+  if (QUIZ_LESSONS[lessonId]) {
     quizTimer = setTimeout(() => openQuiz(lessonId), 650);
   }
 }
 
 function openQuiz(lessonId) {
   pendingBadgeToast = null;
-  const lesson = STONE_LESSONS[lessonId];
+  const lesson = QUIZ_LESSONS[lessonId];
   if (!lesson) return;
   const completed = getCompletedQuizzes();
   const firstUnfinished = lesson.questions.findIndex((question) => !completed.includes(question.id));
@@ -584,7 +602,7 @@ function openQuiz(lessonId) {
 }
 
 function renderQuizQuestion(lessonId, questionIndex, wrongAnswers = 0) {
-  const lesson = STONE_LESSONS[lessonId];
+  const lesson = QUIZ_LESSONS[lessonId];
   const question = lesson.questions[questionIndex];
   const completed = getCompletedQuizzes();
   const alreadyCompleted = completed.includes(question.id);
@@ -608,7 +626,7 @@ function renderQuizQuestion(lessonId, questionIndex, wrongAnswers = 0) {
     </div>
     <p id="quizFeedback" class="quiz-feedback${wrongAnswers >= 2 ? " is-error" : ""}" aria-live="polite">${wrongAnswers >= 2 ? "Kamu bisa membaca lagi penjelasannya, lalu kembali ke soal ini." : ""}</p>
     <button id="quizReviewButton" type="button" class="button secondary quiz-review-button" ${wrongAnswers >= 2 ? "" : "hidden"}>Baca ulang penjelasan</button>
-    <p id="quizProgress" class="quiz-close-hint">${completed.length}/${stoneQuestions.length} soal berbeda selesai · 2 soal per badge.</p>
+    <p id="quizProgress" class="quiz-close-hint">${completed.length}/${lessonQuestions.length} soal berbeda selesai · 2 soal per badge, hingga 3 badge.</p>
     <button id="quizNextButton" type="button" class="button primary" ${alreadyCompleted ? "" : "hidden"}>${questionIndex + 1 < lesson.questions.length ? "Soal berikutnya" : "Selesai"}</button>
     </div>
   `;
@@ -620,7 +638,8 @@ function renderQuizQuestion(lessonId, questionIndex, wrongAnswers = 0) {
   quizContent.querySelector("#quizReviewButton").addEventListener("click", () => {
     quizReviewContext = { lessonId, questionIndex, wrongAnswers: quizWrongAnswers };
     quizModal.close();
-    openArchive(currentRoom.id, lessonId);
+    if (lessonId === "plaque") openPlaquePhoto();
+    else openArchive(currentRoom.id, lessonId);
   });
   quizContent.querySelector("#quizNextButton").addEventListener("click", () => {
     if (questionIndex + 1 < lesson.questions.length) renderQuizQuestion(lessonId, questionIndex + 1);
@@ -658,7 +677,7 @@ function checkAnswer(question, selectedIndex) {
     status.textContent = "✓ Sudah dijawab";
     quizContent.querySelector("#quizCloseButton").disabled = false;
     quizContent.querySelector("#quizCloseHint").textContent = "Baca pembahasan, lalu lanjutkan. Kamu juga boleh menutup dan melanjutkan nanti.";
-    quizContent.querySelector("#quizProgress").textContent = `${getCompletedQuizzes().length}/${stoneQuestions.length} soal berbeda selesai · 2 soal per badge.`;
+    quizContent.querySelector("#quizProgress").textContent = `${getCompletedQuizzes().length}/${lessonQuestions.length} soal berbeda selesai · 2 soal per badge, hingga 3 badge.`;
     quizContent.querySelector("#quizNextButton").hidden = false;
     feedback.scrollIntoView({ block: "nearest", behavior: "instant" });
   } else {

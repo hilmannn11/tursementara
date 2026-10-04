@@ -4,6 +4,16 @@
 .stone-observation h3 { margin: 0 0 8px; font-size: 1rem; }
 .stone-observation p { margin: 0; line-height: 1.8; }
 .plaque-observation { margin-top: 24px; }
+.plaque-decree { padding: 20px; margin-top: 24px; border: 1px solid #bdcbc2; border-radius: 12px; background: #f4f6f0; }
+.plaque-decree h3 { font-size: 1.15rem; line-height: 1.5; margin: 12px 0 16px; }
+.plaque-decree p { line-height: 1.8; }
+.plaque-decree .stone-inline-source { font-size: .82rem; margin: 14px 0 0; }
+.plaque-decree-meta { margin: 0 0 18px; }
+.plaque-decree-meta div + div { margin-top: 10px; }
+.plaque-decree-meta dt { font-size: .82rem; color: var(--muted); }
+.plaque-decree-meta dd { margin: 2px 0 0; font-weight: 700; overflow-wrap: anywhere; }
+.plaque-document-link { display: inline-flex; flex-wrap: wrap; gap: 4px 8px; white-space: normal; text-align: left; }
+.plaque-document-link span { font-size: .8rem; font-weight: 400; }
 .stone-lesson-sections section { padding: 24px 0; border-bottom: 1px solid var(--line); }
 .stone-lesson-sections h3 { display: flex; align-items: baseline; gap: 12px; margin: 0 0 12px; font-size: 1.15rem; line-height: 1.5; }
 .stone-lesson-sections h3 > span { color: #637b71; font-size: .8rem; font-weight: 500; }
@@ -29,6 +39,7 @@
 @media (max-width: 620px) {
   .stone-model-frame { height: 260px; }
   .stone-observation, .stone-quiz-invitation { padding: 15px; }
+  .plaque-decree { padding: 15px; }
   .stone-lesson-sections section { padding: 20px 0; }
   .stone-lesson-sections h3 { font-size: 1.05rem; gap: 8px; }
   .stone-lesson-sections p, .stone-observation p { font-size: .95rem; }

@@ -1,5 +1,9 @@
 // Object-level lessons are shared by every panorama showing the same stone.
 const STONE_SOURCES = {
+  decree: {
+    label: "Pemerintah Kabupaten Banyuwangi (2025b). Keputusan Bupati Banyuwangi Nomor 188/82/KEP/429.011/2025 tentang Penetapan Situs Kendenglembu Banyuwangi sebagai Situs Cagar Budaya.",
+    url: "https://jdih.banyuwangikab.go.id/anjungan-jdih/keputusan_bupati/detail/keputusan-bupati-banyuwangi-nomor-18882kep4290112025-tentang-penetapan-situs-kendenglembu-banyuwangi-sebagai-situs-cagar-budaya",
+  },
   learning: {
     label: "Yudiana & Mahfud (2023), Santhet 7(1), 108–120; khususnya hlm. 112–117.",
     url: "https://ejournal.unibabwi.ac.id/index.php/santhet/article/view/2787",
@@ -16,6 +20,56 @@ const STONE_SOURCES = {
     label: "Dinas Kebudayaan DIY, Jogjacagar: Lumpang Batu di Karangasem A, Paliyan (pembanding pengertian lumpang).",
     url: "https://jogjacagar.jogjaprov.go.id/detail/3781/lumpang-batu-di-karangasem-a-paliyan",
   },
+};
+
+const PLAQUE_LESSON = {
+  title: "Situs Kendenglembu",
+  subtitle: "Surat keputusan dan pelestarian situs",
+  document: "./assets/documents/sk-bupati-kendenglembu-2025.pdf",
+  questions: [
+    {
+      id: "kendenglembu-sk-penetapan",
+      question: "Apa pokok penetapan dalam Keputusan Bupati Nomor 188/82/KEP/429.011/2025?",
+      options: [
+        "Menetapkan setiap batu koleksi sebagai bangunan cagar budaya tersendiri.",
+        "Menetapkan Situs Kendenglembu Banyuwangi sebagai Situs Cagar Budaya.",
+        "Menetapkan perkebunan di sekitar Kendenglembu sebagai kawasan wisata agro.",
+        "Menetapkan Situs Malangsari Afdeling Mulyosari sebagai Situs Cagar Budaya.",
+        "Menetapkan seluruh temuan Kendenglembu berasal dari satu periode yang sama.",
+      ],
+      answer: 1,
+      explanation: "Diktum Kesatu menetapkan status Situs Cagar Budaya untuk Kendenglembu Banyuwangi.",
+      hint: "Perhatikan nama objek dan statusnya pada bagian isi keputusan.",
+    },
+    {
+      id: "kendenglembu-sk-lampiran",
+      question: "Menurut Diktum Kedua, bagaimana kedudukan lampiran dalam SK ini?",
+      options: [
+        "Bahan bacaan tambahan yang terpisah dari keputusan.",
+        "Daftar usulan yang baru digunakan sebelum penetapan.",
+        "Kumpulan foto pengunjung yang dapat menggantikan data situs.",
+        "Bagian yang menyatu dengan keputusan dan memuat deskripsi serta data cagar budaya.",
+        "Dokumen baru yang membatalkan keputusan pada halaman sebelumnya.",
+      ],
+      answer: 3,
+      explanation: "Lampiran berisi deskripsi dan data cagar budaya serta menjadi bagian dari keputusan.",
+      hint: "Baca keterangan Diktum Kedua pada penjelasan surat keputusan.",
+    },
+    {
+      id: "kendenglembu-sk-tanggal",
+      question: "SK ditetapkan pada 28 April 2025. Apa makna tanggal tersebut?",
+      options: [
+        "Tanggal seluruh artefak Kendenglembu pertama kali dibuat.",
+        "Tanggal penemuan pertama Situs Kendenglembu oleh peneliti.",
+        "Tanggal berakhirnya semua kegiatan penelitian di situs.",
+        "Tanggal semua batu dalam panorama mulai digunakan pada masa Neolitik.",
+        "Tanggal penetapan sekaligus mulai berlakunya keputusan.",
+      ],
+      answer: 4,
+      explanation: "Diktum Ketiga menyatakan keputusan berlaku sejak ditetapkan. Tanggal itu bukan usia artefak.",
+      hint: "Hubungkan tanggal penetapan dengan Diktum Ketiga, lalu bedakan dari waktu pembuatan artefak.",
+    },
+  ],
 };
 
 const STONE_LESSONS = {
