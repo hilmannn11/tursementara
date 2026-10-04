@@ -1,5 +1,6 @@
 const STORAGE_KEY = "bentengMissionBadges";
 const QUIZ_STORAGE_KEY = "litheraStoneQuizzesV1";
+const CERTIFICATE_DATE_KEY = "litheraCertificateCompletedAtV1";
 const LEGACY_QUIZ_COUNT_KEY = "bentengMissionLegacyBadgeCount";
 const ROUTE_FORWARD_YAW = 0;
 const ROUTE_BACK_YAW = 180;
@@ -667,6 +668,9 @@ function checkAnswer(question, selectedIndex) {
       if (Math.floor(updated.length / QUESTIONS_PER_BADGE) > getBadges().length) unlockedBadge = saveNextBadge();
     }
     if (unlockedBadge) pendingBadgeToast = unlockedBadge;
+    if (getBadges().length === badgeRooms.length && !localStorage.getItem(CERTIFICATE_DATE_KEY)) {
+      localStorage.setItem(CERTIFICATE_DATE_KEY, new Date().toISOString());
+    }
     selectedButton.classList.add("is-correct");
     options.forEach((button) => (button.disabled = true));
     feedback.className = "quiz-feedback is-success";
@@ -739,9 +743,10 @@ function renderProfile() {
     : badges.length === 0 ? "Perjalanan besarmu dimulai dari satu badge."
     : `Sudah ${badges.length} badge! Tinggal ${badgeRooms.length - badges.length} lagi untuk melengkapi koleksimu.`;
   document.querySelector(".reward-panel").classList.toggle("is-unlocked", badges.length === badgeRooms.length);
+  document.querySelector("#openCertificate").hidden = badges.length !== badgeRooms.length;
   document.querySelector("#rewardText").textContent =
     badges.length === badgeRooms.length
-      ? "Selamat. Sertifikat digital prototipe terbuka karena semua badge sudah terkumpul."
+      ? "Selamat! Buat dan unduh sertifikat penjelajahmu."
       : "Kumpulkan semua badge untuk membuka sertifikat digital.";
 
   document.querySelector("#badgeGrid").innerHTML = badgeRooms
@@ -1089,6 +1094,7 @@ document.addEventListener("fullscreenchange", () => {
 document.querySelector("#resetButton").addEventListener("click", () => {
   localStorage.removeItem(STORAGE_KEY);
   localStorage.removeItem(QUIZ_STORAGE_KEY);
+  localStorage.removeItem(CERTIFICATE_DATE_KEY);
   localStorage.removeItem("bentengMissionVerifiedQuizzesV2");
   localStorage.removeItem("bentengMissionCompletedQuizzes");
   localStorage.removeItem(LEGACY_QUIZ_COUNT_KEY);

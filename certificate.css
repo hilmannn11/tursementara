@@ -1,0 +1,17 @@
+.certificate-modal { width: min(92vw, 650px); max-height: 92vh; padding: 0; border: 0; border-radius: 18px; background: #f7f2e9; color: #183b34; box-shadow: 0 30px 90px #0a1b18a8; }
+.certificate-modal::backdrop { background: #071714bc; }
+.certificate-toolbar { display: flex; align-items: center; justify-content: space-between; padding: 16px 22px; border-bottom: 1px solid #d7c9ac; }
+.certificate-toolbar h2 { margin: 0; font-size: 21px; }
+.certificate-toolbar .icon-button { font-size: 26px; }
+.certificate-editor { display: grid; gap: 12px; padding: 20px 24px 26px; }
+.certificate-editor label { font-weight: 700; }
+.certificate-editor input { width: 100%; padding: 12px 14px; border: 1px solid #a9b5ab; border-radius: 8px; background: white; color: #183b34; font: inherit; }
+.certificate-editor input:focus-visible { outline: 3px solid #9aaf9f; outline-offset: 2px; }
+.certificate-editor p { margin: 0; }
+#certificateCanvas { display: block; width: min(100%, 360px); height: auto; margin: 6px auto; box-shadow: 0 14px 35px #17322a35; }
+.certificate-actions { display: flex; flex-wrap: wrap; gap: 10px; justify-content: center; }
+.certificate-actions .button { margin: 0; }
+#certificateStatus { min-height: 1.3em; text-align: center; }
+#openCertificate[hidden] { display: none; }
+.certificate-art-badges { display: flex; align-items: center; justify-content: center; margin: 12px 0; }
+.certificate-art-badges img { width: 52px; height: 52px; margin: 0 -5px; object-fit: contain; }

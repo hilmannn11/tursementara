@@ -20,6 +20,7 @@
     <link rel="stylesheet" href="./home-cinematic.css?v=1" />
     <link rel="stylesheet" href="./lithera-motion.css?v=3" />
     <link rel="stylesheet" href="./stone-lessons.css?v=20261004-4" />
+    <link rel="stylesheet" href="./certificate.css?v=1" />
   </head>
   <body>
     <main>
@@ -316,11 +317,12 @@
             <div id="badgeGrid" class="badge-grid"></div>
           </div>
           <div class="reward-panel">
-            <div class="certificate-art" aria-hidden="true"><span>LITHERA</span><strong>Sertifikat<br />Penjelajah</strong><img loading="lazy" decoding="async" src="./assets/badges/homo-sapiens.webp" alt="" /><small>6 soal &middot; 1 perjalanan</small></div>
+            <div class="certificate-art" aria-hidden="true"><span>LITHERA</span><strong>Sertifikat<br />Penjelajah</strong><div class="certificate-art-badges"><img loading="lazy" decoding="async" src="./assets/badges/certificate-wanderer-bronze-relief.png" alt="" /><img loading="lazy" decoding="async" src="./assets/badges/certificate-survivor-bronze-relief.png" alt="" /><img loading="lazy" decoding="async" src="./assets/badges/certificate-thinker-bronze-relief.png" alt="" /></div><small>3 badge &middot; 1 perjalanan</small></div>
             <div class="reward-copy">
               <p class="discovery-kicker">Pencapaian berikutnya</p>
               <h3>Satu koleksi, satu pencapaian.</h3>
               <p id="rewardText">Kumpulkan semua badge untuk membuka sertifikat digital.</p>
+              <button id="openCertificate" class="button primary" type="button" hidden>Unduh sertifikat</button>
               <a class="collection-primary" href="#sites">Lanjutkan penjelajahan <span aria-hidden="true">&rarr;</span></a>
               <button id="resetButton" class="button secondary" type="button">Reset Progress</button>
             </div>
@@ -350,6 +352,18 @@
       </div>
     </dialog>
 
+    <dialog id="certificateModal" class="certificate-modal" aria-labelledby="certificateTitle">
+      <div class="certificate-toolbar"><h2 id="certificateTitle">Sertifikat penjelajah</h2><button id="closeCertificate" class="icon-button" type="button" aria-label="Tutup sertifikat">×</button></div>
+      <div class="certificate-editor">
+        <label for="certificateName">Nama pada sertifikat</label>
+        <input id="certificateName" type="text" maxlength="40" autocomplete="name" placeholder="Tulis namamu" />
+        <p id="certificateDate"></p>
+        <canvas id="certificateCanvas" width="1080" height="1520" role="img" aria-label="Pratinjau sertifikat Lithera"></canvas>
+        <div class="certificate-actions"><button id="downloadCertificate" class="button primary" type="button">Unduh PNG</button><button id="printCertificate" class="button secondary" type="button">Unduh PDF</button></div>
+        <p id="certificateStatus" role="status" aria-live="polite"></p>
+      </div>
+    </dialog>
+
     <svg class="liquid-filter-defs" width="0" height="0" aria-hidden="true">
       <filter id="ministry-transparent" color-interpolation-filters="sRGB">
         <feColorMatrix type="matrix" values="1 0 0 0 0  0 1 0 0 0  0 0 1 0 0  -1 -1 -1 0 3" />
@@ -363,7 +377,8 @@
 
     <script src="https://cdn.jsdelivr.net/npm/pannellum@2.5.6/build/pannellum.js"></script>
     <script src="./stone-lessons.js?v=20261004-3"></script>
-    <script src="./app.js?v=20261004-plaque-2"></script>
+    <script src="./app.js?v=20261004-certificate-1"></script>
+    <script src="./certificate.js?v=5"></script>
     <script src="./literacy.js"></script>
     <script src="./discovery.js?v=1"></script>
     <script src="./evolution-gallery.js?v=1"></script>
