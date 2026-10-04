@@ -1,0 +1,30 @@
+#archiveModal { overflow: hidden; }
+.stone-lesson-subtitle { margin: 8px 0 20px; color: var(--muted); font-size: 1.05rem; line-height: 1.6; }
+.stone-observation { padding: 18px 20px; border-radius: 12px; background: #edf1e9; border-left: 3px solid #51796c; }
+.stone-observation h3 { margin: 0 0 8px; font-size: 1rem; }
+.stone-observation p { margin: 0; line-height: 1.8; }
+.stone-lesson-sections section { padding: 24px 0; border-bottom: 1px solid var(--line); }
+.stone-lesson-sections h3 { display: flex; align-items: baseline; gap: 12px; margin: 0 0 12px; font-size: 1.15rem; line-height: 1.5; }
+.stone-lesson-sections h3 > span { color: #637b71; font-size: .8rem; font-weight: 500; }
+.stone-lesson-sections p { margin: 0; line-height: 1.85; }
+.stone-lesson-sections .stone-inline-source { margin-top: 9px; font-size: .82rem; color: var(--muted); }
+.stone-references { margin: 24px 0; font-size: .85rem; line-height: 1.75; }
+.stone-references h3 { font-size: 1rem; }
+.stone-references li + li { margin-top: 12px; }
+.stone-references ol { padding-left: 22px; }
+.stone-references a, .stone-inline-source a { color: #285d50; text-decoration: underline; text-underline-offset: 3px; overflow-wrap: anywhere; }
+.stone-quiz-invitation { padding: 20px; border-radius: 12px; background: #edf1e9; line-height: 1.7; }
+.stone-quiz-invitation p { margin: 0 0 14px; }
+.stone-quiz-invitation .button { white-space: normal; text-align: center; }
+.quiz-options button { display: flex; align-items: baseline; gap: 12px; }
+.quiz-option-letter { flex: 0 0 24px; font-weight: 800; color: inherit; }
+#quizFeedback:not(:empty) { border-left: 3px solid currentColor; padding: 12px 14px; background: #f5f6f0; }
+#quizNextButton { width: 100%; margin-top: 4px; white-space: normal; }
+#quizNextButton[hidden] { display: none; }
+@media (max-width: 620px) {
+  .stone-model-frame { height: 260px; }
+  .stone-observation, .stone-quiz-invitation { padding: 15px; }
+  .stone-lesson-sections section { padding: 20px 0; }
+  .stone-lesson-sections h3 { font-size: 1.05rem; gap: 8px; }
+  .stone-lesson-sections p, .stone-observation p { font-size: .95rem; }
+}

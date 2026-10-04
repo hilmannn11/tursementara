@@ -1,5 +1,5 @@
 const STORAGE_KEY = "bentengMissionBadges";
-const QUIZ_STORAGE_KEY = "bentengMissionVerifiedQuizzesV2";
+const QUIZ_STORAGE_KEY = "litheraStoneQuizzesV1";
 const LEGACY_QUIZ_COUNT_KEY = "bentengMissionLegacyBadgeCount";
 const ROUTE_FORWARD_YAW = 0;
 const ROUTE_BACK_YAW = 180;
@@ -53,11 +53,6 @@ const rooms = [
       body:
         "Titik ini menjadi awal perjalanan virtual. Narasi arsip bisa diganti dengan penjelasan sejarah lokasi, fungsi ruang, atau cerita pengunjung.",
     },
-    quiz: {
-      question: "Apa peran Titik 1 dalam jalur virtual?",
-      options: ["Awal perjalanan virtual", "Titik akhir perjalanan", "Halaman koleksi badge", "Pintu keluar situs"],
-      answer: 0,
-    },
   },
   {
     id: "titik-2",
@@ -74,11 +69,6 @@ const rooms = [
       type: "Foto panorama dan catatan lokasi",
       body:
         "Titik kedua dapat memuat cerita lanjutan, foto pembanding, peta posisi, atau informasi bangunan di sekitar jalur.",
-    },
-    quiz: {
-      question: "Informasi apa yang dapat melengkapi arsip di Titik 2?",
-      options: ["Foto pembanding dan peta posisi", "Daftar permainan", "Jadwal pertandingan", "Katalog belanja"],
-      answer: 0,
     },
   },
   {
@@ -98,11 +88,6 @@ const rooms = [
       type: "Foto panorama dan catatan lokasi",
       body:
         "Titik ketiga menyambungkan awal perjalanan dengan bagian jalur berikutnya. Catatan sejarah lokasi dapat ditambahkan setelah diverifikasi.",
-    },
-    quiz: {
-      question: "Ke titik berapa perjalanan berlanjut setelah Titik 3?",
-      options: ["Titik 4", "Titik 1", "Titik 7", "Kembali ke awal situs"],
-      answer: 0,
     },
   },
   ...[4, 5, 6, 7].map((number) => ({
@@ -128,7 +113,8 @@ const rooms = [
 ];
 
 const badgeRooms = rooms.filter((room) => room.badge);
-const quizRooms = rooms.filter((room) => room.quiz);
+const stoneQuestions = Object.values(STONE_LESSONS).flatMap((lesson) => lesson.questions);
+const QUESTIONS_PER_BADGE = stoneQuestions.length / badgeRooms.length;
 const sceneLinks = Object.fromEntries(rooms.map((room, index) => [room.id, {
   ...(index < rooms.length - 1 ? {
     forward: {
@@ -153,7 +139,7 @@ let viewer;
 let tourCreated = false;
 let quizTimer;
 let quizAnswered = false;
-let activeArchiveRoomId = rooms[0].id;
+let activeLessonId = null;
 let transitionTimer;
 
 const archiveModal = document.querySelector("#archiveModal");
@@ -207,15 +193,13 @@ function getCompletedQuizzes() {
   } catch {
     saved = null;
   }
-  // Older visits recorded badge count but not which quiz earned each badge.
-  // Keep those badges, then require that many distinct verified quizzes
-  // before another badge can be earned. Do not guess the old question IDs.
+  // Preserve existing badges, but do not count demo questions as these lessons.
   if (!Array.isArray(saved)) {
     const legacyCount = getBadges().length;
     if (legacyCount) localStorage.setItem(LEGACY_QUIZ_COUNT_KEY, String(legacyCount));
     saved = [];
   }
-  const completed = quizRooms.filter((room) => saved.includes(room.id)).map((room) => room.id);
+  const completed = stoneQuestions.filter((question) => saved.includes(question.id)).map((question) => question.id);
   if (JSON.stringify(saved) !== JSON.stringify(completed)) {
     localStorage.setItem(QUIZ_STORAGE_KEY, JSON.stringify(completed));
   }
@@ -469,17 +453,19 @@ function showFloorArrow(event) {
 
 function openArchive(roomId, selectedModel) {
   const room = rooms.find((item) => item.id === roomId);
+  if (!room) return;
   const modelId = selectedModel || (room.stoneHotspot ? "first" : room.secondStoneHotspot ? "second" : null);
   const stoneModel = modelId && STONE_MODELS[modelId];
-  const hasStoneModel = !!stoneModel;
-  activeArchiveRoomId = room.id;
+  const lesson = STONE_LESSONS[modelId];
+  if (!stoneModel || !lesson) return;
+  activeLessonId = modelId;
   clearTimeout(quizTimer);
 
   archiveModalContent.innerHTML = `
-    <p class="eyebrow">${room.title}</p>
-    <h2 id="archiveTitle">${room.archive.title}</h2>
-    <div class="archive-meta ${hasStoneModel ? "has-stone-model" : ""}">
-      ${hasStoneModel ? `
+    <p class="eyebrow">Kendenglembu · ${room.title}</p>
+    <h2 id="archiveTitle" tabindex="-1">${lesson.title}</h2>
+    <p class="stone-lesson-subtitle">${lesson.subtitle}</p>
+    <div class="archive-meta has-stone-model">
         <div>
           <div class="stone-model-frame">
             <img class="stone-model-poster" src="${stoneModel.poster}" alt="Pratinjau ${stoneModel.alt}" />
@@ -487,25 +473,36 @@ function openArchive(roomId, selectedModel) {
           </div>
           <p class="stone-model-caption">Geser untuk memutar · cubit atau gulir untuk zoom. Bagian bawah batu diperkirakan dari foto.</p>
         </div>
-      ` : '<div class="archive-thumb">ARSIP</div>'}
-      <div>
-        <strong>${hasStoneModel ? "Model 3D batu dan catatan lokasi" : room.archive.type}</strong>
-        <p>${room.archive.body}</p>
-      </div>
     </div>
-    <p class="provenance-note">Materi demo: narasi dan identitas lokasi foto belum diverifikasi. Referensi jurnal tersedia terpisah di halaman Arsip dan tidak menjadi atribusi foto ini.</p>
+    <div class="stone-observation"><h3>Amati batu ini</h3><p>${lesson.observation}</p></div>
+    <p class="provenance-note">Nama “batu lumpang” digunakan sebagai identifikasi sementara berdasarkan bentuk. Nomor 1 dan 2 adalah penanda di tur, bukan nomor inventaris. Umur, fungsi khusus, dan identitas koleksi kedua objek belum dicocokkan dengan catatan pengelola.</p>
+    <div class="stone-lesson-sections">
+      ${lesson.sections.map((section, index) => `
+        <section aria-labelledby="stoneSection${index}">
+          <h3 id="stoneSection${index}"><span aria-hidden="true">${String(index + 1).padStart(2, "0")}</span>${section.title}</h3>
+          <p>${section.body}</p>
+          ${section.sources.length ? `<p class="stone-inline-source">Rujukan: ${section.sources.map((key) => `<a href="${STONE_SOURCES[key].url}" target="_blank" rel="noopener noreferrer">[${lesson.sources.indexOf(key) + 1}]<span class="sr-only"> ${STONE_SOURCES[key].label} (tab baru)</span></a>`).join(" ")}</p>` : ""}
+        </section>`).join("")}
+    </div>
+    <section class="stone-references" aria-labelledby="stoneSourcesTitle">
+      <h3 id="stoneSourcesTitle">Baca sumbernya</h3>
+      <p>Jurnal dirujuk dari daftar pustaka dokumen penelitian. Sumber Jogjacagar, bila tercantum, menjadi pembanding istilah; bukan identifikasi objek ini.</p>
+      <ol>${lesson.sources.map((key) => `<li><a href="${STONE_SOURCES[key].url}" target="_blank" rel="noopener noreferrer">${STONE_SOURCES[key].label}<span class="sr-only"> (tab baru)</span></a></li>`).join("")}</ol>
+    </section>
+    <div class="stone-quiz-invitation"><p><strong>Uji pemahamanmu</strong><br />3 soal tentang batu ini. Setiap 2 soal berbeda yang benar membuka 1 badge; badge lama tetap tersimpan.</p><button type="button" class="button primary" id="startStoneQuiz">Mulai kuis ${lesson.title}</button></div>
   `;
 
   archiveModal.showModal();
-  if (hasStoneModel) {
-    const frame = archiveModalContent.querySelector(".stone-model-frame");
-    frame.querySelector("model-viewer").addEventListener("load", () => frame.classList.add("is-ready"), { once: true });
-    loadModelViewer().catch(() => frame.classList.add("is-unavailable"));
-  }
+  archiveModalContent.scrollTop = 0;
+  archiveModalContent.querySelector("#archiveTitle").focus({ preventScroll: true });
+  archiveModalContent.querySelector("#startStoneQuiz").addEventListener("click", closeArchiveAndScheduleQuiz);
+  const frame = archiveModalContent.querySelector(".stone-model-frame");
+  frame.querySelector("model-viewer").addEventListener("load", () => frame.classList.add("is-ready"), { once: true });
+  loadModelViewer().catch(() => frame.classList.add("is-unavailable"));
 }
 
 function openPlaquePhoto() {
-  activeArchiveRoomId = null;
+  activeLessonId = null;
   clearTimeout(quizTimer);
   archiveModalContent.innerHTML = `
     <p class="eyebrow">Dokumentasi situs</p>
@@ -521,107 +518,116 @@ function openPlaquePhoto() {
 function closeArchiveAndScheduleQuiz() {
   archiveModal.close();
   clearTimeout(quizTimer);
-  const roomId = activeArchiveRoomId;
+  const lessonId = activeLessonId;
+  activeLessonId = null;
   archiveModalContent.replaceChildren();
-  if (rooms.find((room) => room.id === roomId)?.quiz) {
-    quizTimer = setTimeout(() => openQuiz(roomId), 650);
+  if (STONE_LESSONS[lessonId]) {
+    quizTimer = setTimeout(() => openQuiz(lessonId), 650);
   }
 }
 
-function openQuiz(roomId) {
-  const room = rooms.find((item) => item.id === roomId);
-  const alreadyCompleted = getCompletedQuizzes().includes(room.id);
-  const legacyUnknown = !alreadyCompleted && Number(localStorage.getItem(LEGACY_QUIZ_COUNT_KEY)) > 0;
-
-  quizAnswered = alreadyCompleted;
+function openQuiz(lessonId) {
   pendingBadgeToast = null;
-
-  quizContent.innerHTML = `
-    <div class="dialog-toolbar">
-      <h2 id="quizTitle">${room.title}</h2>
-      <button id="quizCloseButton" class="quiz-close-button" type="button" aria-label="Tutup kuis" aria-describedby="quizCloseHint" ${alreadyCompleted ? "" : "disabled"}><img src="./assets/icons/x.svg" alt="" width="22" height="22" /></button>
-    </div>
-    <div class="dialog-body">
-    <p class="eyebrow">Kuis Misi</p>
-    <p id="quizStatus" class="quiz-status ${alreadyCompleted ? "is-complete" : legacyUnknown ? "is-legacy" : "is-pending"}" role="status">${alreadyCompleted ? "✓ Sudah dijawab" : legacyUnknown ? "Riwayat soal lama belum tercatat" : "○ Belum dijawab"}</p>
-    <p id="quizCloseHint" class="quiz-close-hint">${alreadyCompleted ? "Kuis ini sudah selesai. Kamu boleh mencoba lagi, tetapi progres tidak bertambah." : legacyUnknown ? "Badge lama tetap tersimpan. Progres berikutnya bertambah setelah lebih banyak kuis berbeda tercatat." : "Jawab dengan benar untuk mengaktifkan tombol tutup."}</p>
-    <p id="quizQuestion">${room.quiz.question}</p>
-    <div class="quiz-options">
-      ${room.quiz.options
-        .map((option, index) => `<button type="button" data-index="${index}">${option}</button>`)
-        .join("")}
-    </div>
-    <p id="quizFeedback" class="quiz-feedback" aria-live="polite"></p>
-    </div>
-  `;
-
-  quizContent.querySelectorAll("button").forEach((button) => {
-    if (button.dataset.index !== undefined) {
-      button.addEventListener("click", () => checkAnswer(room, Number(button.dataset.index)));
-    }
-  });
-
-  quizContent.querySelector("#quizCloseButton").addEventListener("click", () => quizModal.close());
-
+  const lesson = STONE_LESSONS[lessonId];
+  if (!lesson) return;
+  const completed = getCompletedQuizzes();
+  const firstUnfinished = lesson.questions.findIndex((question) => !completed.includes(question.id));
+  renderQuizQuestion(lessonId, Math.max(0, firstUnfinished));
   quizModal.showModal();
 }
 
-function checkAnswer(room, selectedIndex) {
+function renderQuizQuestion(lessonId, questionIndex) {
+  const lesson = STONE_LESSONS[lessonId];
+  const question = lesson.questions[questionIndex];
+  const completed = getCompletedQuizzes();
+  const alreadyCompleted = completed.includes(question.id);
+  quizAnswered = alreadyCompleted;
+  quizContent.innerHTML = `
+    <div class="dialog-toolbar">
+      <h2 id="quizTitle">${lesson.title}</h2>
+      <button id="quizCloseButton" class="quiz-close-button" type="button" aria-label="Tutup kuis" aria-describedby="quizCloseHint" ${alreadyCompleted ? "" : "disabled"}><img src="./assets/icons/x.svg" alt="" width="22" height="22" /></button>
+    </div>
+    <div class="dialog-body">
+    <p class="eyebrow">Soal ${questionIndex + 1} dari ${lesson.questions.length} · Pilih satu jawaban</p>
+    <p id="quizStatus" class="quiz-status ${alreadyCompleted ? "is-complete" : "is-pending"}" role="status">${alreadyCompleted ? "✓ Pernah dijawab benar" : "○ Belum selesai"}</p>
+    <p id="quizCloseHint" class="quiz-close-hint">${alreadyCompleted ? "Boleh mencoba lagi. Soal yang sama hanya dihitung sekali." : "Jawab benar untuk melanjutkan atau menutup kuis. Baca petunjuk jika belum tepat."}</p>
+    <p id="quizQuestion" tabindex="-1">${question.question}</p>
+    <div class="quiz-options" role="group" aria-labelledby="quizQuestion">
+      ${question.options
+        .map((option, index) => `<button type="button" data-index="${index}"><span class="quiz-option-letter">${String.fromCharCode(65 + index)}</span><span>${option}</span></button>`)
+        .join("")}
+    </div>
+    <p id="quizFeedback" class="quiz-feedback" aria-live="polite"></p>
+    <p id="quizProgress" class="quiz-close-hint">${completed.length}/${stoneQuestions.length} soal berbeda selesai · 2 soal per badge.</p>
+    <button id="quizNextButton" type="button" class="button primary" ${alreadyCompleted ? "" : "hidden"}>${questionIndex + 1 < lesson.questions.length ? "Soal berikutnya" : "Selesai"}</button>
+    </div>
+  `;
+
+  quizContent.querySelectorAll("[data-index]").forEach((button) => {
+    button.addEventListener("click", () => checkAnswer(question, Number(button.dataset.index)));
+  });
+  quizContent.querySelector("#quizCloseButton").addEventListener("click", () => quizModal.close());
+  quizContent.querySelector("#quizNextButton").addEventListener("click", () => {
+    if (questionIndex + 1 < lesson.questions.length) renderQuizQuestion(lessonId, questionIndex + 1);
+    else quizModal.close();
+  });
+  quizContent.querySelector(".dialog-body").scrollTop = 0;
+  quizContent.querySelector("#quizQuestion").focus({ preventScroll: true });
+}
+
+function checkAnswer(question, selectedIndex) {
   const feedback = document.querySelector("#quizFeedback");
   const options = [...quizContent.querySelectorAll(".quiz-options button")];
   const selectedButton = options[selectedIndex];
 
   options.forEach((button) => button.classList.remove("is-correct", "is-wrong"));
 
-  if (selectedIndex === room.quiz.answer) {
+  if (selectedIndex === question.answer) {
     quizAnswered = true;
     const completed = getCompletedQuizzes();
-    const firstCorrectAnswer = !completed.includes(room.id);
+    const firstCorrectAnswer = !completed.includes(question.id);
     let unlockedBadge = null;
     if (firstCorrectAnswer) {
-      const updated = [...completed, room.id];
+      const updated = [...completed, question.id];
       localStorage.setItem(QUIZ_STORAGE_KEY, JSON.stringify(updated));
-      if (updated.length > getBadges().length) unlockedBadge = saveNextBadge();
+      if (Math.floor(updated.length / QUESTIONS_PER_BADGE) > getBadges().length) unlockedBadge = saveNextBadge();
     }
     if (unlockedBadge) pendingBadgeToast = unlockedBadge;
     selectedButton.classList.add("is-correct");
     options.forEach((button) => (button.disabled = true));
     feedback.className = "quiz-feedback is-success";
-    feedback.textContent = !firstCorrectAnswer
-      ? "Benar. Kuis ini sudah pernah dijawab; progres tidak bertambah. Coba kuis di titik lain untuk melanjutkan."
-      : unlockedBadge
-        ? `Benar. Badge "${unlockedBadge.badge}" berhasil dikumpulkan. Kamu bisa menutup kuis.`
-        : getBadges().length === badgeRooms.length
-          ? "Benar. Semua badge sudah terkumpul. Kamu bisa menutup kuis."
-          : "Benar. Kuis ini sekarang tercatat. Jawab kuis berbeda untuk melanjutkan progres badge.";
+    feedback.textContent = `Benar, jawaban ${String.fromCharCode(65 + question.answer)}. ${question.explanation}${!firstCorrectAnswer ? " Soal ini sudah tercatat; progres tidak bertambah." : unlockedBadge ? ` Badge “${unlockedBadge.badge}” terbuka!` : ""}`;
     const status = quizContent.querySelector("#quizStatus");
     status.className = "quiz-status is-complete";
     status.textContent = "✓ Sudah dijawab";
     quizContent.querySelector("#quizCloseButton").disabled = false;
-    quizContent.querySelector("#quizCloseHint").textContent = "Kuis selesai. Mengulang kuis ini tidak menambah progres.";
-    quizContent.querySelector("#quizCloseButton").focus({ preventScroll: true });
+    quizContent.querySelector("#quizCloseHint").textContent = "Baca pembahasan, lalu lanjutkan. Kamu juga boleh menutup dan melanjutkan nanti.";
+    quizContent.querySelector("#quizProgress").textContent = `${getCompletedQuizzes().length}/${stoneQuestions.length} soal berbeda selesai · 2 soal per badge.`;
+    quizContent.querySelector("#quizNextButton").hidden = false;
+    feedback.scrollIntoView({ block: "nearest", behavior: "instant" });
   } else {
     selectedButton.classList.add("is-wrong");
     feedback.className = "quiz-feedback is-error";
-    feedback.textContent = "Jawaban belum tepat. Coba lagi.";
+    feedback.textContent = `Belum tepat. ${question.hint}`;
+    feedback.scrollIntoView({ block: "nearest", behavior: "instant" });
   }
 }
 
 function renderArchiveGrid() {
   const grid = document.querySelector("#archiveGrid");
-  grid.innerHTML = rooms
+  grid.innerHTML = Object.entries(STONE_LESSONS)
     .map(
-      (room, index) => `
+      ([modelId, lesson], index) => `
         <article class="archive-card">
-          <div class="archive-visual" style="background-image: linear-gradient(180deg, rgba(16, 24, 21, 0.02), rgba(16, 24, 21, 0.58)), url('${room.panorama}');" aria-hidden="true">
+          <div class="archive-visual" style="background-image: linear-gradient(180deg, rgba(16, 24, 21, 0.02), rgba(16, 24, 21, 0.58)), url('${STONE_MODELS[modelId].poster}');" aria-hidden="true">
             <span class="archive-number">0${index + 1}</span>
-            <span class="archive-visual-label">${room.title}</span>
+            <span class="archive-visual-label">${lesson.title}</span>
           </div>
           <div class="archive-card-body">
             <p class="eyebrow">Arsip ${String(index + 1).padStart(2, "0")}</p>
-            <h3>${room.archive.title}</h3>
-            <p>${room.archive.body}</p>
-            <button class="button secondary" type="button" data-room="${room.id}">Buka Arsip</button>
+            <h3>${lesson.title}</h3>
+            <p>${lesson.summary}</p>
+            <button class="button secondary" type="button" data-stone="${modelId}">Pelajari ${lesson.title}</button>
           </div>
         </article>
       `
@@ -629,7 +635,7 @@ function renderArchiveGrid() {
     .join("");
 
   grid.querySelectorAll("button").forEach((button) => {
-    button.addEventListener("click", () => openArchive(button.dataset.room));
+    button.addEventListener("click", () => openArchive("titik-2", button.dataset.stone));
   });
 }
 
@@ -1001,6 +1007,7 @@ document.addEventListener("fullscreenchange", () => {
 document.querySelector("#resetButton").addEventListener("click", () => {
   localStorage.removeItem(STORAGE_KEY);
   localStorage.removeItem(QUIZ_STORAGE_KEY);
+  localStorage.removeItem("bentengMissionVerifiedQuizzesV2");
   localStorage.removeItem("bentengMissionCompletedQuizzes");
   localStorage.removeItem(LEGACY_QUIZ_COUNT_KEY);
   renderProfile();

@@ -19,6 +19,7 @@
     <link rel="stylesheet" href="./street-view.css?v=18" />
     <link rel="stylesheet" href="./home-cinematic.css?v=1" />
     <link rel="stylesheet" href="./lithera-motion.css?v=1" />
+    <link rel="stylesheet" href="./stone-lessons.css?v=20261004-1" />
   </head>
   <body>
     <main>
@@ -71,7 +72,7 @@
                   <span class="discovery-stamp">Catatan dari masa lalu</span>
                 </div>
                 <div class="discovery-card-copy">
-                  <span class="discovery-kicker">02 penelitian &middot; 03 arsip tur</span>
+                  <span class="discovery-kicker">02 penelitian &middot; 02 batu</span>
                   <h3>Arsip &amp; cerita</h3>
                   <p>Temukan kisah di balik situs, dari catatan lapangan hingga referensi penelitian.</p>
                   <span class="discovery-action">Buka arsip <span aria-hidden="true">&rarr;</span></span>
@@ -247,7 +248,7 @@
             <p id="viewerError" class="viewer-error" role="alert" hidden>Panorama belum dapat dimuat. Periksa koneksi lalu muat ulang halaman. Arsip tetap dapat diakses lewat menu Arsip.</p>
           </div>
         </div>
-        <p class="provenance-note">Tur menampilkan tujuh panorama sesuai urutan foto. Narasi arsip dan kuis masih berupa demo interaksi.</p>
+        <p class="provenance-note">Klik ikon i pada kedua batu untuk melihat model 3D, membaca penjelasan dengan rujukan penelitian, dan mengerjakan kuis. Identifikasi masing-masing batu masih bersifat sementara.</p>
       </section>
 
       <section id="archive" class="archive-section">
@@ -265,7 +266,7 @@
         </div>
         <div class="archive-tabs" role="tablist" aria-label="Jenis arsip">
           <button id="researchTab" type="button" role="tab" aria-selected="true" aria-controls="researchPanel">Penelitian <span>02</span></button>
-          <button id="tourArchiveTab" type="button" role="tab" aria-selected="false" aria-controls="tourArchivePanel" tabindex="-1">Arsip tur <span>03</span></button>
+          <button id="tourArchiveTab" type="button" role="tab" aria-selected="false" aria-controls="tourArchivePanel" tabindex="-1">Arsip tur <span>02</span></button>
         </div>
         <div id="researchPanel" class="research-references" role="tabpanel" aria-labelledby="researchTab" tabindex="0">
           <div class="collection-section-label"><h2 id="researchTitle">Dari catatan para peneliti</h2><span>Terbuka untuk semua</span></div>
@@ -290,7 +291,7 @@
           <p class="provenance-note">Ringkasan dan glosarium diadaptasi dari artikel di atas. Tahun sitasi mengikuti tahun edisi jurnal (2011/2017); portal BRIN menampilkan tanggal publikasi 2024 yang berbeda. Referensi ini bukan atribusi foto panorama. Identitas lokasi, pembuat, tanggal, dan izin foto demo belum diverifikasi.</p>
         </div>
         <div id="tourArchivePanel" role="tabpanel" aria-labelledby="tourArchiveTab" tabindex="0" hidden>
-          <div class="collection-section-label"><h2>Catatan sepanjang perjalanan</h2><span>7 titik &middot; Materi demo</span></div>
+          <div class="collection-section-label"><h2>Kenali kedua batu</h2><span>2 objek &middot; 6 soal</span></div>
           <div id="archiveGrid" class="archive-grid"></div>
         </div>
         <div class="collection-footer"><p>Cerita terasa berbeda ketika dijelajahi.</p><a href="#sites">Masuk tur virtual <span aria-hidden="true">&rarr;</span></a></div>
@@ -305,7 +306,7 @@
           <div>
             <p class="discovery-kicker">Sedikit penasaran, banyak penemuan</p>
             <h1>Koleksi penjelajah</h1>
-            <p>Tiga tantangan, tiga badge untuk dikoleksi. Setiap kuis berbeda yang dijawab benar dihitung satu kali.</p>
+            <p>Dua batu, enam soal, tiga badge. Setiap dua soal berbeda yang dijawab benar membuka satu badge. Mengulang soal tidak menambah progres; badge lama tetap tersimpan.</p>
           </div>
           <div class="collection-count" role="group" aria-label="Jumlah badge terkumpul">
             <div><strong id="profileBadgeCount">0</strong><span>/ 3</span></div>
@@ -322,7 +323,7 @@
             <div id="badgeGrid" class="badge-grid"></div>
           </div>
           <div class="reward-panel">
-            <div class="certificate-art" aria-hidden="true"><span>LITHERA</span><strong>Sertifikat<br />Penjelajah</strong><img loading="lazy" decoding="async" src="./assets/badges/homo-sapiens.webp" alt="" /><small>3 tantangan &middot; 1 perjalanan</small></div>
+            <div class="certificate-art" aria-hidden="true"><span>LITHERA</span><strong>Sertifikat<br />Penjelajah</strong><img loading="lazy" decoding="async" src="./assets/badges/homo-sapiens.webp" alt="" /><small>6 soal &middot; 1 perjalanan</small></div>
             <div class="reward-copy">
               <p class="discovery-kicker">Pencapaian berikutnya</p>
               <h3>Satu koleksi, satu pencapaian.</h3>
@@ -368,7 +369,8 @@
     </svg>
 
     <script src="https://cdn.jsdelivr.net/npm/pannellum@2.5.6/build/pannellum.js"></script>
-    <script src="./app.js?v=20261003-reference-blur-1"></script>
+    <script src="./stone-lessons.js?v=20261004-1"></script>
+    <script src="./app.js?v=20261004-stone-lessons-1"></script>
     <script src="./literacy.js"></script>
     <script src="./discovery.js?v=1"></script>
     <script src="./evolution-gallery.js?v=1"></script>
