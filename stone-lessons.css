@@ -21,6 +21,10 @@
 #quizFeedback:not(:empty) { border-left: 3px solid currentColor; padding: 12px 14px; background: #f5f6f0; }
 #quizNextButton { width: 100%; margin-top: 4px; white-space: normal; }
 #quizNextButton[hidden] { display: none; }
+.quiz-review-button { width: 100%; margin: 0 0 12px; text-align: center; white-space: normal; }
+.quiz-review-button[hidden] { display: none; }
+.stone-quiz-topic { margin: 0 0 8px; color: var(--muted); font-size: .9rem; line-height: 1.5; }
+.stone-archive-subtitle { font-weight: 700; }
 @media (max-width: 620px) {
   .stone-model-frame { height: 260px; }
   .stone-observation, .stone-quiz-invitation { padding: 15px; }

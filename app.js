@@ -140,6 +140,8 @@ let tourCreated = false;
 let quizTimer;
 let quizAnswered = false;
 let activeLessonId = null;
+let quizReviewContext = null;
+let quizWrongAnswers = 0;
 let transitionTimer;
 
 const archiveModal = document.querySelector("#archiveModal");
@@ -462,7 +464,7 @@ function openArchive(roomId, selectedModel) {
   clearTimeout(quizTimer);
 
   archiveModalContent.innerHTML = `
-    <p class="eyebrow">Kendenglembu · ${room.title}</p>
+    <p class="eyebrow">Kendenglembu · Tur virtual</p>
     <h2 id="archiveTitle" tabindex="-1">${lesson.title}</h2>
     <p class="stone-lesson-subtitle">${lesson.subtitle}</p>
     <div class="archive-meta has-stone-model">
@@ -475,7 +477,7 @@ function openArchive(roomId, selectedModel) {
         </div>
     </div>
     <div class="stone-observation"><h3>Amati batu ini</h3><p>${lesson.observation}</p></div>
-    <p class="provenance-note">Nama “batu lumpang” digunakan sebagai identifikasi sementara berdasarkan bentuk. Nomor 1 dan 2 adalah penanda di tur, bukan nomor inventaris. Umur, fungsi khusus, dan identitas koleksi kedua objek belum dicocokkan dengan catatan pengelola.</p>
+    <p class="provenance-note">Nama “batu lumpang” digunakan sebagai identifikasi sementara berdasarkan bentuk. Umur, fungsi khusus, dan identitas koleksi kedua objek belum dicocokkan dengan catatan pengelola.</p>
     <div class="stone-lesson-sections">
       ${lesson.sections.map((section, index) => `
         <section aria-labelledby="stoneSection${index}">
@@ -489,7 +491,7 @@ function openArchive(roomId, selectedModel) {
       <p>Jurnal dirujuk dari daftar pustaka dokumen penelitian. Sumber Jogjacagar, bila tercantum, menjadi pembanding istilah; bukan identifikasi objek ini.</p>
       <ol>${lesson.sources.map((key) => `<li><a href="${STONE_SOURCES[key].url}" target="_blank" rel="noopener noreferrer">${STONE_SOURCES[key].label}<span class="sr-only"> (tab baru)</span></a></li>`).join("")}</ol>
     </section>
-    <div class="stone-quiz-invitation"><p><strong>Uji pemahamanmu</strong><br />3 soal tentang batu ini. Setiap 2 soal berbeda yang benar membuka 1 badge; badge lama tetap tersimpan.</p><button type="button" class="button primary" id="startStoneQuiz">Mulai kuis ${lesson.title}</button></div>
+    <div class="stone-quiz-invitation"><p><strong>Uji pemahamanmu</strong><br />3 soal tentang batu ini. Setiap 2 soal berbeda yang benar membuka 1 badge; badge lama tetap tersimpan.</p><button type="button" class="button primary" id="startStoneQuiz">${quizReviewContext ? "Kembali ke soal" : `Mulai kuis ${lesson.title}`}</button></div>
   `;
 
   archiveModal.showModal();
@@ -519,8 +521,17 @@ function closeArchiveAndScheduleQuiz() {
   archiveModal.close();
   clearTimeout(quizTimer);
   const lessonId = activeLessonId;
+  const resume = quizReviewContext;
   activeLessonId = null;
   archiveModalContent.replaceChildren();
+  if (resume && resume.lessonId === lessonId) {
+    quizTimer = setTimeout(() => {
+      renderQuizQuestion(resume.lessonId, resume.questionIndex, resume.wrongAnswers);
+      quizReviewContext = null;
+      quizModal.showModal();
+    }, 150);
+    return;
+  }
   if (STONE_LESSONS[lessonId]) {
     quizTimer = setTimeout(() => openQuiz(lessonId), 650);
   }
@@ -536,18 +547,20 @@ function openQuiz(lessonId) {
   quizModal.showModal();
 }
 
-function renderQuizQuestion(lessonId, questionIndex) {
+function renderQuizQuestion(lessonId, questionIndex, wrongAnswers = 0) {
   const lesson = STONE_LESSONS[lessonId];
   const question = lesson.questions[questionIndex];
   const completed = getCompletedQuizzes();
   const alreadyCompleted = completed.includes(question.id);
   quizAnswered = alreadyCompleted;
+  quizWrongAnswers = wrongAnswers;
   quizContent.innerHTML = `
     <div class="dialog-toolbar">
       <h2 id="quizTitle">${lesson.title}</h2>
       <button id="quizCloseButton" class="quiz-close-button" type="button" aria-label="Tutup kuis" aria-describedby="quizCloseHint" ${alreadyCompleted ? "" : "disabled"}><img src="./assets/icons/x.svg" alt="" width="22" height="22" /></button>
     </div>
     <div class="dialog-body">
+    <p class="stone-quiz-topic">${lesson.subtitle}</p>
     <p class="eyebrow">Soal ${questionIndex + 1} dari ${lesson.questions.length} · Pilih satu jawaban</p>
     <p id="quizStatus" class="quiz-status ${alreadyCompleted ? "is-complete" : "is-pending"}" role="status">${alreadyCompleted ? "✓ Pernah dijawab benar" : "○ Belum selesai"}</p>
     <p id="quizCloseHint" class="quiz-close-hint">${alreadyCompleted ? "Boleh mencoba lagi. Soal yang sama hanya dihitung sekali." : "Jawab benar untuk melanjutkan atau menutup kuis. Baca petunjuk jika belum tepat."}</p>
@@ -557,7 +570,8 @@ function renderQuizQuestion(lessonId, questionIndex) {
         .map((option, index) => `<button type="button" data-index="${index}"><span class="quiz-option-letter">${String.fromCharCode(65 + index)}</span><span>${option}</span></button>`)
         .join("")}
     </div>
-    <p id="quizFeedback" class="quiz-feedback" aria-live="polite"></p>
+    <p id="quizFeedback" class="quiz-feedback${wrongAnswers >= 2 ? " is-error" : ""}" aria-live="polite">${wrongAnswers >= 2 ? "Kamu bisa membaca lagi penjelasannya, lalu kembali ke soal ini." : ""}</p>
+    <button id="quizReviewButton" type="button" class="button secondary quiz-review-button" ${wrongAnswers >= 2 ? "" : "hidden"}>Baca ulang penjelasan</button>
     <p id="quizProgress" class="quiz-close-hint">${completed.length}/${stoneQuestions.length} soal berbeda selesai · 2 soal per badge.</p>
     <button id="quizNextButton" type="button" class="button primary" ${alreadyCompleted ? "" : "hidden"}>${questionIndex + 1 < lesson.questions.length ? "Soal berikutnya" : "Selesai"}</button>
     </div>
@@ -567,6 +581,11 @@ function renderQuizQuestion(lessonId, questionIndex) {
     button.addEventListener("click", () => checkAnswer(question, Number(button.dataset.index)));
   });
   quizContent.querySelector("#quizCloseButton").addEventListener("click", () => quizModal.close());
+  quizContent.querySelector("#quizReviewButton").addEventListener("click", () => {
+    quizReviewContext = { lessonId, questionIndex, wrongAnswers: quizWrongAnswers };
+    quizModal.close();
+    openArchive(currentRoom.id, lessonId);
+  });
   quizContent.querySelector("#quizNextButton").addEventListener("click", () => {
     if (questionIndex + 1 < lesson.questions.length) renderQuizQuestion(lessonId, questionIndex + 1);
     else quizModal.close();
@@ -597,6 +616,7 @@ function checkAnswer(question, selectedIndex) {
     options.forEach((button) => (button.disabled = true));
     feedback.className = "quiz-feedback is-success";
     feedback.textContent = `Benar, jawaban ${String.fromCharCode(65 + question.answer)}. ${question.explanation}${!firstCorrectAnswer ? " Soal ini sudah tercatat; progres tidak bertambah." : unlockedBadge ? ` Badge “${unlockedBadge.badge}” terbuka!` : ""}`;
+    quizContent.querySelector("#quizReviewButton").hidden = true;
     const status = quizContent.querySelector("#quizStatus");
     status.className = "quiz-status is-complete";
     status.textContent = "✓ Sudah dijawab";
@@ -606,10 +626,17 @@ function checkAnswer(question, selectedIndex) {
     quizContent.querySelector("#quizNextButton").hidden = false;
     feedback.scrollIntoView({ block: "nearest", behavior: "instant" });
   } else {
+    quizWrongAnswers += 1;
     selectedButton.classList.add("is-wrong");
     feedback.className = "quiz-feedback is-error";
-    feedback.textContent = `Belum tepat. ${question.hint}`;
-    feedback.scrollIntoView({ block: "nearest", behavior: "instant" });
+    feedback.textContent = `Belum tepat. ${question.hint}${quizWrongAnswers >= 2 ? " Kamu bisa membaca ulang penjelasannya, lalu kembali ke soal ini." : ""}`;
+    if (quizWrongAnswers >= 2) {
+      const reviewButton = quizContent.querySelector("#quizReviewButton");
+      reviewButton.hidden = false;
+      reviewButton.scrollIntoView({ block: "nearest", behavior: "instant" });
+    } else {
+      feedback.scrollIntoView({ block: "nearest", behavior: "instant" });
+    }
   }
 }
 
@@ -617,17 +644,17 @@ function renderArchiveGrid() {
   const grid = document.querySelector("#archiveGrid");
   grid.innerHTML = Object.entries(STONE_LESSONS)
     .map(
-      ([modelId, lesson], index) => `
+      ([modelId, lesson]) => `
         <article class="archive-card">
           <div class="archive-visual" style="background-image: linear-gradient(180deg, rgba(16, 24, 21, 0.02), rgba(16, 24, 21, 0.58)), url('${STONE_MODELS[modelId].poster}');" aria-hidden="true">
-            <span class="archive-number">0${index + 1}</span>
             <span class="archive-visual-label">${lesson.title}</span>
           </div>
           <div class="archive-card-body">
-            <p class="eyebrow">Arsip ${String(index + 1).padStart(2, "0")}</p>
+            <p class="eyebrow">Materi batu</p>
             <h3>${lesson.title}</h3>
+            <p class="stone-archive-subtitle">${lesson.subtitle}</p>
             <p>${lesson.summary}</p>
-            <button class="button secondary" type="button" data-stone="${modelId}">Pelajari ${lesson.title}</button>
+            <button class="button secondary" type="button" data-stone="${modelId}" aria-label="Pelajari ${lesson.title}: ${lesson.subtitle}">Pelajari ${lesson.title}</button>
           </div>
         </article>
       `
@@ -1025,6 +1052,7 @@ quizModal.addEventListener("cancel", (event) => {
 });
 
 quizModal.addEventListener("close", () => {
+  if (quizReviewContext) return;
   if (pendingBadgeToast) showBadgeToast(pendingBadgeToast);
   pendingBadgeToast = null;
 });

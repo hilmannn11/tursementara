@@ -20,7 +20,7 @@ const STONE_SOURCES = {
 
 const STONE_LESSONS = {
   first: {
-    title: "Batu Lumpang 1",
+    title: "Batu Lumpang",
     subtitle: "Cekungan batu dan jejak pengolahan bahan",
     summary: "Kenali bentuk lumpang, cara kerjanya, dan bukti kecil yang membantu peneliti memahami pemanfaatan tumbuhan.",
     observation: "Pada dokumentasi ini, batu pertama tampak lebih membulat dan tinggi, dengan satu cekungan di bagian atas. Perhatikan bibir, dinding, dan dasar cekungannya melalui model 3D.",
@@ -93,7 +93,7 @@ const STONE_LESSONS = {
     ],
   },
   second: {
-    title: "Batu Lumpang 2",
+    title: "Batu Lumpang",
     subtitle: "Bentuk berbeda, riwayat yang perlu ditelusuri",
     summary: "Bandingkan batu yang lebih melebar ini dan pelajari mengapa konteks penemuan penting untuk memahami umur serta fungsinya.",
     observation: "Batu kedua tampak lebih memanjang dan rendah dibanding batu pertama, dengan cekungan pada permukaan atas. Warna gelap dan bercak pada permukaan terlihat dalam foto; keduanya bukan ukuran umur batu.",
