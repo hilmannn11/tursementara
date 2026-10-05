@@ -1,15 +1,11 @@
 (() => {
-  const browserSpeechSupported = "speechSynthesis" in window && "SpeechSynthesisUtterance" in window;
-  const synth = browserSpeechSupported ? window.speechSynthesis : null;
   const audioLibrary = window.LITHERA_NARRATION_AUDIO || {};
-  const supported = browserSpeechSupported || Object.keys(audioLibrary).length > 0;
+  const voiceName = window.LITHERA_NARRATION_VOICE?.label || "Indonesia";
+  const supported = typeof Audio === "function" && Object.keys(audioLibrary).length > 0;
   const records = new Set();
   const mounted = new WeakMap();
   let active = null;
-  let version = 0;
   let pendingSync = false;
-  const mobileSpeech = /Android|iPhone|iPad|iPod/i.test(navigator.userAgent)
-    || (navigator.platform === "MacIntel" && navigator.maxTouchPoints > 1);
 
   const playIcon = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="m9 5 11 7-11 7Z" fill="currentColor"/></svg>';
 
@@ -45,32 +41,14 @@
     const record = session.record;
     unhighlight();
     active = null;
-    version += 1;
     session.audio?.pause();
     if (session.audio) { session.audio.removeAttribute("src"); session.audio.load(); }
-    synth?.cancel();
     setStatus(record, message);
     updateControls(record);
   }
 
-  function chooseVoice() {
-    if (!synth) return null;
-    const voices = synth.getVoices().filter((voice) => /^id(?:[-_]|$)/i.test(voice.lang));
-    const score = (voice) => {
-      const name = `${voice.name} ${voice.voiceURI}`;
-      return (/natural|neural|premium|enhanced/i.test(name) ? 100 : 0)
-        + (/gadis|sari/i.test(name) ? 30 : 0)
-        + (/google/i.test(name) ? 20 : 0)
-        + (!voice.localService ? 10 : 0)
-        + (voice.default ? 1 : 0);
-    };
-    return voices.sort((a, b) => score(b) - score(a))[0] || null;
-  }
-
   function readyStatus() {
-    if (Object.keys(audioLibrary).length) return "Suara AI Indonesia · hangat dan natural.";
-    const voice = chooseVoice();
-    return voice ? `Bahasa Indonesia · ${voice.name}` : "Bahasa Indonesia · suara mengikuti perangkat.";
+    return `Suara AI ${voiceName} · ceria dan natural.`;
   }
 
   function playAudio(session, clip) {
@@ -93,79 +71,19 @@
       session.queue[index]?.element?.classList.add("narration-reading");
     };
     audio.addEventListener("playing", () => {
-      if (current() && session.state === "playing") { setStatus(session.record, "Sedang membacakan penjelasan."); highlight(); }
+      if (current() && session.state === "playing") { setStatus(session.record, `Suara AI ${voiceName} · sedang membacakan penjelasan.`); highlight(); }
     });
     audio.addEventListener("waiting", () => {
-      if (current() && session.state === "playing") setStatus(session.record, "Menyiapkan audio…");
+      if (current() && session.state === "playing") setStatus(session.record, `Memuat suara AI ${voiceName}…`);
     });
     audio.addEventListener("timeupdate", highlight);
     audio.addEventListener("ended", () => { if (current()) stop("Selesai dibacakan. Kamu bisa mendengarkannya lagi."); });
     const failed = () => {
       if (!current() || session.state !== "playing") return;
-      // Only fall back before playback starts, to avoid repeating a passage.
-      if (audio.currentTime === 0 && browserSpeechSupported) {
-        audio.pause();
-        session.audio = null;
-        setStatus(session.record, "Audio belum tersedia. Menggunakan suara perangkat.");
-        speakQueue();
-      } else stop("Audio belum dapat diputar. Ketuk Dengarkan untuk mencoba lagi.");
+      stop("Audio AI belum dapat dimuat. Periksa koneksi, lalu ketuk Dengarkan untuk mencoba lagi.");
     };
     audio.addEventListener("error", failed);
     audio.play().catch(failed);
-  }
-
-  function speakQueue() {
-    const session = active;
-    if (!session || session.state !== "playing") return;
-    if (!session.queue[session.index]) {
-      stop("Selesai dibacakan. Kamu bisa mendengarkannya lagi.");
-      return;
-    }
-    const token = ++version;
-    const current = () => active === session && version === token;
-    session.nativePaused = false;
-    session.utterances = session.queue.slice(session.index).map((chunk, relativeIndex) => {
-      const index = session.index + relativeIndex;
-      const startOffset = relativeIndex === 0 ? session.offset : 0;
-      const utterance = new SpeechSynthesisUtterance(chunk.text.slice(startOffset));
-      utterance.lang = "id-ID";
-      utterance.voice = session.voice;
-      utterance.rate = Number(session.record.rate.value);
-      // Keep the selected voice's own prosody rather than artificially shifting pitch.
-      utterance.pitch = 1;
-      utterance.volume = 1;
-      utterance.onstart = () => {
-        if (!current()) return;
-        unhighlight();
-        session.index = index;
-        session.offset = startOffset;
-        chunk.element?.classList.add("narration-reading");
-        setStatus(session.record, "Sedang membacakan penjelasan.");
-      };
-      utterance.onboundary = (event) => {
-        if (current() && event.name === "word") session.offset = startOffset + event.charIndex;
-      };
-      utterance.onend = () => {
-        if (!current()) return;
-        unhighlight();
-        session.index = index + 1;
-        session.offset = 0;
-        if (session.index === session.queue.length) stop("Selesai dibacakan. Kamu bisa mendengarkannya lagi.");
-      };
-      utterance.onerror = (event) => {
-        if (!current()) return;
-        stop(event.error === "not-allowed"
-          ? "Suara belum diizinkan. Ketuk Dengarkan untuk mencoba lagi."
-          : "Suara belum dapat diputar. Coba lagi atau gunakan browser yang mendukung pembacaan suara.");
-      };
-      return utterance;
-    });
-    // Cancellation can leave a browser's shared speech engine paused.
-    synth.resume();
-    // Queue the whole passage together: the engine prepares the next sentence
-    // without waiting for JavaScript to restart speech after every short chunk.
-    try { session.utterances.forEach((utterance) => synth.speak(utterance)); }
-    catch { stop("Suara belum dapat diputar di perangkat ini."); }
   }
 
   function play(record) {
@@ -179,11 +97,7 @@
         session.audio.play().catch(() => {
           if (active === session && session.state === "playing") stop("Audio belum dapat diputar. Ketuk Dengarkan untuk mencoba lagi.");
         });
-      } else if (active.nativePaused) {
-        active.nativePaused = false;
-        active.queue[active.index]?.element?.classList.add("narration-reading");
-        synth.resume();
-      } else speakQueue();
+      }
       return;
     }
     stop();
@@ -192,31 +106,20 @@
       setStatus(record, "Belum ada penjelasan untuk dibacakan.");
       return;
     }
-    active = { record, queue, index: 0, offset: 0, state: "playing", voice: chooseVoice(), utterances: [], nativePaused: false };
-    synth?.cancel();
-    setStatus(record, "Menyiapkan suara bahasa Indonesia…");
+    active = { record, queue, index: 0, state: "playing", audio: null };
+    setStatus(record, `Memuat suara AI ${voiceName}…`);
     updateControls(record);
     const text = queue.map((chunk) => chunk.text).join(" ");
     const clip = audioLibrary[passageKey(text)];
     if (clip?.text === text) playAudio(active, clip);
-    else if (browserSpeechSupported) speakQueue();
-    else stop("Audio untuk penjelasan ini belum tersedia.");
+    else stop("Rekaman suara AI belum cocok dengan penjelasan ini. Muat ulang halaman untuk memperbaruinya.");
   }
 
   function pause() {
     if (!active || active.state !== "playing") return;
     unhighlight();
     active.state = "paused";
-    if (active.audio) {
-      active.audio.pause();
-    } else if (mobileSpeech) {
-      // Mobile engines may not resume a paused utterance. Preserve the word.
-      version += 1;
-      synth.cancel();
-    } else {
-      active.nativePaused = true;
-      synth.pause();
-    }
+    active.audio?.pause();
     setStatus(active.record, "Dijeda. Ketuk Lanjutkan untuk meneruskan pembacaan.");
     updateControls(active.record);
   }
@@ -255,18 +158,7 @@
     record.pause.addEventListener("click", pause);
     record.stop.addEventListener("click", () => stop());
     record.rate.addEventListener("change", () => {
-      if (active?.record === record && active.audio) {
-        active.audio.playbackRate = Number(record.rate.value);
-      } else if (active?.record === record && active.state === "playing") {
-        unhighlight();
-        version += 1;
-        synth.cancel();
-        speakQueue();
-      } else if (active?.record === record && active.nativePaused) {
-        active.nativePaused = false;
-        version += 1;
-        synth.cancel();
-      }
+      if (active?.record === record && active.audio) active.audio.playbackRate = Number(record.rate.value);
     });
     setStatus(record, supported ? readyStatus() : "Pembacaan suara belum tersedia di browser ini.");
     updateControls(record);
@@ -318,12 +210,5 @@
   window.addEventListener("popstate", () => stop());
   window.addEventListener("pagehide", () => stop());
   document.addEventListener("visibilitychange", () => { if (document.hidden) pause(); });
-  // Voice lists may arrive after the page loads. Freeze one voice per passage.
-  if (browserSpeechSupported) {
-    synth.getVoices();
-    synth.addEventListener("voiceschanged", () => {
-      for (const record of records) if (active?.record !== record) setStatus(record, readyStatus());
-    });
-  }
   sync();
 })();

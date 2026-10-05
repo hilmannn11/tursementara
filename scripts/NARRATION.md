@@ -1,7 +1,10 @@
 # Indonesian narration
 
-The site plays static MP3 recordings generated with `id-ID-GadisNeural`, at
-`+3%` speaking rate and `+2Hz` pitch. Each complete explanation is one recording;
+The site plays static MP3 recordings generated with `en-US-EmmaMultilingualNeural`, at
+`+3%` speaking rate and the voice's original pitch. Emma's multilingual model
+supports Indonesian and is categorized as cheerful, clear, and conversational.
+Microsoft documents its [Indonesian language support](https://learn.microsoft.com/en-us/azure/ai-services/speech-service/speech-synthesis-markup-voice#multilingual-voices).
+Each complete explanation is one recording;
 word timing marks move the reading highlight between its paragraphs.
 
 The audio library covers About, the tour introduction, research summaries,
@@ -11,8 +14,13 @@ removed at the user's request remains absent.
 
 No visitor account, API key, or live synthesis server is required. Playback
 uses browser audio, including on devices without Web Speech support. If audio
-cannot load before playback starts or newly edited text has no recording,
-the existing browser speech engine is used when available.
+cannot load or newly edited text has no recording, show a retry/update message.
+There is no automatic fallback to a device voice, which could sound robotic.
+The player names the voice in its loading and playback status.
+
+Emma recordings use the separate `assets/narration/emma-conversation-v1/`
+directory to prevent playback of a cached older voice. Existing Gadis files
+remain available for older tabs until those tabs reload.
 
 ## Refresh recordings after changing narrated content
 
