@@ -3,6 +3,7 @@
   if (!section) return;
 
   const cards = [...section.querySelectorAll('.archive-spread-card')];
+  const stage = section.querySelector('.archive-spread-stage');
   const copy = section.querySelector('.archive-spread-copy');
   const hint = section.querySelector('.archive-spread-hint');
   const reducedMotion = matchMedia('(prefers-reduced-motion: reduce)');
@@ -16,11 +17,24 @@
     frame = 0;
     if (section.closest('[hidden]')) return;
 
+    const navHeight = document.querySelector('.explore-nav')?.getBoundingClientRect().height ?? 0;
+    stage.style.setProperty('--archive-nav-height', `${navHeight}px`);
     const bounds = section.getBoundingClientRect();
     const available = Math.max(1, bounds.height - innerHeight);
     const scroll = clamp(-bounds.top / available, 0, 1);
     const progress = reducedMotion.matches ? 1 : clamp((scroll - .12) / .78, 0, 1);
     const small = innerWidth < 701;
+
+    const ambientProgress = reducedMotion.matches ? .5 : progress;
+    const ambientPointerX = !small && !reducedMotion.matches ? pointerX : 0;
+    const ambientPointerY = !small && !reducedMotion.matches ? pointerY : 0;
+    stage.style.setProperty('--ambient-x', `${(ambientProgress - .5) * 7 + ambientPointerX * 1.4}%`);
+    stage.style.setProperty('--ambient-y', `${(ambientProgress - .5) * -5 + ambientPointerY * 1.1}%`);
+    stage.style.setProperty('--ambient-scale', String(1 + ambientProgress * .08));
+    stage.style.setProperty('--contour-x', `${(ambientProgress - .5) * -3 - ambientPointerX * .6}%`);
+    stage.style.setProperty('--contour-y', `${(ambientProgress - .5) * 3 - ambientPointerY * .5}%`);
+    stage.style.setProperty('--contour-angle', `${-4 + ambientProgress * 8}deg`);
+    stage.style.setProperty('--contour-opacity', String(.16 + ambientProgress * .1));
 
     cards.forEach((card, index) => {
       const x = Number(card.dataset[small ? 'smallX' : 'x']);
