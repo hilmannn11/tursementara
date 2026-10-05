@@ -4,10 +4,6 @@
     kendenglembu: {
       apa: "Noerwidi, S., & Sulistyarto, P. H. (2011). Awal kolonisasi Austronesia di tenggara Pulau Jawa: Perspektif Situs Kendenglembu. AMERTA, 29(1), 45–60. https://ejournal.brin.go.id/amerta/article/view/3521",
       mla: 'Noerwidi, Sofwan, and Priyatno Hadi Sulistyarto. "Awal Kolonisasi Austronesia di Tenggara Pulau Jawa: Perspektif Situs Kendenglembu." AMERTA, vol. 29, no. 1, 2011, pp. 45–60. https://ejournal.brin.go.id/amerta/article/view/3521.'
-    },
-    malangsari: {
-      apa: "Kasnowihardjo, G. (2017). Hasil ekskavasi Situs Malangsari, Banyuwangi: Data baru dolmen di Jawa Timur. Berkala Arkeologi, 37(1), 1–14. https://doi.org/10.30883/jba.v37i1.108",
-      mla: 'Kasnowihardjo, Gunadi. "Hasil Ekskavasi Situs Malangsari, Banyuwangi: Data Baru Dolmen di Jawa Timur." Berkala Arkeologi, vol. 37, no. 1, 2017, pp. 1–14. https://doi.org/10.30883/jba.v37i1.108.'
     }
   };
   const modal = document.querySelector("#citationModal");

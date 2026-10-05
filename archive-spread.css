@@ -1,0 +1,82 @@
+#archive .archive-spread {
+  position: relative;
+  width: 100vw;
+  height: 320svh;
+  margin: 42px 0 0 calc(50% - 50vw);
+  background: #ececeb;
+}
+#archive .archive-spread-stage {
+  position: sticky;
+  top: 0;
+  width: 100%;
+  height: 100svh;
+  overflow: hidden;
+  isolation: isolate;
+}
+#archive .archive-spread-copy {
+  position: absolute;
+  inset: 0;
+  z-index: 5;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+  text-align: center;
+  pointer-events: none;
+  opacity: 0;
+}
+#archive .archive-spread-copy h2 {
+  max-width: 9ch;
+  margin: 0;
+  color: #18483d;
+  font: 500 clamp(42px, 5vw, 84px)/1.05 Fraunces, Georgia, serif;
+}
+#archive .archive-spread-copy p {
+  max-width: 38ch;
+  margin: 16px 0 0;
+  color: #455c50;
+  font-size: clamp(14px, 1.25vw, 19px);
+  line-height: 1.5;
+}
+#archive .archive-spread-card {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  z-index: var(--z);
+  width: clamp(100px, 14vw, 220px);
+  height: clamp(142px, 24vh, 310px);
+  overflow: hidden;
+  border: 6px solid #fff;
+  border-radius: 9px;
+  background: #ddd;
+  box-shadow: 0 14px 34px rgba(27, 42, 33, .2);
+  transform: translate(-50%, -50%) rotate(var(--start-rotate));
+  will-change: transform;
+}
+#archive .archive-spread-card img { display: block; width: 100%; height: 100%; object-fit: cover; }
+#archive .archive-spread-hint {
+  position: absolute;
+  right: 0;
+  bottom: 4vh;
+  left: 0;
+  z-index: 20;
+  color: #18483d;
+  font-size: 12px;
+  font-weight: 750;
+  letter-spacing: .16em;
+  text-align: center;
+  text-transform: uppercase;
+  pointer-events: none;
+}
+@media (max-width: 700px) {
+  #archive .archive-spread { height: 290svh; }
+  #archive .archive-spread-card { width: 25vw; height: 19vh; border-width: 3px; border-radius: 6px; }
+  #archive .archive-spread-copy { padding: 0 14vw; }
+  #archive .archive-spread-copy h2 { font-size: clamp(31px, 8vw, 50px); }
+  #archive .archive-spread-copy p { font-size: 13px; }
+}
+@media (prefers-reduced-motion: reduce) {
+  #archive .archive-spread { height: 100svh; }
+  #archive .archive-spread-card { will-change: auto; }
+}

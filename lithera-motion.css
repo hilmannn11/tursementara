@@ -30,7 +30,7 @@
   }
 }
 
-/* A tiny Lithera mark rises above Arsip on hover or keyboard focus. */
+/* Tiny Lithera mark rises from the Archive label on hover or keyboard focus. */
 .explore-nav-links a[data-explore-route="archive"]::before {
   content: "";
   position: absolute;
