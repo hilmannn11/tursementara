@@ -82,6 +82,7 @@
     Object.assign(panel.style, expanded);
     positionCaption(expanded);
     section.dataset.photoOpen = 'true';
+    section.dataset.photoCopyHidden = 'true';
     viewer.showModal();
     card.style.visibility = 'hidden';
     movePhoto(from, expanded);
@@ -93,6 +94,7 @@
   async function closePhoto() {
     if (!viewer.open || closing) return;
     closing = true;
+    delete section.dataset.photoCopyHidden;
     const from = geometry(panel);
     await Promise.all([
       movePhoto(from, geometry(activeCard)),

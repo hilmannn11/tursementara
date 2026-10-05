@@ -69,20 +69,33 @@
   opacity: 0;
   transition: opacity 200ms ease;
 }
-#archive .archive-spread[data-photo-open="true"] .archive-spread-copy { opacity: 0 !important; }
 #archive .archive-spread-copy h2 {
-  max-width: 9ch;
+  max-width: none;
   margin: 0;
+  padding: .05em .1em;
+  overflow: hidden;
   color: #f5eedf;
   text-shadow: 0 4px 28px rgba(0, 15, 12, .25);
   font: 500 clamp(42px, 5vw, 84px)/1.05 Fraunces, Georgia, serif;
 }
+#archive .archive-spread-title-line {
+  display: block;
+  white-space: nowrap;
+  transform: translateX(0);
+  opacity: 1;
+  transition: transform 560ms cubic-bezier(.22, .8, .25, 1), opacity 420ms ease;
+}
+#archive .archive-spread-copy { --copy-shift: clamp(40px, 7vw, 100px); }
+#archive .archive-spread[data-photo-copy-hidden="true"] .archive-spread-title-line:first-child { transform: translateX(var(--copy-shift)); opacity: 0; }
+#archive .archive-spread[data-photo-copy-hidden="true"] .archive-spread-title-line:last-child { transform: translateX(calc(-1 * var(--copy-shift))); opacity: 0; }
+#archive .archive-spread[data-photo-copy-hidden="true"] .archive-spread-copy p { transform: translateX(calc(-.45 * var(--copy-shift))); opacity: 0; }
 #archive .archive-spread-copy p {
   max-width: 38ch;
   margin: 16px 0 0;
   color: #cedacb;
   font-size: clamp(14px, 1.25vw, 19px);
   line-height: 1.5;
+  transition: transform 560ms cubic-bezier(.22, .8, .25, 1), opacity 420ms ease;
 }
 #archive .archive-spread-card {
   position: absolute;
@@ -143,6 +156,7 @@
   #archive .archive-spread-atmosphere { animation: none; transform: none; will-change: auto; }
   #archive .archive-spread-contours { transform: none; will-change: auto; }
   #archive .archive-spread-hint span { animation: none; background: none; -webkit-text-fill-color: currentColor; }
+  #archive .archive-spread-title-line, #archive .archive-spread-copy p { transition: none; transform: none !important; }
 }
 
 .archive-photo-viewer {
