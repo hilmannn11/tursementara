@@ -97,7 +97,10 @@
   transform: translate(-50%, -50%) rotate(var(--start-rotate));
   will-change: transform;
 }
-#archive .archive-spread-card img { display: block; width: 100%; height: 100%; object-fit: cover; }
+#archive .archive-spread-card { padding: 0; appearance: none; cursor: zoom-in; touch-action: manipulation; }
+#archive .archive-spread-card:hover { border-color: #dcc79e; }
+#archive .archive-spread-card:focus-visible { outline: 3px solid #dcc79e; outline-offset: 5px; }
+#archive .archive-spread-card img { display: block; width: 100%; height: 100%; object-fit: cover; pointer-events: none; user-select: none; }
 #archive .archive-spread-hint {
   position: absolute;
   right: 0;
@@ -125,3 +128,50 @@
   #archive .archive-spread-atmosphere { animation: none; transform: none; will-change: auto; }
   #archive .archive-spread-contours { transform: none; will-change: auto; }
 }
+
+.archive-photo-viewer {
+  position: fixed;
+  inset: 0;
+  width: 100vw;
+  height: 100%;
+  max-width: none;
+  max-height: none;
+  margin: 0;
+  padding: 0;
+  overflow: hidden;
+  border: 0;
+  background: transparent;
+  color: #f5eedf;
+}
+.archive-photo-viewer::backdrop { background: transparent; }
+.archive-photo-scrim { position: absolute; inset: 0; background: rgba(3, 19, 16, .87); backdrop-filter: blur(8px); }
+.archive-photo-frame {
+  position: fixed;
+  margin: 0;
+  overflow: hidden;
+  border: 6px solid #f6f1e8;
+  border-radius: 9px;
+  background: #f6f1e8;
+  box-shadow: 0 24px 80px rgba(0, 0, 0, .4);
+  transform-origin: center;
+}
+.archive-photo-frame img { display: block; width: 100%; height: 100%; object-fit: cover; user-select: none; }
+.archive-photo-close {
+  position: absolute;
+  top: max(16px, env(safe-area-inset-top));
+  right: max(16px, env(safe-area-inset-right));
+  display: grid;
+  place-items: center;
+  width: 44px;
+  height: 44px;
+  padding: 0;
+  border: 1px solid rgba(245, 238, 223, .4);
+  border-radius: 50%;
+  background: rgba(20, 46, 38, .9);
+  color: #f5eedf;
+  font: 300 30px/1 system-ui, sans-serif;
+  cursor: pointer;
+}
+.archive-photo-close:hover { background: #365b49; }
+.archive-photo-close:focus-visible { outline: 3px solid #dcc79e; outline-offset: 4px; }
+.archive-photo-caption { position: absolute; inset: auto 16px 16px; margin: 0; color: #e4e9dd; font: 500 13px/1.5 system-ui, sans-serif; text-align: center; pointer-events: none; }

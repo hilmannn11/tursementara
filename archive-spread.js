@@ -64,7 +64,7 @@
   addEventListener('scroll', schedule, { passive: true });
   addEventListener('resize', schedule);
   addEventListener('pointermove', event => {
-    if (coarsePointer.matches) return;
+    if (coarsePointer.matches || section.dataset.photoOpen === 'true') return;
     pointerX = event.clientX / innerWidth * 2 - 1;
     pointerY = event.clientY / innerHeight * 2 - 1;
     schedule();
