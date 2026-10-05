@@ -30,15 +30,8 @@ const STONE_MODELS = {
 };
 const MODEL_VIEWER_URL = "https://ajax.googleapis.com/ajax/libs/model-viewer/4.3.1/model-viewer.min.js";
 const PLAQUE_PHOTO = "./assets/photos/papan-cagar-budaya-kendenglembu.webp";
-const panoramaTiles = (number) => ({
-  basePath: `./assets/panoramas/tiles/${number}`,
-  path: "/%l/%s%y_%x",
-  fallbackPath: "/fallback/%s",
-  extension: "webp",
-  tileResolution: 512,
-  maxLevel: 3,
-  cubeResolution: 2048,
-});
+const useHdPanoramas = !window.matchMedia("(max-width: 900px), (pointer: coarse)").matches;
+const panoramaAsset = (number) => `./assets/panoramas/${number}${useHdPanoramas ? "-hd" : ""}.webp`;
 let modelViewerImport;
 
 function loadModelViewer() {
@@ -51,7 +44,7 @@ const rooms = [
     id: "titik-1",
     title: "Titik 1",
     description: "Awal jalur virtual. Klik panah di lantai untuk berjalan maju ke titik berikutnya.",
-    multiRes: panoramaTiles(1),
+    panorama: panoramaAsset(1),
     personBlurBoxes: PERSON_BLUR_BOXES[1],
     badge: "The Wanderer",
     badgeImage: "./assets/badges/homo-erectus.webp",
@@ -66,7 +59,7 @@ const rooms = [
     id: "titik-2",
     title: "Titik 2",
     description: "Titik lanjutan. Arahkan pandangan ke jalur depan, lalu klik panah untuk maju lagi.",
-    multiRes: panoramaTiles(2),
+    panorama: panoramaAsset(2),
     personBlurBoxes: PERSON_BLUR_BOXES[2],
     stoneHotspot: { pitch: -7, yaw: -57 },
     secondStoneHotspot: { pitch: -12, yaw: -51 },
@@ -83,7 +76,7 @@ const rooms = [
     id: "titik-3",
     title: "Titik 3",
     description: "Titik ketiga jalur virtual. Teruskan perjalanan ke panorama berikutnya.",
-    multiRes: panoramaTiles(3),
+    panorama: panoramaAsset(3),
     personBlurBoxes: PERSON_BLUR_BOXES[3],
     stoneHotspot: { pitch: -10, yaw: -54 },
     secondStoneHotspot: { pitch: -20, yaw: -54 },
@@ -104,7 +97,7 @@ const rooms = [
     description: number === 7
       ? "Titik terakhir dalam rangkaian tujuh panorama. Putar pandangan ke belakang untuk kembali."
       : `Titik ${number} dalam jalur virtual. Lanjutkan ke panorama berikutnya atau kembali ke titik sebelumnya.`,
-    multiRes: panoramaTiles(number),
+    panorama: panoramaAsset(number),
     personBlurBoxes: PERSON_BLUR_BOXES[number] || [],
     ...(number === 4 ? { stoneHotspot: { pitch: -16, yaw: -44 } } : {}),
     ...(number === 4 ? { secondStoneHotspot: { pitch: -25, yaw: -54 } } : {}),
@@ -119,32 +112,6 @@ const rooms = [
     },
   })),
 ];
-
-const panoramaPreloads = new Map();
-function preloadPanoramaTiles(room) {
-  if (!room || panoramaPreloads.has(room.id)) return;
-  const base = room.multiRes.basePath;
-  const paths = [..."fbudlr"].map((face) => `${base}/1/${face}0_0.webp`);
-  for (let row = 0; row < 2; row++) {
-    for (let column = 0; column < 2; column++) {
-      paths.push(`${base}/2/f${row}_${column}.webp`);
-    }
-  }
-  const images = paths.map((path) => {
-    const image = new Image();
-    image.decoding = "async";
-    image.fetchPriority = "low";
-    image.src = path;
-    return image;
-  });
-  panoramaPreloads.set(room.id, images);
-  if (panoramaPreloads.size > 2) panoramaPreloads.delete(panoramaPreloads.keys().next().value);
-}
-
-if (!location.hash || location.hash === "#home" || location.hash === "#sites") {
-  if ("requestIdleCallback" in window) requestIdleCallback(() => preloadPanoramaTiles(rooms[0]), { timeout: 1500 });
-  else setTimeout(() => preloadPanoramaTiles(rooms[0]), 400);
-}
 
 const badgeRooms = rooms.filter((room) => room.badge);
 const QUIZ_LESSONS = { ...STONE_LESSONS, plaque: PLAQUE_LESSON };
@@ -284,7 +251,7 @@ function createTour() {
   viewer = pannellum.viewer("panorama", {
     default: {
       firstScene: rooms[0].id,
-      sceneFadeDuration: 160,
+      sceneFadeDuration: 450,
       autoLoad: true,
       compass: false,
       showZoomCtrl: false,
@@ -297,8 +264,8 @@ function createTour() {
         room.id,
         {
           title: room.title,
-          type: "multires",
-          multiRes: room.multiRes,
+          type: "equirectangular",
+          panorama: room.panorama,
           hotSpots: [
             ...[
               room.stoneHotspot && { ...room.stoneHotspot, model: "first" },
@@ -343,8 +310,6 @@ function createTour() {
   viewer.on("scenechange", (sceneId) => updateRoomPanel(sceneId));
   viewer.on("zoomchange", updateBlockedHotspotSize);
   viewer.on("load", () => {
-    const nextRoom = rooms[rooms.findIndex((room) => room.id === currentRoom.id) + 1];
-    preloadPanoramaTiles(nextRoom);
     updateBlockedHotspotSize();
     updatePersonBlurSizes();
     viewerError.hidden = true;
