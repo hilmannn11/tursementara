@@ -9,7 +9,7 @@
 
   const playIcon = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="m9 5 11 7-11 7Z" fill="currentColor"/></svg>';
 
-  const { collect, passageKey } = window.LitheraNarrationContent;
+  const { collect, passageKey, objectOptions } = window.LitheraNarrationContent;
 
   function visible(root) {
     return root.isConnected && !root.closest('[hidden], dialog:not([open])') && root.getClientRects().length > 0;
@@ -176,7 +176,7 @@
     }
     mount(document.querySelector('#archiveModalContent'), {
       label: "Dengarkan semua penjelasan", after: '#archiveTitle',
-      selector: 'h2, h3, p, dt, dd, .stone-references li',
+      ...objectOptions,
     });
     mount(document.querySelector('#quizFeedback'), { label: "Dengarkan pembahasan", afterSelf: true });
     mount(document.querySelector('#aboutPage .about-page-inner'), { label: "Dengarkan tentang Lithera", after: 'h1', selector: 'h1, p' });

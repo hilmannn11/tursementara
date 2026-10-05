@@ -12,7 +12,7 @@ const { chromium } = require(process.env.PLAYWRIGHT_MODULE || 'playwright');
     await page.goto(pathToFileURL(path.join(root, 'index.html')).href + '#about', { waitUntil: 'load' });
     await page.waitForTimeout(300);
     const passages = await page.evaluate(async () => {
-      const { collect, passageKey } = window.LitheraNarrationContent;
+      const { collect, passageKey, objectOptions } = window.LitheraNarrationContent;
       const output = {};
       const add = (record) => {
         const queue = collect(record);
@@ -29,7 +29,7 @@ const { chromium } = require(process.env.PLAYWRIGHT_MODULE || 'playwright');
         if (model === 'plaque') openPlaquePhoto();
         else openArchive('titik-2', model);
         await new Promise(resolve => setTimeout(resolve, 100));
-        add({ root: document.querySelector('#archiveModalContent'), selector: 'h2, h3, p, dt, dd, .stone-references li' });
+        add({ root: document.querySelector('#archiveModalContent'), ...objectOptions });
         document.querySelector('#archiveModal').close();
       }
       const paragraph = document.createElement('p');

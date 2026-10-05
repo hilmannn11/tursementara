@@ -6,6 +6,9 @@ supports Indonesian and is categorized as cheerful, clear, and conversational.
 Microsoft documents its [Indonesian language support](https://learn.microsoft.com/en-us/azure/ai-services/speech-service/speech-synthesis-markup-voice#multilingual-voices).
 Each complete explanation is one recording;
 word timing marks move the reading highlight between its paragraphs.
+Object narrations start at the first explanation paragraph (`.stone-observation p`),
+skipping the object title, subtitle, image instructions, and observation heading.
+The shared `objectOptions` controls both playback text and the exported recordings.
 
 The audio library covers About, the tour introduction, research summaries,
 both stone explanations, the site/decree explanation, and all nine questions'

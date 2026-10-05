@@ -49,8 +49,11 @@
   }
 
   function collect(record) {
+    const start = record.startAt ? record.root.querySelector(record.startAt) : null;
+    if (record.startAt && !start) return [];
     const nodes = record.selector ? [...record.root.querySelectorAll(record.selector)] : [record.root];
     const blocks = nodes
+      .filter((node) => !start || node === start || (start.compareDocumentPosition(node) & Node.DOCUMENT_POSITION_FOLLOWING))
       .filter((node) => !node.closest('[data-narration-ui], .stone-inline-source, .stone-quiz-invitation, .glossary-tooltip') && !node.matches('.eyebrow, .stone-model-caption, .plaque-photo-caption'))
       .map((element) => ({ element, text: spokenText(element) }))
       .filter((block) => block.text);
@@ -68,5 +71,9 @@
     for (let i = 0; i < text.length; i++) hash = Math.imul(hash ^ text.charCodeAt(i), 16777619);
     return (hash >>> 0).toString(16).padStart(8, "0");
   }
-  window.LitheraNarrationContent = Object.freeze({ collect, chunks, speechText, passageKey });
+  const objectOptions = Object.freeze({
+    selector: 'h2, h3, p, dt, dd, .stone-references li',
+    startAt: '.stone-observation p',
+  });
+  window.LitheraNarrationContent = Object.freeze({ collect, chunks, speechText, passageKey, objectOptions });
 })();
