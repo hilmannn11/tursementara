@@ -73,7 +73,6 @@
   max-width: none;
   margin: 0;
   padding: .05em .1em;
-  overflow: hidden;
   color: #f5eedf;
   text-shadow: 0 4px 28px rgba(0, 15, 12, .25);
   font: 500 clamp(42px, 5vw, 84px)/1.05 Fraunces, Georgia, serif;
