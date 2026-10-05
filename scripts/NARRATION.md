@@ -9,6 +9,11 @@ word timing marks move the reading highlight between its paragraphs.
 Object narrations start at the first explanation paragraph (`.stone-observation p`),
 skipping the object title, subtitle, image instructions, and observation heading.
 The shared `objectOptions` controls both playback text and the exported recordings.
+Each object subheading has its own player. It uses paragraph timing marks in
+the complete recording to play only the chosen subpart, then stops before the
+next subheading. The main player mirrors its controls while a subpart plays.
+Players include an accessible progress slider with elapsed and total time;
+seeking keeps the current paused or playing state.
 
 The audio library covers About, the tour introduction, research summaries,
 both stone explanations, the site/decree explanation, and all nine questions'

@@ -1,5 +1,5 @@
 .narration-player { margin: 14px 0 20px; padding: 14px; border: 1px solid #cad4ce; border-radius: 10px; background: #f2f5ef; color: #183b36; }
-.narration-player[hidden], .narration-player button[hidden] { display: none; }
+.narration-player[hidden], .narration-player [hidden] { display: none; }
 .narration-actions { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; }
 .narration-actions button { display: inline-flex; align-items: center; justify-content: center; gap: 8px; min-height: 44px; padding: 9px 13px; border: 1px solid #738d81; border-radius: 7px; background: #fff; color: #183b36; font: 600 .85rem/1.4 system-ui, sans-serif; cursor: pointer; white-space: normal; text-align: center; }
 .narration-actions .narration-play { border-color: #183b36; background: #183b36; color: #fff; }
@@ -11,8 +11,19 @@
 .narration-speed select { min-height: 44px; max-width: 110px; padding: 6px 8px; border: 1px solid #a2b3a7; border-radius: 6px; background: #fff; color: #183b36; font: inherit; }
 .narration-player .narration-status { margin: 9px 0 0; font-size: .78rem; line-height: 1.6; color: #455f53; }
 .narration-reading { background-color: #e7eee1; box-shadow: -3px 0 0 #55776a; }
+.narration-timeline { margin-top: 12px; }
+.narration-seek { display: block; width: 100%; min-height: 32px; margin: 0; accent-color: #285d50; cursor: pointer; }
+.narration-seek:disabled { opacity: .5; cursor: wait; }
+.narration-seek:focus-visible { outline: 3px solid #a44f39; outline-offset: 3px; border-radius: 4px; }
+.narration-times { display: flex; justify-content: space-between; color: #455f53; font: 500 .78rem/1.4 system-ui, sans-serif; font-variant-numeric: tabular-nums; }
+.narration-part-player { margin: 0 0 14px; padding: 0; border: 0; background: transparent; }
+.narration-part-player:not([data-active="true"]) .narration-speed,
+.narration-part-player:not([data-active="true"]) .narration-status { display: none; }
+.narration-part-player .narration-actions .narration-play { background: #f2f5ef; color: #285d50; border-color: #cad4ce; }
+.narration-part-player[data-active="true"] { padding: 12px; border: 1px solid #cad4ce; border-radius: 10px; background: #f2f5ef; }
 @media (max-width: 620px) {
   .narration-player { padding: 12px; }
   .narration-play { flex: 1 0 100%; }
   .narration-speed { margin-left: auto; }
+  .narration-part-player:not([data-active="true"]) .narration-play { flex: 0 1 auto; }
 }
