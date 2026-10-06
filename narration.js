@@ -300,7 +300,6 @@
     }
     mount(document.querySelector('#quizFeedback'), { label: "Dengarkan pembahasan", afterSelf: true });
     mount(document.querySelector('#aboutPage .about-page-inner'), { label: "Dengarkan tentang Lithera", after: 'h1', selector: 'h1, p' });
-    mount(document.querySelector('#siteChooser .site-chooser-inner'), { label: "Dengarkan pengantar tur", after: '.site-chooser-description', selector: 'h2, .site-chooser-description' });
     document.querySelectorAll('.research-entry').forEach((root) => mount(root, {
       label: "Dengarkan ringkasan penelitian", after: 'h4', selector: 'h4, p', glossary: true,
     }));
