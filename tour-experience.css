@@ -61,10 +61,6 @@
   background: #f7f5ef;
 }
 #kendenglembu .tour-heading {
-  display: flex;
-  align-items: end;
-  justify-content: space-between;
-  gap: 24px;
   max-width: none;
   margin: 0 0 25px;
 }
@@ -86,25 +82,8 @@
   font-size: 14px;
   line-height: 1.6;
 }
-.tour-heading-meta { display: flex; gap: 10px; flex: 0 0 auto; padding-bottom: 3px; }
-.tour-heading-meta span {
-  display: flex;
-  align-items: baseline;
-  gap: 8px;
-  padding: 10px 13px;
-  border: 1px solid #dce3da;
-  border-radius: 9px;
-  background: #fffcf6;
-  color: #586a61;
-  font-size: 12px;
-  white-space: nowrap;
-}
-.tour-heading-meta strong { color: #24463d; font: 600 19px/1 Georgia, serif; }
-
 #kendenglembu .tour-layout {
-  grid-template-columns: minmax(0, 1fr) minmax(288px, 344px);
-  gap: 18px;
-  align-items: stretch;
+  grid-template-columns: minmax(0, 1fr);
 }
 #kendenglembu .viewer-shell,
 #kendenglembu #panorama { height: max(580px, 72vh); min-height: 0; }
@@ -133,84 +112,15 @@
 }
 .tour-scene-dot { width: 7px; height: 7px; border-radius: 50%; background: #efc58c; }
 
-.tour-guide {
-  display: flex;
-  flex-direction: column;
-  min-width: 0;
-  height: max(580px, 72vh);
-  padding: 22px 18px 18px;
-  border: 1px solid #dce3d9;
-  border-radius: 15px;
-  background: #fffefa;
-  box-shadow: 0 10px 28px rgba(25, 47, 39, .055);
-}
-.tour-guide-topline { display: flex; justify-content: space-between; color: #ad6048; font-size: 10px; font-weight: 800; letter-spacing: .11em; text-transform: uppercase; }
-.tour-guide h3 { margin: 13px 0 5px; color: #203f36; font: 400 27px/1.15 Georgia, serif; letter-spacing: -.035em; }
-.tour-guide-intro { margin: 0 0 18px; color: #627169; font-size: 13px; line-height: 1.5; }
-.tour-route { display: flex; flex: 1 1 auto; flex-direction: column; gap: 3px; min-height: 0; overflow-y: auto; scrollbar-color: #cad8cb transparent; scrollbar-width: thin; }
-.tour-route-point {
-  display: grid;
-  grid-template-columns: 33px minmax(0, 1fr) 16px;
-  align-items: center;
-  gap: 10px;
-  width: 100%;
-  min-height: 44px;
-  padding: 4px 10px;
-  flex: 1 1 0;
-  border: 1px solid transparent;
-  border-radius: 9px;
-  background: transparent;
-  color: #25443b;
-  text-align: left;
-  cursor: pointer;
-  transition: background 160ms ease, border-color 160ms ease;
-}
-.tour-route-point:hover { background: #f2f4ec; }
-.tour-route-point:disabled { cursor: not-allowed; opacity: .55; }
-.tour-route-point:disabled:hover { background: transparent; }
-.tour-route-point.is-current { border-color: #cdded2; background: #eaf2e9; }
-.tour-route-index { display: grid; place-items: center; width: 31px; height: 31px; border: 1px solid #d9e1d6; border-radius: 50%; color: #798b7c; font: 700 11px/1 Inter, system-ui, sans-serif; }
-.tour-route-point.is-current .tour-route-index { border-color: #294d42; background: #294d42; color: white; }
-.tour-route-copy { display: flex; flex-direction: column; gap: 3px; min-width: 0; }
-.tour-route-copy strong { overflow: hidden; font-size: 13px; font-weight: 750; text-overflow: ellipsis; white-space: nowrap; }
-.tour-route-copy small { overflow: hidden; color: #738077; font-size: 11px; text-overflow: ellipsis; white-space: nowrap; }
-.tour-route-arrow { color: #678777; font-size: 15px; opacity: 0; }
-.tour-route-point:hover .tour-route-arrow, .tour-route-point.is-current .tour-route-arrow { opacity: 1; }
-.tour-guide-bottom { flex: 0 0 auto; margin-top: 12px; padding-top: 13px; border-top: 1px solid #e3e8df; }
-#tourPointDescription { min-height: 33px; margin: 0 0 12px; color: #596c61; font-size: 12px; line-height: 1.45; }
-.tour-step-actions { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
-.tour-step-actions button {
-  min-height: 42px;
-  padding: 9px 10px;
-  border: 1px solid #c9d8ca;
-  border-radius: 7px;
-  background: #fff;
-  color: #294a40;
-  font: 700 12px/1.2 Inter, system-ui, sans-serif;
-  cursor: pointer;
-}
-.tour-step-actions button:last-child { border-color: #24493e; background: #24493e; color: #fff; }
-.tour-step-actions button:hover:not(:disabled) { filter: brightness(.93); }
-.tour-step-actions button:disabled { cursor: not-allowed; opacity: .45; }
-.tour-archive-link { display: flex; justify-content: space-between; min-height: 36px; align-items: center; margin-top: 8px; color: #9b533b; font-size: 12px; font-weight: 750; text-decoration: none; }
-.tour-archive-link:hover { text-decoration: underline; text-underline-offset: 3px; }
 #kendenglembu > .provenance-note { max-width: 850px; margin: 16px 0 0; font-size: 12px; line-height: 1.6; }
 
 #kendenglembu .viewer-shell:fullscreen { height: 100vh; border: 0; border-radius: 0; }
 #kendenglembu .viewer-shell:fullscreen #panorama { height: 100%; }
 
-@media (max-width: 1080px) {
-  #kendenglembu .tour-heading { align-items: start; flex-direction: column; }
-  #kendenglembu .tour-layout { grid-template-columns: minmax(0, 1fr) 288px; }
-}
 @media (max-width: 850px) {
   #tourIntro.mission-strip { grid-template-columns: 1fr; gap: 25px; }
   #tourIntro .mission-panel { width: min(360px, 100%); }
-  #kendenglembu .tour-layout { grid-template-columns: 1fr; }
   #kendenglembu .viewer-shell, #kendenglembu #panorama { height: clamp(420px, 58vh, 650px); }
-  #kendenglembu .tour-guide { height: auto; }
-  .tour-route { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); max-height: none; overflow: visible; }
-  .tour-guide-bottom { margin-top: 16px; }
 }
 @media (max-width: 620px) {
   #tourIntro.mission-strip { padding: 28px 20px 30px; }
@@ -218,20 +128,9 @@
   #tourIntro .mission-lead { margin-top: 13px; font-size: 14px; }
   #tourIntro .mission-panel { padding: 18px; }
   #kendenglembu.tour-section { padding: 31px 16px 40px; }
-  #kendenglembu .tour-heading { gap: 17px; margin-bottom: 18px; }
+  #kendenglembu .tour-heading { margin-bottom: 18px; }
   #kendenglembu .tour-heading h2 { font-size: 32px; }
   #kendenglembu .tour-heading p:not(.eyebrow) { font-size: 13px; }
-  .tour-heading-meta { flex-wrap: wrap; gap: 7px; }
-  .tour-heading-meta span { padding: 8px 10px; font-size: 11px; }
-  .tour-heading-meta strong { font-size: 16px; }
   #kendenglembu .viewer-shell, #kendenglembu #panorama { height: clamp(380px, 57vh, 560px); }
   .tour-scene-label { top: 11px; left: 11px; padding: 8px 10px; font-size: 11px; }
-  .tour-guide { padding: 18px 14px; }
-  .tour-guide h3 { font-size: 24px; }
-  .tour-route { grid-template-columns: 1fr 1fr; gap: 6px; }
-  .tour-route-point { grid-template-columns: 26px minmax(0, 1fr); gap: 7px; min-height: 56px; padding: 7px; border-color: #e6ebe3; }
-  .tour-route-index { width: 26px; height: 26px; font-size: 10px; }
-  .tour-route-arrow { display: none; }
-  .tour-route-copy strong { font-size: 11px; }
-  .tour-route-copy small { font-size: 10px; }
 }

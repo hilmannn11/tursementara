@@ -200,9 +200,6 @@ const globalNav = document.querySelector("#globalNav");
 const viewerHint = document.querySelector("#viewerHint");
 const viewerTools = document.querySelector("#viewerTools");
 const viewerError = document.querySelector("#viewerError");
-const tourRouteButtons = [...document.querySelectorAll("[data-tour-point]")];
-const tourPrevious = document.querySelector("#tourPrevious");
-const tourNext = document.querySelector("#tourNext");
 const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)");
 let viewerHintShown = false;
 let hintCheckFrame;
@@ -279,22 +276,11 @@ function updateRoomPanel(roomId) {
   document.querySelector("#panorama").setAttribute("aria-label", `Viewer panorama 360 derajat, ${currentRoom.title}`);
   const index = rooms.findIndex((room) => room.id === currentRoom.id);
   document.querySelector("#tourSceneLabel").textContent = `Titik ${String(index + 1).padStart(2, "0")} / ${String(rooms.length).padStart(2, "0")}`;
-  document.querySelector("#tourPointDescription").textContent = currentRoom.description;
-  tourPrevious.disabled = index === 0;
-  tourNext.disabled = index === rooms.length - 1;
-  tourRouteButtons.forEach((button) => {
-    const active = button.dataset.tourPoint === currentRoom.id;
-    button.classList.toggle("is-current", active);
-    if (active) button.setAttribute("aria-current", "step");
-    else button.removeAttribute("aria-current");
-  });
 }
 
 function createTour() {
   if (!window.pannellum) {
     viewerError.hidden = false;
-    tourRouteButtons.forEach((button) => { button.disabled = true; });
-    tourNext.disabled = true;
     return;
   }
   viewer = pannellum.viewer("panorama", {
@@ -1081,15 +1067,6 @@ document.addEventListener("visibilitychange", () => {
 });
 const viewerHelp = document.querySelector("#viewerHelp");
 viewerHelp.addEventListener("click", showViewerHint);
-tourRouteButtons.forEach((button) => {
-  button.addEventListener("click", () => {
-    if (!viewer || button.dataset.tourPoint === currentRoom.id) return;
-    hideFloorArrow();
-    viewer.loadScene(button.dataset.tourPoint, null, ROUTE_FORWARD_YAW);
-  });
-});
-tourPrevious.addEventListener("click", () => walk("back"));
-tourNext.addEventListener("click", () => walk("forward"));
 viewerHint.addEventListener("pointerenter", () => clearTimeout(hintTimer));
 viewerHint.addEventListener("pointerleave", () => { hintTimer = setTimeout(hideViewerHint, 3000); });
 document.addEventListener("keydown", (event) => { if (event.key === "Escape") hideViewerHint(); });

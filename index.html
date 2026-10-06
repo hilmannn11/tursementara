@@ -27,7 +27,7 @@
     <link rel="stylesheet" href="./stone-lessons.css?v=20261004-4" />
     <link rel="stylesheet" href="./narration.css?v=20261005-sections-1" />
     <link rel="stylesheet" href="./certificate.css?v=1" />
-    <link rel="stylesheet" href="./tour-experience.css?v=1" />
+    <link rel="stylesheet" href="./tour-experience.css?v=2" />
   </head>
   <body>
     <main>
@@ -230,9 +230,8 @@
           <div>
             <p class="eyebrow">Tur Virtual 360</p>
             <h2>Jelajahi Kendenglembu</h2>
-            <p>Putar panorama untuk melihat sekitar. Pilih titik di peta rute atau ikuti panah pada jalur untuk melanjutkan perjalanan.</p>
+            <p>Putar panorama untuk melihat sekitar. Arahkan kursor ke bagian bawah panorama, lalu klik panah yang muncul untuk berpindah titik.</p>
           </div>
-          <div class="tour-heading-meta" aria-label="Ringkasan tur"><span><strong>07</strong> titik panorama</span><span><strong>02</strong> objek interaktif</span></div>
         </div>
         <div class="tour-layout">
           <div class="viewer-shell">
@@ -253,25 +252,6 @@
             </div>
             <p id="viewerError" class="viewer-error" role="alert" hidden>Panorama belum dapat dimuat. Periksa koneksi lalu muat ulang halaman. Arsip tetap dapat diakses lewat menu Arsip.</p>
           </div>
-          <aside class="tour-guide" aria-labelledby="tourGuideTitle">
-            <div class="tour-guide-topline"><span>Peta perjalanan</span><span>01 — 07</span></div>
-            <h3 id="tourGuideTitle">Pilih titik eksplorasi</h3>
-            <p class="tour-guide-intro">Setiap titik membuka sudut pandang baru di jalur virtual.</p>
-            <div class="tour-route" role="group" aria-label="Pilih titik panorama">
-              <button type="button" class="tour-route-point is-current" data-tour-point="titik-1" aria-current="step"><span class="tour-route-index">01</span><span class="tour-route-copy"><strong>Titik awal</strong><small>Mulai perjalanan</small></span><span class="tour-route-arrow" aria-hidden="true">↗</span></button>
-              <button type="button" class="tour-route-point" data-tour-point="titik-2"><span class="tour-route-index">02</span><span class="tour-route-copy"><strong>Area batu</strong><small>Objek interaktif</small></span><span class="tour-route-arrow" aria-hidden="true">↗</span></button>
-              <button type="button" class="tour-route-point" data-tour-point="titik-3"><span class="tour-route-index">03</span><span class="tour-route-copy"><strong>Jalur situs</strong><small>Objek &amp; papan informasi</small></span><span class="tour-route-arrow" aria-hidden="true">↗</span></button>
-              <button type="button" class="tour-route-point" data-tour-point="titik-4"><span class="tour-route-index">04</span><span class="tour-route-copy"><strong>Sudut berikutnya</strong><small>Objek &amp; papan informasi</small></span><span class="tour-route-arrow" aria-hidden="true">↗</span></button>
-              <button type="button" class="tour-route-point" data-tour-point="titik-5"><span class="tour-route-index">05</span><span class="tour-route-copy"><strong>Lanjut jelajah</strong><small>Objek &amp; papan informasi</small></span><span class="tour-route-arrow" aria-hidden="true">↗</span></button>
-              <button type="button" class="tour-route-point" data-tour-point="titik-6"><span class="tour-route-index">06</span><span class="tour-route-copy"><strong>Mendekati akhir</strong><small>Panorama jalur</small></span><span class="tour-route-arrow" aria-hidden="true">↗</span></button>
-              <button type="button" class="tour-route-point" data-tour-point="titik-7"><span class="tour-route-index">07</span><span class="tour-route-copy"><strong>Titik akhir</strong><small>Akhir perjalanan</small></span><span class="tour-route-arrow" aria-hidden="true">↗</span></button>
-            </div>
-            <div class="tour-guide-bottom">
-              <p id="tourPointDescription" role="status" aria-live="polite">Awal jalur virtual. Klik panah di lantai untuk berjalan maju ke titik berikutnya.</p>
-              <div class="tour-step-actions"><button id="tourPrevious" type="button" disabled aria-label="Ke titik sebelumnya">← Sebelumnya</button><button id="tourNext" type="button" aria-label="Ke titik berikutnya">Berikutnya →</button></div>
-              <a href="#archive" class="tour-archive-link">Baca arsip &amp; cerita <span aria-hidden="true">↗</span></a>
-            </div>
-          </aside>
         </div>
         <p class="provenance-note">Temukan ikon informasi pada panorama untuk melihat model 3D, membaca penjelasan dengan rujukan penelitian, dan mengerjakan kuis. Identifikasi kedua batu masih bersifat sementara.</p>
       </section>
@@ -417,7 +397,7 @@
 
     <script src="https://cdn.jsdelivr.net/npm/pannellum@2.5.6/build/pannellum.js"></script>
     <script src="./stone-lessons.js?v=20261005-emma-1"></script>
-    <script src="./app.js?v=20261005-emma-1"></script>
+    <script src="./app.js?v=20261006-tour-2"></script>
     <script src="./certificate.js?v=5"></script>
     <script src="./literacy.js"></script>
     <script src="./discovery.js?v=1"></script>
